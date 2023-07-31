@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface GoodsRepository extends JpaRepository<Goods, Long> {
-    List<Goods> findAllByOrderByCreatedAtDesc();
+    List<Goods> findAllByOrderByGoodsIdDesc();
 
-    List<Goods> findAllByLocationIdOrderByCreatedAtDesc(Long locationId);
+    List<Goods> findAllByLocationIdOrderByGoodsIdDesc(Long locationId);
 }
