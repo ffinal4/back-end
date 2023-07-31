@@ -8,6 +8,9 @@ import com.example.peeppo.global.responseDto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class GoodsService {
@@ -18,5 +21,15 @@ public class GoodsService {
         Goods goods = goodsRepository.save(new Goods(reqeustDto));
         GoodsResponseDto responseDto = new GoodsResponseDto(goods);
         return new ApiResponse<>(true, responseDto, null);
+    }
+
+    public ApiResponse<List<GoodsResponseDto>> allGoods(){
+        List<Goods> goodsList = goodsRepository.findAllByOrderByCreatedAtDesc();
+        List<GoodsResponseDto> responseDtoList = goodsList.stream()
+                .map(GoodsResponseDto::new)
+                .collect(Collectors.toList());
+
+        return new ApiResponse<>(true, responseDtoList, null);
+
     }
 }
