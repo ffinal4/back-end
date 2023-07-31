@@ -14,13 +14,20 @@ import java.util.List;
 @RequestMapping("/api/goods")
 public class GoodsController {
     private final GoodsService goodsService;
+
     @PostMapping
-    public ApiResponse<GoodsResponseDto> goodsCreate(@RequestBody goodsRequestDto reqeustDto){
+    public ApiResponse<GoodsResponseDto> goodsCreate(@RequestBody goodsRequestDto reqeustDto) {
         return goodsService.goodsCreate(reqeustDto);
 
     }
+
     @GetMapping
-    public ApiResponse<List<GoodsResponseDto>> allGoods(){
+    public ApiResponse<List<GoodsResponseDto>> allGoods() {
         return goodsService.allGoods();
+    }
+
+    @GetMapping("/{locationId}")
+    public ApiResponse<List<GoodsResponseDto>> locationAllGoods(@PathVariable Long locationId) {
+        return goodsService.locationAllGoods(locationId);
     }
 }

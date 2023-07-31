@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 public class GoodsService {
 
     private final GoodsRepository goodsRepository;
+
     public ApiResponse<GoodsResponseDto> goodsCreate(goodsRequestDto reqeustDto) {
 
         Goods goods = goodsRepository.save(new Goods(reqeustDto));
@@ -23,13 +24,23 @@ public class GoodsService {
         return new ApiResponse<>(true, responseDto, null);
     }
 
-    public ApiResponse<List<GoodsResponseDto>> allGoods(){
+    public ApiResponse<List<GoodsResponseDto>> allGoods() {
         List<Goods> goodsList = goodsRepository.findAllByOrderByCreatedAtDesc();
-        List<GoodsResponseDto> responseDtoList = goodsList.stream()
-                .map(GoodsResponseDto::new)
+        List<GoodsResponseDto> goodsResponseList = responseDtoList(goodsList);
+        return new ApiResponse<>(true, goodsResponseList, null);
+
+    }
+
+    public ApiResponse<List<GoodsResponseDto>> locationAllGoods(Long locationId) {
+        List<Goods> goodsList = goodsRepository.findAllByLocationIdOrderByCreatedAtDesc(locationId);
+        List<GoodsResponseDto> goodsResponseList = responseDtoList(goodsList);
+
+        return new ApiResponse<>(true, goodsResponseList, null);
+    }
+
+    public List<GoodsResponseDto> responseDtoList(List<Goods> goodsList) {
+        return goodsList.stream()
+                .map(GoodsResponseDto::new) // 또는 GoodsResponseDto의 생성자를 호출하여 변환
                 .collect(Collectors.toList());
-
-        return new ApiResponse<>(true, responseDtoList, null);
-
     }
 }
