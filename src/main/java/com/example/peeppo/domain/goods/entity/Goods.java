@@ -1,6 +1,6 @@
 package com.example.peeppo.domain.goods.entity;
 
-import com.example.peeppo.domain.goods.dto.goodsRequestDto;
+import com.example.peeppo.domain.goods.dto.GoodsRequestDto;
 import com.example.peeppo.global.utils.Timestamped;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -20,11 +20,19 @@ public class Goods extends Timestamped{
     private String category;
     private String location;
 
-    public Goods(goodsRequestDto requestDto) {
+    public Goods(GoodsRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.image = requestDto.getImage();
         this.category = requestDto.getCategory();
         this.location = requestDto.getLocation();
+    }
+
+    public void update(GoodsRequestDto requestDto){
+        this.title = requestDto.getTitle();
+        this.content = requestDto.getContent();
+        this.image = requestDto.getImage();
+        this.category = requestDto.getCategory();
+
     }
 }
