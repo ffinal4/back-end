@@ -1,4 +1,4 @@
-package com.example.peeppo;
+package com.example.peeppo.utils;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
