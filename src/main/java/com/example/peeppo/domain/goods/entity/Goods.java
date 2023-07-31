@@ -5,12 +5,14 @@ import com.example.peeppo.global.utils.Timestamped;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
-public class Goods extends Timestamped{
+public class Goods extends Timestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long goodsId;
@@ -19,6 +21,7 @@ public class Goods extends Timestamped{
     private String image;
     private String category;
     private String location;
+    private boolean isDeleted;
 
     public Goods(GoodsRequestDto requestDto) {
         this.title = requestDto.getTitle();
@@ -28,7 +31,7 @@ public class Goods extends Timestamped{
         this.location = requestDto.getLocation();
     }
 
-    public void update(GoodsRequestDto requestDto){
+    public void update(GoodsRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.image = requestDto.getImage();

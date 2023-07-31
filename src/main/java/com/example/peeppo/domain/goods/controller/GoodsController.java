@@ -1,5 +1,6 @@
 package com.example.peeppo.domain.goods.controller;
 
+import com.example.peeppo.domain.goods.dto.DeleteResponseDto;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.dto.GoodsRequestDto;
 import com.example.peeppo.domain.goods.service.GoodsService;
@@ -45,8 +46,13 @@ public class GoodsController {
 
     @PatchMapping("/{goodsId}")
     public ApiResponse<GoodsResponseDto> goodsUpdate(@PathVariable Long goodsId,
-    @RequestBody GoodsRequestDto requestDto) {
+                                                     @RequestBody GoodsRequestDto requestDto) {
 
         return goodsService.goodsUpdate(goodsId, requestDto);
+    }
+
+    @DeleteMapping("/{goodsId}")
+    public ApiResponse<DeleteResponseDto> deleteGoods(@PathVariable Long goodsId) {
+        return goodsService.deleteGoods(goodsId);
     }
 }
