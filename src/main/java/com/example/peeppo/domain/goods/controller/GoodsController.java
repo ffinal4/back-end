@@ -51,7 +51,13 @@ public class GoodsController {
 
     @PatchMapping("/{goodsId}")
     public ApiResponse<GoodsResponseDto> goodsUpdate(@PathVariable Long goodsId,
-                                                     @RequestBody GoodsRequestDto requestDto) {
+                                                     @RequestPart String title,
+                                                     @RequestPart String content,
+                                                     @RequestPart String category,
+                                                     @RequestPart String location,
+                                                     @RequestPart List<MultipartFile> images) {
+
+        GoodsRequestDto requestDto = new GoodsRequestDto(title, content, images, category, location);
 
         return goodsService.goodsUpdate(goodsId, requestDto);
     }

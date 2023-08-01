@@ -74,4 +74,8 @@ public class ImageUtil {
 
         return uploadedFileUuids;
     }
+
+    public void deleteFileFromS3(String imageUuid, AmazonS3 amazonS3, String bucket) {
+        amazonS3.deleteObject(bucket, imageUuid);
+    }
 }
