@@ -113,9 +113,11 @@ public class GoodsService {
 
     }
 
+    @Transactional
     public ApiResponse<DeleteResponseDto> deleteGoods(Long goodsId) {
         Goods goods = findGoods(goodsId);
         goods.setDeleted(true);
+        goodsRepository.save(goods);
 
         return new ApiResponse<>(true, new DeleteResponseDto("삭제되었습니다"), null);
     }
