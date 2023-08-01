@@ -53,7 +53,13 @@ public class GoodsService {
     // image, username, title, content,
     public ApiResponse<List<GoodsResponseDto>> allGoods() {
         List<Goods> goodsList = goodsRepository.findAllByIsDeletedFalseOrderByGoodsIdDesc();
-        List<GoodsResponseDto> goodsResponseList = responseDtoList(goodsList);
+        List<GoodsResponseDto> goodsResponseList = new ArrayList<>();
+
+        for (Goods goods : goodsList) {
+            List<Image> images = imageRepository.findByGoodsGoodsId(goods.getGoodsId());
+            GoodsResponseDto goodsResponseDto = new GoodsResponseDto(goods, images);
+            goodsResponseList.add(goodsResponseDto);
+        }
 
         return new ApiResponse<>(true, goodsResponseList, null);
 
