@@ -33,6 +33,6 @@ public class Goods extends Timestamped {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.category = requestDto.getCategory();
-
+        this.location = requestDto.getLocation();
     }
 }
