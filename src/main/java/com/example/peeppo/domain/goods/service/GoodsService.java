@@ -69,8 +69,10 @@ public class GoodsService {
 
     public ApiResponse<GoodsResponseDto> getGoods(Long goodsId) {
         Goods goods = findGoods(goodsId);
+        List<Image> S3ObjectUrl = imageRepository.findByGoodsGoodsId(goodsId);
+
         deleteCheck(goods);
-        GoodsResponseDto goodsResponseDto = new GoodsResponseDto(goods);
+        GoodsResponseDto goodsResponseDto = new GoodsResponseDto(goods, S3ObjectUrl);
 
         return new ApiResponse<>(true, goodsResponseDto, null);
 
