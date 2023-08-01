@@ -1,4 +1,3 @@
-/*
 package com.example.peeppo.global.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -21,6 +20,9 @@ public class S3Config {
     @Value("${cloud.aws.region.static}")
     private String region;
 
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
+
     @Bean
     public AmazonS3Client amazonS3Client() {
         BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey, secretKey);
@@ -31,6 +33,9 @@ public class S3Config {
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .build();
     }
-}
 
-*/
+    @Bean
+    public String Bucket() {
+        return bucket;
+    }
+}
