@@ -1,3 +1,4 @@
+/*
 package com.example.peeppo.global.jwt;
 
 import io.jsonwebtoken.*;
@@ -142,3 +143,4 @@ public class JwtProvider {
         return this.createAccessToken(email, role, name, gender);
     }
 }
+*/

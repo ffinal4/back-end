@@ -22,12 +22,21 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-security' //패스워드인코더
+  //  implementation 'org.springframework.boot:spring-boot-starter-security' //패스워드인코더
     implementation 'org.springframework.boot:spring-boot-starter-validation'//validation
     implementation 'mysql:mysql-connector-java:8.0.28'                      //mysql
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE' // s3
+
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    // sockjs
+    implementation 'org.webjars:sockjs-client:1.5.1'
+// stomp
+    implementation 'org.webjars:stomp-websocket:2.3.4'
+// gson
+    implementation 'com.google.code.gson:gson:2.9.0'
+   // implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE' // s3
+
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

@@ -1,5 +1,7 @@
+/*
 package com.example.peeppo.global.jwt;
 
+import com.example.peeppo.domain.user.dto.LoginRequestDto;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -85,3 +87,4 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
     }
 }
+*/
