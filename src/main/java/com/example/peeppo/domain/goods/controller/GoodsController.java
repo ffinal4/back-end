@@ -7,6 +7,7 @@ import com.example.peeppo.domain.goods.service.GoodsService;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -17,10 +18,14 @@ public class GoodsController {
     private final GoodsService goodsService;
 
     @PostMapping
-    public ApiResponse<GoodsResponseDto> goodsCreate(@RequestBody GoodsRequestDto reqeustDto) {
+    public ApiResponse<GoodsResponseDto> goodsCreate(@RequestPart String title,
+                                                     @RequestPart String content,
+                                                     @RequestPart String category,
+                                                     @RequestPart String location,
+                                                     @RequestPart List<MultipartFile> images){
 
-        return goodsService.goodsCreate(reqeustDto);
-
+        GoodsRequestDto requestDto = new GoodsRequestDto(title, content, images, category, location);
+        return goodsService.goodsCreate(requestDto);
     }
 
     // 상세조회가 아니므로 출력값을 변경해야 함
@@ -32,11 +37,11 @@ public class GoodsController {
     }
 
     // 상세조회가 아니므로 출력값을 변경해야 함
-    @GetMapping("/location/{locationId}")
-    public ApiResponse<List<GoodsResponseDto>> locationAllGoods(@PathVariable Long locationId) {
-
-        return goodsService.locationAllGoods(locationId);
-    }
+//    @GetMapping("/location/{locationId}")
+//    public ApiResponse<List<GoodsResponseDto>> locationAllGoods(@PathVariable Long locationId) {
+//
+//        return goodsService.locationAllGoods(locationId);
+//    }
 
     @GetMapping("/{goodsId}")
     public ApiResponse<GoodsResponseDto> getGoods(@PathVariable Long goodsId) {

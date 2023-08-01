@@ -8,7 +8,7 @@ import java.util.List;
 public interface GoodsRepository extends JpaRepository<Goods, Long> {
     List<Goods> findAllByIsDeletedFalseOrderByGoodsIdDesc();
 
-    List<Goods> findAllByLocationIdAndIsDeletedFalseOrderByGoodsIdDesc(Long locationId);
+//    List<Goods> findAllByLocationIdAndIsDeletedFalseOrderByGoodsIdDesc(Long locationId);
 
 
 }
