@@ -16,7 +16,7 @@ public class Image {
     @Column(nullable = false)
     private String image;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST) // TransientPropertyValueException으로 인해 추가
     @JoinColumn(name = "goods_id") // 연결할 외래키 컬럼명
     private Goods goods;
 
