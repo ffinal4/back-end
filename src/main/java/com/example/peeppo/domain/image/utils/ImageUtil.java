@@ -36,11 +36,11 @@ public class ImageUtil {
         }
 
         // 파일 크기 검증
-        long maxSize = 20 * 1024 * 1024; // 20MB
+        long maxSize = 10 * 1024 * 1024; // 10MB
         long fileSize = file.getSize();
 
         if (fileSize > maxSize) {
-            throw new IllegalArgumentException("파일의 크기는 최대 20MB입니다.");
+            throw new IllegalArgumentException("파일의 크기는 최대 10MB입니다.");
         }
         return true;
     }
