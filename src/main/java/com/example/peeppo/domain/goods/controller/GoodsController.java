@@ -22,11 +22,14 @@ public class GoodsController {
                                                      @RequestPart String content,
                                                      @RequestPart String category,
                                                      @RequestPart String location,
-                                                     @RequestPart List<MultipartFile> images){
+                                                     @RequestPart List<MultipartFile> images,
+                                                     @RequestPart String goodsCondition,
+                                                     @RequestPart String tradeType){
 
-        GoodsRequestDto requestDto = new GoodsRequestDto(title, content, images, category, location);
+        GoodsRequestDto requestDto = new GoodsRequestDto(title, content, category, location,images, goodsCondition, tradeType);
         return goodsService.goodsCreate(requestDto);
     }
+
 
     // 상세조회가 아니므로 출력값을 변경해야 함
     // image, username, title, content
@@ -55,9 +58,11 @@ public class GoodsController {
                                                      @RequestPart String content,
                                                      @RequestPart String category,
                                                      @RequestPart String location,
-                                                     @RequestPart List<MultipartFile> images) {
+                                                     @RequestPart List<MultipartFile> images,
+                                                     @RequestPart String goodsCondition,
+                                                     @RequestPart String tradeType) {
 
-        GoodsRequestDto requestDto = new GoodsRequestDto(title, content, images, category, location);
+        GoodsRequestDto requestDto = new GoodsRequestDto(title, content, category, location, images, goodsCondition, tradeType);
 
         return goodsService.goodsUpdate(goodsId, requestDto);
     }
