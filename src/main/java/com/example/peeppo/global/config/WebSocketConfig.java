@@ -1,4 +1,4 @@
-package com.example.peeppo.global.config;
+/*package com.example.peeppo.global.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
@@ -27,3 +27,4 @@ public class WebSocketConfig implements WebSocketConfigurer { // 추가적인 �
 
 
 }
+*/

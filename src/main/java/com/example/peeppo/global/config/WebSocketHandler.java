@@ -1,3 +1,4 @@
+/*
 package com.example.peeppo.global.config;
 
 import com.example.peeppo.domain.chat.entity.ChatMessage;
@@ -35,3 +36,4 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
 
 }
+*/
