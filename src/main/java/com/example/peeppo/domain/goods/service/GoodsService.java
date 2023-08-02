@@ -5,6 +5,7 @@ import com.example.peeppo.domain.goods.dto.DeleteResponseDto;
 import com.example.peeppo.domain.goods.dto.GoodsRequestDto;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
+import com.example.peeppo.domain.goods.enums.Category;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.domain.image.entity.Image;
@@ -17,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +39,9 @@ public class GoodsService {
         //S3에 업로드 후 이미지 키 반환.
         List<String> imageUuids = imageUtil.uploadFileToS3(images, amazonS3, bucket);
         List<Image> S3ObjectUrl = new ArrayList<>();
-        Goods goods = goodsRepository.save(new Goods(requestDto));
+        Goods goods = new Goods(requestDto);
+        goods.setCategory(Category.getKoreanValueByEnglish(requestDto.getCategory()));
+        goodsRepository.save(goods);
         for (String imageUuid : imageUuids) {
             Image image = new Image(imageUuid, amazonS3.getUrl(bucket, imageUuid).toString(), goods);
             S3ObjectUrl.add(image);
@@ -57,8 +59,7 @@ public class GoodsService {
 
         for (Goods goods : goodsList) {
             List<Image> images = imageRepository.findByGoodsGoodsId(goods.getGoodsId());
-            GoodsResponseDto goodsResponseDto = new GoodsResponseDto(goods, images);
-            goodsResponseList.add(goodsResponseDto);
+            goodsResponseList.add(new GoodsResponseDto(goods, images));
         }
 
         return new ApiResponse<>(true, goodsResponseList, null);
@@ -77,7 +78,6 @@ public class GoodsService {
         Goods goods = findGoods(goodsId);
         List<Image> S3ObjectUrl = imageRepository.findByGoodsGoodsId(goodsId);
 
-        deleteCheck(goods);
         GoodsResponseDto goodsResponseDto = new GoodsResponseDto(goods, S3ObjectUrl);
 
         return new ApiResponse<>(true, goodsResponseDto, null);
@@ -87,7 +87,6 @@ public class GoodsService {
     @Transactional
     public ApiResponse<GoodsResponseDto> goodsUpdate(Long goodsId, GoodsRequestDto requestDto) {
         Goods goods = findGoods(goodsId);
-        deleteCheck(goods);
 
         List<Image> imagesToDelete = imageRepository.findByGoodsGoodsId(goodsId);
 
@@ -114,6 +113,7 @@ public class GoodsService {
         }
 
         // goods 테이블 수정
+        goods.setCategory(Category.getKoreanValueByEnglish(requestDto.getCategory()));
         goods.update(requestDto);
         GoodsResponseDto responseDto = new GoodsResponseDto(goods, S3ObjectUrl);
 
@@ -130,22 +130,14 @@ public class GoodsService {
         return new ApiResponse<>(true, new DeleteResponseDto("삭제되었습니다"), null);
     }
 
-
-    public List<GoodsResponseDto> responseDtoList(List<Goods> goodsList) {
-        return goodsList.stream()
-                .map(GoodsResponseDto::new)
-                .collect(Collectors.toList());
-    }
-
     public Goods findGoods(Long goodsId) {
-        return goodsRepository.findById(goodsId).orElseThrow(() ->
+        Goods goods = goodsRepository.findById(goodsId).orElseThrow(() ->
                 new NullPointerException("해당 게시글은 존재하지 않습니다."));
-    }
-
-    public void deleteCheck(Goods goods) {
         if (goods.isDeleted()) {
             throw new IllegalStateException("삭제된 게시글입니다.");
         }
+        return goods;
     }
+
 
 }

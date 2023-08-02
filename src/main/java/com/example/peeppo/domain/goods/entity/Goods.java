@@ -18,16 +18,15 @@ public class Goods extends Timestamped {
     private Long goodsId;
     private String title;
     private String content;
-    private String category;
     private String location;
     private String goodsCondition;
     private String tradeType;
+    private String category;
     private boolean isDeleted;
 
     public Goods(GoodsRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
-        this.category = requestDto.getCategory();
         this.location = requestDto.getLocation();
         this.goodsCondition = requestDto.getGoodsCondition();
         this.tradeType = requestDto.getTradeType();
@@ -36,7 +35,6 @@ public class Goods extends Timestamped {
     public void update(GoodsRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
-        this.category = requestDto.getCategory();
         this.location = requestDto.getLocation();
     }
 }
