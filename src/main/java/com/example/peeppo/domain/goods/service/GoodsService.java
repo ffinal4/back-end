@@ -12,12 +12,14 @@ import com.example.peeppo.domain.image.helper.ImageHelper;
 import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -40,11 +42,12 @@ public class GoodsService {
     }
 
 
-    public ApiResponse<List<GoodsResponseDto>> allGoods() {
-        List<Goods> goodsList = goodsRepository.findAllByIsDeletedFalseOrderByGoodsIdDesc();
+    public Page<GoodsResponseDto> allGoods(int page, int size, String sortBy) {
+        Pageable pageable = paging(page, size, sortBy);
+        Page<Goods> goodsPage = goodsRepository.findAllByIsDeletedFalseOrderByGoodsIdDesc(pageable);
         List<GoodsResponseDto> goodsResponseList = new ArrayList<>();
 
-        for (Goods goods : goodsList) {
+        for (Goods goods : goodsPage.getContent()) {
             List<Image> images = imageRepository.findByGoodsGoodsId(goods.getGoodsId());
             List<String> imageUrls = new ArrayList<>();
             for (Image image : images) {
@@ -53,7 +56,7 @@ public class GoodsService {
             goodsResponseList.add(new GoodsResponseDto(goods, imageUrls));
         }
 
-        return new ApiResponse<>(true, goodsResponseList, null);
+        return new PageImpl<>(goodsResponseList, pageable, goodsPage.getTotalElements());
     }
 
 //    public ApiResponse<List<GoodsResponseDto>> locationAllGoods(Long locationId) {
@@ -67,10 +70,9 @@ public class GoodsService {
     public ApiResponse<GoodsResponseDto> getGoods(Long goodsId) {
         Goods goods = findGoods(goodsId);
         List<Image> images = imageRepository.findByGoodsGoodsId(goodsId);
-        List<String> imageUrls = new ArrayList<>();
-        for (Image image : images) {
-            imageUrls.add(image.getImage());
-        }
+        List<String> imageUrls = images.stream()
+                .map(Image::getImage)
+                .collect(Collectors.toList());
 
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls), null);
     }
@@ -112,5 +114,13 @@ public class GoodsService {
             throw new IllegalStateException("삭제된 게시글입니다.");
         }
         return goods;
+    }
+
+    private Pageable paging(int page, int size, String sortBy) {
+        // 정렬
+        Sort sort = Sort.by(sortBy);
+
+        // pageable 생성
+        return PageRequest.of(page, size, sort);
     }
 }
