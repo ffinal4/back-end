@@ -1,40 +1,45 @@
 package com.example.peeppo.domain.user.entity;
 
-import com.example.peeppo.domain.user.dto.SignupRequestDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import static lombok.AccessLevel.PROTECTED;
+import lombok.Setter;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = PROTECTED)
+@Setter
+@NoArgsConstructor
+@Table(name = "user")
 public class User {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long userId;
 
     @Column(nullable = false)
-    private String nickname;
+    private String nickname; // 로그인 시
 
     @Column(nullable = false, unique = true)
-    private String name;
-
-    @Column(nullable = false)
-    private String email;
+    private String username; // 사용자 이름
 
     @Column(nullable = false)
     private String password;
 
     @Column(nullable = false)
-    private String emailImg;
+    @Enumerated(value = EnumType.STRING)
+    private UserRoleEnum role;
 
-    public User(SignupRequestDto requestDto, String encodedPassword) {
-        this.nickname = requestDto.getNickname();
-        this.name = requestDto.getName();
-        this.email = requestDto.getEmail();
-        this.password = encodedPassword;
+    public User(String username, String password, String nickname, UserRoleEnum role) {
+        this.username = username;
+        this.password = password;
+        this.nickname = nickname;
+        this.role = role;
     }
+
+    public User(User user){
+        this.username = user.getUsername();
+        this.password = user.getPassword();
+        this.nickname = user.getNickname();
+        this.role = user.getRole();
+    }
+
 }

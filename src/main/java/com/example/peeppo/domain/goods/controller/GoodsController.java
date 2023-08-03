@@ -1,11 +1,12 @@
 package com.example.peeppo.domain.goods.controller;
 
 import com.example.peeppo.domain.goods.dto.DeleteResponseDto;
-import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.dto.GoodsRequestDto;
+import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.service.GoodsService;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,18 +25,13 @@ public class GoodsController {
         return goodsService.goodsCreate(requestDto, images);
     }
 
-    @GetMapping
-    public ApiResponse<List<GoodsResponseDto>> allGoods() {
+@GetMapping
+public Page<GoodsResponseDto> allGoods(@RequestParam("page") int page,
+                                                    @RequestParam("size") int size,
+                                                    @RequestParam("sortBy") String sortBy) {
 
-        return goodsService.allGoods();
+        return goodsService.allGoods(page-1, size, sortBy);
     }
-
-    // 상세조회가 아니므로 출력값을 변경해야 함
-//    @GetMapping("/location/{locationId}")
-//    public ApiResponse<List<GoodsResponseDto>> locationAllGoods(@PathVariable Long locationId) {
-//
-//        return goodsService.locationAllGoods(locationId);
-//    }
 
     @GetMapping("/{goodsId}")
     public ApiResponse<GoodsResponseDto> getGoods(@PathVariable Long goodsId) {
