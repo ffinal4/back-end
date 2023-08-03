@@ -17,6 +17,7 @@ import org.springframework.web.socket.WebSocketSession;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -56,6 +57,11 @@ public class ChatService {
     //roomId 기준으로 채팅방 찾기
     public ChatRoom findRoomById(String roomId) {
         return chatRoomRepository.findByRoomId(roomId);
+    }
+
+    //roomId 기준으로 채팅방 메시지 내용 찾기
+    public List<ChatMessage> findMessageById(String roomId) {
+        return chatMessageRepository.findAllByRoomId(roomId);
     }
 
     //채팅방 유저 리스트에 유저 추가
@@ -109,4 +115,8 @@ public class ChatService {
     }
 
 
+    public void deleteChatRoom(String roomId) {
+        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId);
+        chatRoomRepository.delete(chatRoom);
+    }
 }

@@ -3,6 +3,7 @@ package com.example.peeppo.domain.chat.controller;
 
 import com.example.peeppo.domain.chat.dto.ChatRoomRequestDto;
 import com.example.peeppo.domain.chat.dto.ChatRoomResponseDto;
+import com.example.peeppo.domain.chat.entity.ChatMessage;
 import com.example.peeppo.domain.chat.entity.ChatRoom;
 import com.example.peeppo.domain.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +31,12 @@ public class ChatRoomController {
 
     //채팅방 상세 조회
     @GetMapping("/room/{chatId}")
-    public ChatRoom findChatRoom(@PathVariable("chatId") String roomId){
-        return chatService.findRoomById(roomId);
+    public List<ChatMessage> findChatRoom(@PathVariable("chatId") String roomId){
+        return chatService.findMessageById(roomId);
+    }
+
+    @DeleteMapping("/room/{chatId}")
+    public void deleteRoom(@PathVariable("chatId") String roomId){
+        chatService.deleteChatRoom(roomId);
     }
 }
