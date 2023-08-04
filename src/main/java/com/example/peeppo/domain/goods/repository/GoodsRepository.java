@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface GoodsRepository extends JpaRepository<Goods, Long> {
-    Page<Goods> findAllByIsDeletedFalseOrderByGoodsIdDesc(Pageable pageable);
+    Page<Goods> findAllByIsDeletedFalse(Pageable pageable);
 
 //    List<Goods> findAllByLocationIdAndIsDeletedFalseOrderByGoodsIdDesc(Long locationId);
 

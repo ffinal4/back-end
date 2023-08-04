@@ -25,12 +25,13 @@ public class GoodsController {
         return goodsService.goodsCreate(requestDto, images);
     }
 
-@GetMapping
-public Page<GoodsResponseDto> allGoods(@RequestParam("page") int page,
-                                                    @RequestParam("size") int size,
-                                                    @RequestParam("sortBy") String sortBy) {
+    @GetMapping
+    public Page<GoodsResponseDto> allGoods(@RequestParam("page") int page,
+                                           @RequestParam("size") int size,
+                                           @RequestParam("sortBy") String sortBy,
+                                           @RequestParam("isAsc") boolean isAsc) {
 
-        return goodsService.allGoods(page-1, size, sortBy);
+        return goodsService.allGoods(page - 1, size, sortBy, isAsc);
     }
 
     @GetMapping("/{goodsId}")

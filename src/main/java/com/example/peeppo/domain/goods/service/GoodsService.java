@@ -12,6 +12,7 @@ import com.example.peeppo.domain.image.helper.ImageHelper;
 import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,9 +43,9 @@ public class GoodsService {
     }
 
 
-    public Page<GoodsResponseDto> allGoods(int page, int size, String sortBy) {
-        Pageable pageable = paging(page, size, sortBy);
-        Page<Goods> goodsPage = goodsRepository.findAllByIsDeletedFalseOrderByGoodsIdDesc(pageable);
+    public Page<GoodsResponseDto> allGoods(int page, int size, String sortBy, boolean isAsc) {
+        Pageable pageable = paging(page, size, sortBy, isAsc);
+        Page<Goods> goodsPage = goodsRepository.findAllByIsDeletedFalse(pageable);
         List<GoodsResponseDto> goodsResponseList = new ArrayList<>();
 
         for (Goods goods : goodsPage.getContent()) {
@@ -67,7 +68,9 @@ public class GoodsService {
 //    }
 
 
+    @Cacheable(key = "#goodsId", value = "getGoods")
     public ApiResponse<GoodsResponseDto> getGoods(Long goodsId) {
+
         Goods goods = findGoods(goodsId);
         List<Image> images = imageRepository.findByGoodsGoodsId(goodsId);
         List<String> imageUrls = images.stream()
@@ -116,9 +119,10 @@ public class GoodsService {
         return goods;
     }
 
-    private Pageable paging(int page, int size, String sortBy) {
+    private Pageable paging(int page, int size, String sortBy, boolean isAsc) {
         // 정렬
-        Sort sort = Sort.by(sortBy);
+        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, sortBy);
 
         // pageable 생성
         return PageRequest.of(page, size, sort);
