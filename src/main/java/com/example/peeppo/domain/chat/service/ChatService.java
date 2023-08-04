@@ -58,7 +58,7 @@ public class ChatService {
         hashOpsChatRoom.put(CHAT_ROOMS, randomId, chatRoom);
         chatRoomRepository.save(chatRoom);
         return new ChatRoomResponseDto(chatRoom);
-    }a
+    }
 
     /**
      * destination정보에서 roomId 추출
