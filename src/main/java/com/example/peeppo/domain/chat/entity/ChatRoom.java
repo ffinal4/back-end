@@ -9,13 +9,15 @@ import lombok.Setter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
 @Getter
 @Setter
 @Entity
-public class ChatRoom extends Timestamped {
+public class ChatRoom extends Timestamped implements Serializable {
+    //redis는 data를 hash해 저장하기 때문에, redis에 저장할 객체는 serializable를 implements 해야한다.
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

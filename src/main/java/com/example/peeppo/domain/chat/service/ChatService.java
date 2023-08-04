@@ -7,44 +7,102 @@ import com.example.peeppo.domain.chat.repository.ChatMessageRepository;
 import com.example.peeppo.domain.chat.repository.ChatRoomRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.simp.SimpMessageSendingOperations;
+import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
-import org.springframework.web.socket.TextMessage;
-import org.springframework.web.socket.WebSocketSession;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class ChatService {
     private final ObjectMapper objectMapper;
+    private final RedisTemplate redisTemplate;
+    private final ChannelTopic channelTopic;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private Map<String, ChatRoom> chatRooms;
 
-    private final SimpMessageSendingOperations template;
+    // Redis CacheKeys
+    private static final String CHAT_ROOMS = "CHAT_ROOM"; // 채팅룸 저장
+    public static final String USER_COUNT = "USER_COUNT"; // 채팅룸에 입장한 클라이언트수 저장
+    public static final String ENTER_INFO = "ENTER_INFO"; // 채팅룸에 입장한 클라이언트의 sessionId와 채팅룸 id를 맵핑한 정보 저장
+
+    @Resource(name = "redisTemplate")
+    private HashOperations<String, String, ChatRoom> hashOpsChatRoom;
+    @Resource(name = "redisTemplate")
+    private HashOperations<String, String, String> hashOpsEnterInfo;
+    @Resource(name = "redisTemplate")
+    private ValueOperations<String, String> valueOps;
+
 
     @PostConstruct // 의존성 주입이 이루어진 후 초기화 작업이 필요한 에 사용
     private void init(){
         chatRooms = new LinkedHashMap<>();
     } //순서대로 저장메서드
 
+//     채팅방 생성 : 서버간 채팅방 공유를 위해 redis hash에 저장한다. -> 이것으로 채팅방은 지워지지 않음
     public ChatRoomResponseDto createRoom(String title){
         String randomId = UUID.randomUUID().toString();
         ChatRoom chatRoom = ChatRoom.builder()
                 .roomId(randomId)
                 .title(title)
                 .build();
-        chatRooms.put(randomId, chatRoom);
+        hashOpsChatRoom.put(CHAT_ROOMS, randomId, chatRoom);
         chatRoomRepository.save(chatRoom);
         return new ChatRoomResponseDto(chatRoom);
+    }a
+
+    /**
+     * destination정보에서 roomId 추출
+     */
+    public String getRoomId(String destination) {
+        int lastIndex = destination.lastIndexOf('/');
+        if (lastIndex != -1)
+            return destination.substring(lastIndex + 1);
+        else
+            return "";
     }
+
+    // 유저가 입장한 채팅방ID와 유저 세션ID 맵핑 정보 저장
+    public void setUserEnterInfo(String sessionId, String roomId) {
+        hashOpsEnterInfo.put(ENTER_INFO, sessionId, roomId);
+    }
+
+    // 유저 세션으로 입장해 있는 채팅방 ID 조회
+    public String getUserEnterRoomId(String sessionId) {
+        return hashOpsEnterInfo.get(ENTER_INFO, sessionId);
+    }
+
+
+    // 유저 세션정보와 맵핑된 채팅방ID 삭제
+    public void removeUserEnterInfo(String sessionId) {
+        hashOpsEnterInfo.delete(ENTER_INFO, sessionId);
+    }
+
+    // 채팅방 유저수 조회
+    public long getUserCount(String roomId) {
+        return Long.valueOf(Optional.ofNullable(valueOps.get(USER_COUNT + "_" + roomId)).orElse("0"));
+    }
+
+    // 채팅방에 입장한 유저수 +1
+    public long plusUserCount(String roomId) {
+        return Optional.ofNullable(valueOps.increment(USER_COUNT + "_" + roomId)).orElse(0L);
+    }
+
+    // 채팅방에 입장한 유저수 -1
+    public long minusUserCount(String roomId) {
+        return Optional.ofNullable(valueOps.decrement(USER_COUNT + "_" + roomId)).filter(count -> count > 0).orElse(0L);
+    }
+
+
 
     //전체 채팅방 조회
     public List<ChatRoom> findAllRoom(){
@@ -101,17 +159,9 @@ public class ChatService {
         }
         chatMessageRepository.save(chatMessage);
         System.out.println("전송 요청");
-        template.convertAndSend("/sub/chat/room/" + chatMessage.getRoomId(), chatMessage);
+        //template.convertAndSend("/sub/chat/room/" + chatMessage.getRoomId(), chatMessage);
+        redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
         System.out.println("전송 완료");
-    }
-
-
-    public <T> void sendMessage(WebSocketSession session, T message) {
-        try{
-            session.sendMessage(new TextMessage(objectMapper.writeValueAsString(message)));
-        } catch (IOException e) {
-            log.error(e.getMessage(), e);
-        }
     }
 
 

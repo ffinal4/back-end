@@ -39,6 +39,9 @@ public class ChatController { //채팅을 수신하고 송신하기 위한 컨�
         template.convertAndSend("/sub/chat/room/" + chat.getRoomId(), chat);
     }
     */
+    /**
+     * websocket "/pub/chatroom/{id}"로 들어오는 메시징을 처리한다.
+     */
 
     // 해당 유저
     @MessageMapping("/chatroom/{id}")

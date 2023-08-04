@@ -1,15 +1,19 @@
 package com.example.peeppo.global.config;
 
+import com.example.peeppo.domain.chat.handler.StompHandler;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
-
+@RequiredArgsConstructor
 @Configuration
 @EnableWebSocketMessageBroker
 public class SpringChatConfig implements WebSocketMessageBrokerConfigurer {
 
+    private final StompHandler stompHandler;
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry){
         // stomp 접속 주소 url => /ws-stomp
@@ -26,4 +30,11 @@ public class SpringChatConfig implements WebSocketMessageBrokerConfigurer {
         //메시지를 발행하는 요청 url => 즉 메시지 보낼때
         registry.setApplicationDestinationPrefixes("/pub");
     }
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(stompHandler); // StompHandler가 Websocket 앞단에서 token을 체크할 수 있도록 인터셉터로 설정
+    }
+
+
 }
