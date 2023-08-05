@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.goods.entity;
 
 import com.example.peeppo.domain.goods.dto.WantedRequestDto;
+import com.example.peeppo.domain.goods.enums.Category;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,13 +18,16 @@ public class WantedGoods {
 
     private String title;
     private String content;
-    private String category;
+    @Enumerated(EnumType.STRING)
+    private Category category;
     @OneToOne
     @JoinColumn(name = "goods_id")
     private Goods goods;
 
-    public WantedGoods(WantedRequestDto requestDto) {
+    public WantedGoods(WantedRequestDto requestDto, Goods goods) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
+        this.category = requestDto.getCategory();
+        this.goods = goods;
     }
 }
