@@ -22,7 +22,10 @@ public class Goods extends Timestamped {
     private String goodsCondition;
     private String tradeType;
     private String category;
+    private Long userId; // 유저부분 완료 시 수정할 것
     private boolean isDeleted;
+    @OneToOne(mappedBy = "goods", fetch = FetchType.LAZY)
+    private WantedGoods wantedGoods;
 
     public Goods(GoodsRequestDto requestDto) {
         this.title = requestDto.getTitle();

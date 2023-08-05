@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface GoodsRepository extends JpaRepository<Goods, Long> {
     Page<Goods> findAllByIsDeletedFalse(Pageable pageable);
+    Page<Goods> findAllByUserIdAndIsDeletedFalse(Long userId, Pageable pageable);
 
 //    List<Goods> findAllByLocationIdAndIsDeletedFalseOrderByGoodsIdDesc(Long locationId);
 

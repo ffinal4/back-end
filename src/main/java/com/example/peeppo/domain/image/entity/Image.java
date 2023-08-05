@@ -2,6 +2,7 @@ package com.example.peeppo.domain.image.entity;
 
 
 import com.example.peeppo.domain.goods.entity.Goods;
+import com.example.peeppo.global.utils.Timestamped;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-public class Image {
+public class Image extends Timestamped {
     @Id
     private String imageKey;
 
