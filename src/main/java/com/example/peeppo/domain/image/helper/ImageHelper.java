@@ -9,6 +9,7 @@ import com.example.peeppo.domain.image.repository.ImageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,14 +26,15 @@ import java.util.UUID;
 public class ImageHelper {
     private final ImageRepository imageRepository;
 
-    public List<String> saveImagesToS3AndRepository(List<MultipartFile> images, AmazonS3 amazonS3, String bucket, Goods goods) {
+    @Transactional
+    public List<Image> saveImagesToS3AndRepository(List<MultipartFile> images, AmazonS3 amazonS3, String bucket, Goods goods) {
         for (MultipartFile image : images) {
             if (!validateFile(image)) {
                 throw new IllegalStateException("파일 검증 실패");
             }
         }
 
-        List<String> uploadedFileUuids = new ArrayList<>();
+        List<Image> newImageList = new ArrayList<>();
         // 새 S3 객체 업로드
         for (MultipartFile image : images) {
 
@@ -53,22 +55,26 @@ public class ImageHelper {
                 throw new RuntimeException(e);
             }
 
+            Image img = new Image(imageUuid, amazonS3.getUrl(bucket, imageUuid).toString(), goods);
             // S3 버킷에 등록
             amazonS3.putObject(request);
-            uploadedFileUuids.add(imageUuid);
+            newImageList.add(img);
 
-            imageRepository.save(new Image(imageUuid, amazonS3.getUrl(bucket, imageUuid).toString(), goods));
         }
 
-        return uploadedFileUuids;
+        imageRepository.saveAll(newImageList);
+
+        return newImageList;
     }
 
+    @Transactional
     public void deleteFileFromS3(String imageUuid, AmazonS3 amazonS3, String bucket) {
         amazonS3.deleteObject(bucket, imageUuid);
     }
 
-    public List<Image> repositoryImageDelete(Long goodsId) {
-        return imageRepository.deleteByGoodsGoodsId(goodsId);
+    @Transactional
+    public void repositoryImageDelete(List<Image> imageList) {
+        imageRepository.deleteAll(imageList);
     }
 
     public boolean validateFile(MultipartFile file) {
