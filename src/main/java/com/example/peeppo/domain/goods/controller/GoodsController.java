@@ -52,7 +52,7 @@ public class GoodsController {
     }
 
 
-    @PatchMapping("/{goodsId}")
+    @PutMapping("/{goodsId}")
     public ApiResponse<GoodsResponseDto> goodsUpdate(@PathVariable Long goodsId,
                                                      @RequestPart(value = "data") GoodsRequestDto requestDto,
                                                      @RequestPart(value = "images") List<MultipartFile> images) {
