@@ -3,12 +3,11 @@ package com.example.peeppo.domain.chat.entity;
 import com.example.peeppo.domain.chat.service.ChatService;
 import com.example.peeppo.global.utils.Timestamped;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.web.socket.WebSocketSession;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,7 +16,11 @@ import java.util.Set;
 @Setter
 @Entity
 public class ChatRoom extends Timestamped implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 5056853071687151531L;
     //redis는 data를 hash해 저장하기 때문에, redis에 저장할 객체는 serializable를 implements 해야한다.
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
