@@ -12,22 +12,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class SignupRequestDto {
 
-    @NotBlank(message = "username은 공백일 수 없습니다.")
-    @Size(min = 2, max = 15, message = "두글자 이상, 15글자 이하만 가능합니다.")
+    @NotBlank
+    @Size(min = 2, max = 15, message = "2자 이상 15자 이내로 입력해주세요.")
     @Pattern(regexp = "^[a-z0-9]+$", message = "소문자 영어와 숫자만 사용 가능합니다.")
-    private String username;
+    String nickname;
 
-    @NotBlank(message = "password는 공백일 수 없습니다.")
-    @Size(min = 4, message = "최소 길이는 4입니다.")
-    private String password;
+    @Email(message = "이메일 형식이 아닙니다.")
+    @NotBlank
+    @Pattern(regexp = "^[a-zA-Z0-9+-\\_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$")
+    String email;
 
-    @NotBlank(message = "nickname은 공백일 수 없습니다.")
-    @Size(min = 2, max = 15, message = "두글자 이상, 15글자 이하만 가능합니다.")
-    @Pattern(regexp = "^[가-힣a-zA-Z]+$", message = "한글 또는 영어만 입력 가능합니다.")
-    private String nickname;
-
-    private boolean admin = false;
-
-    private String adminToken = "";
-
+    @NotBlank
+    @Pattern(regexp = "^(?=.*?[A-Za-z])(?=.*?[0-9])[A-Za-z\\d~!@#$%^&*()+|=]{8,}$")
+    String password;
 }

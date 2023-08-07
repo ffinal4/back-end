@@ -150,7 +150,6 @@ public class GoodsService {
         }
         return goods;
     }
-
     public WantedGoods findWantedGoods(Long wantedId) {
         WantedGoods wantedGoods = wantedGoodsRepository.findById(wantedId).orElseThrow(() ->
                 new NullPointerException("해당 게시글은 존재하지 않습니다."));
@@ -162,7 +161,6 @@ public class GoodsService {
         // 정렬
         Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sort = Sort.by(direction, sortBy);
-
         // pageable 생성
         return PageRequest.of(page, size, sort);
     }
