@@ -1,19 +1,23 @@
 package com.example.peeppo.domain.goods.service;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.example.peeppo.domain.goods.dto.DeleteResponseDto;
-import com.example.peeppo.domain.goods.dto.GoodsRequestDto;
-import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
+import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.entity.Goods;
-import com.example.peeppo.domain.goods.enums.Category;
+import com.example.peeppo.domain.goods.entity.WantedGoods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
+import com.example.peeppo.domain.goods.repository.WantedGoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.helper.ImageHelper;
 import com.example.peeppo.domain.image.repository.ImageRepository;
-import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.responseDto.ApiResponse;
+import com.example.peeppo.global.responseDto.PageResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,37 +31,49 @@ import java.util.stream.Collectors;
 public class GoodsService {
     private final GoodsRepository goodsRepository;
     private final ImageRepository imageRepository;
+    private final WantedGoodsRepository wantedGoodsRepository;
     private final ImageHelper imageHelper;
     private final AmazonS3 amazonS3;
     private final String bucket;
 
     @Transactional
-    public ApiResponse<GoodsResponseDto> goodsCreate(GoodsRequestDto requestDto, List<MultipartFile> images, User user) {
-        Goods goods = new Goods(requestDto, user);
-        goods.setCategory(Category.getKoreanValueByEnglish(requestDto.getCategory()));
+    public ApiResponse<GoodsResponseDto> goodsCreate(GoodsRequestDto goodsRequestDto,
+                                                     List<MultipartFile> images,
+                                                     WantedRequestDto wantedRequestDto) {
+        WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
+        Goods goods = new Goods(goodsRequestDto, wantedGoods);
         goodsRepository.save(goods);
 
-        List<String> imageUuids = imageHelper.saveImagesToS3AndRepository(images, amazonS3, bucket, goods);
+        wantedGoodsRepository.save(wantedGoods);
 
-        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUuids), null);
+        List<String> imageUuids = imageHelper
+                .saveImagesToS3AndRepository(images, amazonS3, bucket, goods)
+                .stream()
+                .map(Image::getImageUrl)
+                .collect(Collectors.toList());
+
+        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUuids, wantedGoods), null);
     }
 
+    @CachePut(key = "#page", value = "allGoods")
+    @Cacheable(key = "#page", value = "allGoods", condition = "#page == 0", cacheManager = "cacheManager")
+    public Page<GoodsListResponseDto> allGoods(int page, int size, String sortBy, boolean isAsc) {
+        // 페이징 되어있는 걸 쿼리DSL 사용
 
-    public Page<GoodsResponseDto> allGoods(int page, int size, String sortBy) {
-        Pageable pageable = paging(page, size, sortBy);
-        Page<Goods> goodsPage = goodsRepository.findAllByIsDeletedFalseOrderByGoodsIdDesc(pageable);
-        List<GoodsResponseDto> goodsResponseList = new ArrayList<>();
+        Pageable pageable = paging(page, size, sortBy, isAsc);
+        Page<Goods> goodsPage = goodsRepository.findAllByIsDeletedFalse(pageable);
+        List<GoodsListResponseDto> goodsResponseList = new ArrayList<>();
 
         for (Goods goods : goodsPage.getContent()) {
             List<Image> images = imageRepository.findByGoodsGoodsId(goods.getGoodsId());
             List<String> imageUrls = new ArrayList<>();
             for (Image image : images) {
-                imageUrls.add(image.getImage());
+                imageUrls.add(image.getImageUrl());
             }
-            goodsResponseList.add(new GoodsResponseDto(goods, imageUrls));
+            goodsResponseList.add(new GoodsListResponseDto(goods, imageUrls.get(0)));
         }
 
-        return new PageImpl<>(goodsResponseList, pageable, goodsPage.getTotalElements());
+        return new PageResponse<>(goodsResponseList, pageable, goodsPage.getTotalElements());
     }
 
 //    public ApiResponse<List<GoodsResponseDto>> locationAllGoods(Long locationId) {
@@ -69,34 +85,52 @@ public class GoodsService {
 
 
     public ApiResponse<GoodsResponseDto> getGoods(Long goodsId) {
+
         Goods goods = findGoods(goodsId);
+        WantedGoods wantedGoods = findWantedGoods(goodsId);
         List<Image> images = imageRepository.findByGoodsGoodsId(goodsId);
         List<String> imageUrls = images.stream()
-                .map(Image::getImage)
+                .map(Image::getImageUrl)
                 .collect(Collectors.toList());
 
-        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls), null);
+        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods), null);
+    }
+
+    public ApiResponse<List<GoodsListResponseDto>> getMyGoods(Long userId, int page, int size, String sortBy, boolean isAsc) {
+        Pageable pageable = paging(page, size, sortBy, isAsc);
+        Page<Goods> goodsList = goodsRepository.findAllByUserIdAndIsDeletedFalse(userId, pageable);
+        List<GoodsListResponseDto> myGoods = new ArrayList<>();
+        for (Goods goods : goodsList) {
+            Image firstImage = imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goods.getGoodsId());
+            myGoods.add(new GoodsListResponseDto(goods, firstImage.getImageUrl()));
+        }
+
+        return new ApiResponse<>(true, myGoods, null);
     }
 
     @Transactional
-    public ApiResponse<GoodsResponseDto> goodsUpdate(Long goodsId, GoodsRequestDto requestDto, List<MultipartFile> images) {
+    public ApiResponse<GoodsResponseDto> goodsUpdate(Long goodsId, GoodsRequestDto goodsRequestDto, List<MultipartFile> images, WantedRequestDto wantedRequestDto) {
         Goods goods = findGoods(goodsId);
+        WantedGoods wantedGoods = findWantedGoods(goodsId);
 
         // repository 이미지 삭제
-        List<Image> imagesToDelete = imageHelper.repositoryImageDelete(goodsId);
+        List<Image> imageList = imageRepository.findByGoodsGoodsId(goodsId);
+        imageHelper.repositoryImageDelete(imageList);
 
         // s3 이미지 삭제
-        for (Image imageToDelete : imagesToDelete) {
-            imageHelper.deleteFileFromS3(imageToDelete.getImageKey(), amazonS3, bucket);
+        for (Image image : imageList) {
+            imageHelper.deleteFileFromS3(image.getImageKey(), amazonS3, bucket);
         }
 
         // 이미지 업로드
-        List<String> imageUuids = imageHelper.saveImagesToS3AndRepository(images, amazonS3, bucket, goods);
+        List<String> imageUrls = imageHelper.saveImagesToS3AndRepository(images, amazonS3, bucket, goods)
+                .stream()
+                .map(Image::getImageUrl)
+                .collect(Collectors.toList());
+        goods.update(goodsRequestDto);
+        wantedGoods.update(wantedRequestDto);
 
-        goods.setCategory(Category.getKoreanValueByEnglish(requestDto.getCategory()));
-        goods.update(requestDto);
-
-        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUuids), null);
+        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods), null);
     }
 
     @Transactional
@@ -116,11 +150,17 @@ public class GoodsService {
         }
         return goods;
     }
+    public WantedGoods findWantedGoods(Long wantedId) {
+        WantedGoods wantedGoods = wantedGoodsRepository.findById(wantedId).orElseThrow(() ->
+                new NullPointerException("해당 게시글은 존재하지 않습니다."));
+        return wantedGoods;
+    }
 
-    private Pageable paging(int page, int size, String sortBy) {
+
+    private Pageable paging(int page, int size, String sortBy, boolean isAsc) {
         // 정렬
-        Sort sort = Sort.by(sortBy);
-
+        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, sortBy);
         // pageable 생성
         return PageRequest.of(page, size, sort);
     }
