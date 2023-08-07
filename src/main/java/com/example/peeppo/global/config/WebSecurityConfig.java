@@ -1,15 +1,15 @@
-
 package com.example.peeppo.global.config;
 
-import com.example.peeppo.global.security.AuthExceptionFilter;
-import com.example.peeppo.global.security.JwtAuthenticationFilter;
-import com.example.peeppo.global.security.JwtAuthorizationFilter;
+import com.example.peeppo.global.jwt.AuthExceptionFilter;
+import com.example.peeppo.global.jwt.JwtAuthenticationFilter;
+import com.example.peeppo.global.jwt.JwtAuthorizationFilter;
+import com.example.peeppo.global.jwt.JwtUtil;
 import com.example.peeppo.global.security.UserDetailsServiceImpl;
-import com.example.peeppo.global.utils.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
@@ -35,11 +35,12 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
+    private final RedisTemplate redisTemplate;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final static String LOGIN_URL = "/api/users/login";
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource(){
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         config.addAllowedOrigin("*");
@@ -64,19 +65,19 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil);
+    public JwtAuthenticationFilter jwtAuthenticationFilter(RedisTemplate redisTemplate) throws Exception {
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, redisTemplate);
         filter.setFilterProcessesUrl(LOGIN_URL);
         filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
         return filter;
     }
 
     @Bean
-    public WebSecurityCustomizer webSecurityCustomizer(){
+    public WebSecurityCustomizer webSecurityCustomizer() {
         return web -> {
             web.ignoring()
                     .requestMatchers("/api/users/**")
-                    .requestMatchers(HttpMethod.GET, "/api/boards/**");
+                    .requestMatchers(HttpMethod.GET, "/api/goods");
         };
     }
 
@@ -91,20 +92,15 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         );
 
         http.authorizeHttpRequests((authorizeHttpRequests) ->
-                        authorizeHttpRequests
-                                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .anyRequest().authenticated() // 그 외 모든 요청 인증처리
-        );
-
-        http.formLogin((formLogin) ->
-                formLogin
-                        .loginPage(LOGIN_URL).permitAll()
+                authorizeHttpRequests
+                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .anyRequest().authenticated() // 그 외 모든 요청 인증처리
         );
 
         http.cors(Customizer.withDefaults());
 
-        http.addFilterBefore(new JwtAuthorizationFilter(jwtUtil,userDetailsService), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new JwtAuthorizationFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(new AuthExceptionFilter(), JwtAuthorizationFilter.class);
 
         return http.build();
