@@ -20,14 +20,17 @@ public class WantedGoods {
     private String content;
     @Enumerated(EnumType.STRING)
     private Category category;
-    @OneToOne
-    @JoinColumn(name = "goods_id")
-    private Goods goods;
 
-    public WantedGoods(WantedRequestDto requestDto, Goods goods) {
+    public WantedGoods(WantedRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.category = requestDto.getCategory();
-        this.goods = goods;
+    }
+
+    public void update(WantedRequestDto wantedRequestDto) {
+        this.title = wantedRequestDto.getTitle();
+        this.content = wantedRequestDto.getContent();
+        this.category = wantedRequestDto.getCategory();
+
     }
 }
