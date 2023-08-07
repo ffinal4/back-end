@@ -1,7 +1,6 @@
 package com.example.peeppo.domain.goods.dto;
 
 import com.example.peeppo.domain.goods.entity.Goods;
-import com.example.peeppo.domain.image.entity.Image;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,9 +19,9 @@ public class GoodsResponseDto {
     private String tradeType;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
-    private List<Image> images;
+    private List<String> images;
 
-    public GoodsResponseDto(Goods goods, List<Image> images) {
+    public GoodsResponseDto(Goods goods, List<String> images) {
         this.goodsId = goods.getGoodsId();
         this.title = goods.getTitle();
         this.content = goods.getContent();

@@ -7,63 +7,57 @@ import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.enums.Category;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
-import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.domain.image.entity.Image;
-import com.example.peeppo.domain.image.utils.ImageUtil;
+import com.example.peeppo.domain.image.helper.ImageHelper;
+import com.example.peeppo.domain.image.repository.ImageRepository;
+import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class GoodsService {
     private final GoodsRepository goodsRepository;
     private final ImageRepository imageRepository;
-    private final ImageUtil imageUtil;
+    private final ImageHelper imageHelper;
     private final AmazonS3 amazonS3;
     private final String bucket;
 
-
     @Transactional
-    public ApiResponse<GoodsResponseDto> goodsCreate(GoodsRequestDto requestDto) {
-        List<MultipartFile> images = requestDto.getImages();
-
-        images.stream().filter(image -> !imageUtil.validateFile(image)).findFirst().ifPresent(image -> {
-            throw new IllegalStateException("파일 검증 실패");
-        });
-        //S3에 업로드 후 이미지 키 반환.
-        List<String> imageUuids = imageUtil.uploadFileToS3(images, amazonS3, bucket);
-        List<Image> S3ObjectUrl = new ArrayList<>();
-        Goods goods = new Goods(requestDto);
+    public ApiResponse<GoodsResponseDto> goodsCreate(GoodsRequestDto requestDto, List<MultipartFile> images, User user) {
+        Goods goods = new Goods(requestDto, user);
         goods.setCategory(Category.getKoreanValueByEnglish(requestDto.getCategory()));
         goodsRepository.save(goods);
-        for (String imageUuid : imageUuids) {
-            Image image = new Image(imageUuid, amazonS3.getUrl(bucket, imageUuid).toString(), goods);
-            S3ObjectUrl.add(image);
-            imageRepository.save(image);
-        }
 
-        GoodsResponseDto responseDto = new GoodsResponseDto(goods, S3ObjectUrl);
-        return new ApiResponse<>(true, responseDto, null);
+        List<String> imageUuids = imageHelper.saveImagesToS3AndRepository(images, amazonS3, bucket, goods);
+
+        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUuids), null);
     }
 
-    // image, username, title, content,
-    public ApiResponse<List<GoodsResponseDto>> allGoods() {
-        List<Goods> goodsList = goodsRepository.findAllByIsDeletedFalseOrderByGoodsIdDesc();
+
+    public Page<GoodsResponseDto> allGoods(int page, int size, String sortBy) {
+        Pageable pageable = paging(page, size, sortBy);
+        Page<Goods> goodsPage = goodsRepository.findAllByIsDeletedFalseOrderByGoodsIdDesc(pageable);
         List<GoodsResponseDto> goodsResponseList = new ArrayList<>();
 
-        for (Goods goods : goodsList) {
+        for (Goods goods : goodsPage.getContent()) {
             List<Image> images = imageRepository.findByGoodsGoodsId(goods.getGoodsId());
-            goodsResponseList.add(new GoodsResponseDto(goods, images));
+            List<String> imageUrls = new ArrayList<>();
+            for (Image image : images) {
+                imageUrls.add(image.getImage());
+            }
+            goodsResponseList.add(new GoodsResponseDto(goods, imageUrls));
         }
 
-        return new ApiResponse<>(true, goodsResponseList, null);
-
+        return new PageImpl<>(goodsResponseList, pageable, goodsPage.getTotalElements());
     }
 
 //    public ApiResponse<List<GoodsResponseDto>> locationAllGoods(Long locationId) {
@@ -76,49 +70,33 @@ public class GoodsService {
 
     public ApiResponse<GoodsResponseDto> getGoods(Long goodsId) {
         Goods goods = findGoods(goodsId);
-        List<Image> S3ObjectUrl = imageRepository.findByGoodsGoodsId(goodsId);
+        List<Image> images = imageRepository.findByGoodsGoodsId(goodsId);
+        List<String> imageUrls = images.stream()
+                .map(Image::getImage)
+                .collect(Collectors.toList());
 
-        GoodsResponseDto goodsResponseDto = new GoodsResponseDto(goods, S3ObjectUrl);
-
-        return new ApiResponse<>(true, goodsResponseDto, null);
-
+        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls), null);
     }
 
     @Transactional
-    public ApiResponse<GoodsResponseDto> goodsUpdate(Long goodsId, GoodsRequestDto requestDto) {
+    public ApiResponse<GoodsResponseDto> goodsUpdate(Long goodsId, GoodsRequestDto requestDto, List<MultipartFile> images) {
         Goods goods = findGoods(goodsId);
 
-        List<Image> imagesToDelete = imageRepository.findByGoodsGoodsId(goodsId);
+        // repository 이미지 삭제
+        List<Image> imagesToDelete = imageHelper.repositoryImageDelete(goodsId);
 
-        // 이미지 삭제
-        for (Image image : imagesToDelete) {
-            imageUtil.deleteFileFromS3(image.getImageKey(), amazonS3, bucket);
-        }
-        imageRepository.deleteByGoodsGoodsId(goodsId);
-
-        // 이미지 등록
-        List<MultipartFile> images = requestDto.getImages();
-
-        images.stream().filter(image -> !imageUtil.validateFile(image)).findFirst().ifPresent(image -> {
-            throw new IllegalStateException("파일 검증 실패");
-        });
-
-        //S3에 업로드 후 이미지 키 반환.
-        List<String> imageUuids = imageUtil.uploadFileToS3(images, amazonS3, bucket);
-        List<Image> S3ObjectUrl = new ArrayList<>();
-        for (String imageUuid : imageUuids) {
-            Image image = new Image(imageUuid, amazonS3.getUrl(bucket, imageUuid).toString(), goods);
-            S3ObjectUrl.add(image);
-            imageRepository.save(image);
+        // s3 이미지 삭제
+        for (Image imageToDelete : imagesToDelete) {
+            imageHelper.deleteFileFromS3(imageToDelete.getImageKey(), amazonS3, bucket);
         }
 
-        // goods 테이블 수정
+        // 이미지 업로드
+        List<String> imageUuids = imageHelper.saveImagesToS3AndRepository(images, amazonS3, bucket, goods);
+
         goods.setCategory(Category.getKoreanValueByEnglish(requestDto.getCategory()));
         goods.update(requestDto);
-        GoodsResponseDto responseDto = new GoodsResponseDto(goods, S3ObjectUrl);
 
-        return new ApiResponse<>(true, responseDto, null);
-
+        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUuids), null);
     }
 
     @Transactional
@@ -139,5 +117,11 @@ public class GoodsService {
         return goods;
     }
 
+    private Pageable paging(int page, int size, String sortBy) {
+        // 정렬
+        Sort sort = Sort.by(sortBy);
 
+        // pageable 생성
+        return PageRequest.of(page, size, sort);
+    }
 }
