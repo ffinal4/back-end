@@ -12,6 +12,7 @@ import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.responseDto.PageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,10 +40,10 @@ public class GoodsService {
     public ApiResponse<GoodsResponseDto> goodsCreate(GoodsRequestDto goodsRequestDto,
                                                      List<MultipartFile> images,
                                                      WantedRequestDto wantedRequestDto) {
-        Goods goods = new Goods(goodsRequestDto);
+        WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
+        Goods goods = new Goods(goodsRequestDto, wantedGoods);
         goodsRepository.save(goods);
 
-        WantedGoods wantedGoods = new WantedGoods(wantedRequestDto, goods);
         wantedGoodsRepository.save(wantedGoods);
 
         List<String> imageUuids = imageHelper
@@ -54,11 +55,11 @@ public class GoodsService {
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUuids, wantedGoods), null);
     }
 
-    //@CachePut(key = "#page", value = "allGoods")
+    @CachePut(key = "#page", value = "allGoods")
     @Cacheable(key = "#page", value = "allGoods", condition = "#page == 0", cacheManager = "cacheManager")
     public Page<GoodsListResponseDto> allGoods(int page, int size, String sortBy, boolean isAsc) {
         // 페이징 되어있는 걸 쿼리DSL 사용
-        //
+
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Goods> goodsPage = goodsRepository.findAllByIsDeletedFalse(pageable);
         List<GoodsListResponseDto> goodsResponseList = new ArrayList<>();
@@ -86,7 +87,7 @@ public class GoodsService {
     public ApiResponse<GoodsResponseDto> getGoods(Long goodsId) {
 
         Goods goods = findGoods(goodsId);
-        WantedGoods wantedGoods = wantedGoodsRepository.findByGoodsGoodsId(goodsId);
+        WantedGoods wantedGoods = findWantedGoods(goodsId);
         List<Image> images = imageRepository.findByGoodsGoodsId(goodsId);
         List<String> imageUrls = images.stream()
                 .map(Image::getImageUrl)
@@ -108,8 +109,9 @@ public class GoodsService {
     }
 
     @Transactional
-    public ApiResponse<GoodsResponseDto> goodsUpdate(Long goodsId, GoodsRequestDto requestDto, List<MultipartFile> images) {
+    public ApiResponse<GoodsResponseDto> goodsUpdate(Long goodsId, GoodsRequestDto goodsRequestDto, List<MultipartFile> images, WantedRequestDto wantedRequestDto) {
         Goods goods = findGoods(goodsId);
+        WantedGoods wantedGoods = findWantedGoods(goodsId);
 
         // repository 이미지 삭제
         List<Image> imageList = imageRepository.findByGoodsGoodsId(goodsId);
@@ -125,9 +127,10 @@ public class GoodsService {
                 .stream()
                 .map(Image::getImageUrl)
                 .collect(Collectors.toList());
-        goods.update(requestDto);
+        goods.update(goodsRequestDto);
+        wantedGoods.update(wantedRequestDto);
 
-        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls), null);
+        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods), null);
     }
 
     @Transactional
@@ -146,6 +149,12 @@ public class GoodsService {
             throw new IllegalStateException("삭제된 게시글입니다.");
         }
         return goods;
+    }
+
+    public WantedGoods findWantedGoods(Long wantedId) {
+        WantedGoods wantedGoods = wantedGoodsRepository.findById(wantedId).orElseThrow(() ->
+                new NullPointerException("해당 게시글은 존재하지 않습니다."));
+        return wantedGoods;
     }
 
 
