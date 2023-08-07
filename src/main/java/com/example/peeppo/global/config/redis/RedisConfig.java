@@ -2,6 +2,8 @@
 package com.example.peeppo.global.config.redis;
 
 
+import com.example.peeppo.domain.chat.entity.ChatMessage;
+import com.example.peeppo.domain.chat.entity.ChatRoom;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -59,9 +61,27 @@ public class RedisConfig {
         redisTemplate.setConnectionFactory(connectionFactory);
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class)); //Json포맷 형식으로 메시지를 교환하기 위해
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(String.class)); //Json포맷 형식으로 메시지를 교환하기 위해
+
+       /* redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class)); //Json포맷 형식으로 메시지를 교환하기 위해
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class)); //Json포맷 형식으로 메시지를 교환하기 위해*/
+
         return redisTemplate;
     }
 
+    @Bean
+    public RedisTemplate<String, Object> chatRoomRedisTemplate(RedisConnectionFactory connectionFactory) {
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(connectionFactory);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class));
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class));
+        redisTemplate.afterPropertiesSet();
+
+        return redisTemplate;
+    }
     //Topic 공유를 위해 Channel Topic을 빈으로 등록해 단일화 시켜준다.
     @Bean
     public ChannelTopic channelTopic() {
