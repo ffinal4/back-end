@@ -29,6 +29,7 @@ public class Goods extends Timestamped {
     private String tradeType;
     @Enumerated(EnumType.STRING) // ENUM타입을 String으로 넣음
     private Category category;
+
     private Long userId; // 유저부분 완료 시 수정할 것
     private boolean isDeleted;
 //    @OneToOne(fetch = FetchType.LAZY)
