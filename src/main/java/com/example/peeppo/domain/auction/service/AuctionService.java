@@ -1,5 +1,6 @@
 package com.example.peeppo.domain.auction.service;
 
+import com.example.peeppo.domain.auction.dto.AuctionListResponseDto;
 import com.example.peeppo.domain.auction.dto.AuctionResponseDto;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.entity.AuctionList;
@@ -37,8 +38,8 @@ public class AuctionService {
         return goodsRepository.findById(goodsId).orElse(null);
     }
 
-    public List<AuctionResponseDto> findAllAuction() {
-            return auctionRepository.findAll().stream().map(AuctionResponseDto::new).toList();
+    public List<AuctionListResponseDto> findAllAuction() {
+            return auctionRepository.findAll().stream().map(AuctionListResponseDto::new).toList();
     }
 
 }

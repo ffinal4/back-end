@@ -1,7 +1,9 @@
 package com.example.peeppo.domain.auction.controller;
 
 
+import com.example.peeppo.domain.auction.dto.AuctionListResponseDto;
 import com.example.peeppo.domain.auction.dto.AuctionResponseDto;
+import com.example.peeppo.domain.auction.entity.AuctionList;
 import com.example.peeppo.domain.auction.service.AuctionService;
 import lombok.RequiredArgsConstructor;
 
@@ -22,7 +24,7 @@ public class AuctionController {
     }
 
     @GetMapping
-    public List<AuctionResponseDto> allAuction(){
+    public List<AuctionListResponseDto> allAuction(){
         return auctionService.findAllAuction();
     }
 }

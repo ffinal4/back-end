@@ -30,5 +30,4 @@ public class Auction extends Timestamped {
     public Auction(Goods goods){
         this.goods = goods;
     }
-
 }
