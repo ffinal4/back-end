@@ -27,4 +27,9 @@ public class AuctionController {
     public List<AuctionListResponseDto> allAuction(){
         return auctionService.findAllAuction();
     }
+
+    @GetMapping("/{auctionId}")
+    public AuctionResponseDto getAuction(@PathVariable("auctionId")Long auctionId){
+        return auctionService.findAuctionById(auctionId);
+    }
 }

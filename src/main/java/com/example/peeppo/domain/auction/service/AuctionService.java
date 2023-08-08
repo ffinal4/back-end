@@ -42,4 +42,8 @@ public class AuctionService {
             return auctionRepository.findAll().stream().map(AuctionListResponseDto::new).toList();
     }
 
+    public AuctionResponseDto findAuctionById(Long auctionId) {
+        Auction auction = auctionRepository.findById(auctionId).orElse(null);
+        return new AuctionResponseDto(auction, auction.getGoods());
+    }
 }
