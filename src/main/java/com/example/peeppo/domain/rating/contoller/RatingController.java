@@ -1,12 +1,11 @@
 package com.example.peeppo.domain.rating.contoller;
 
 import com.example.peeppo.domain.rating.dto.RatingResponseDto;
+import com.example.peeppo.domain.rating.dto.RatingRequestDto;
 import com.example.peeppo.domain.rating.service.RatingService;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -15,10 +14,16 @@ public class RatingController {
     private final RatingService ratingService;
 
     @GetMapping
-    public ApiResponse<RatingResponseDto> RandomRatingGoods() {
-        return ratingService.RandomRatingGoods();
+    public ApiResponse<RatingResponseDto> randomRatingGoods() {
+        return ratingService.randomRatingGoods();
 
     }
-//    @PostMapping("/{ratingId}")
+    @PostMapping("/{goodsId}")
+    public ApiResponse<RatingResponseDto> nextRandomRatingGoods(@PathVariable Long goodsId,
+                                                                @RequestBody RatingRequestDto ratingRequestDto){
+
+        return ratingService.nextRandomRatingGoods(goodsId, ratingRequestDto);
+
+    }
 
 }

@@ -3,34 +3,50 @@ package com.example.peeppo.domain.rating.repository;
 import com.example.peeppo.domain.rating.entity.QRating;
 import com.example.peeppo.domain.rating.entity.Rating;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
-
 
 @RequiredArgsConstructor
 public class RatingRepositoryCustomImpl implements RatingRepositoryCustom {
     private final JPAQueryFactory queryFactory;
     @Override
     public Rating findRandomRatingWithCountLessThanOrEqual7() {
-        QRating qRating = QRating.rating;
-        List<Long> ids = queryFactory.select(qRating.ratingId)
-                .from(qRating)
-                .where(qRating.ratingCount.loe(7))
-                .orderBy(qRating.ratingCount.asc())
-                .fetch();
+        List<Long> ids = fetchRatingIdsWithCountLessThanOrEqual7();
 
         if (ids.isEmpty()) {
             return null;
         }
 
         Long randomId = getRandomId(ids);
-
-        return queryFactory.selectFrom(qRating)
-                .where(qRating.ratingId.eq(randomId))
+        return queryFactory.selectFrom(QRating.rating)
+                .where(QRating.rating.ratingId.eq(randomId))
                 .fetchOne();
+    }
+
+    @Override
+    public Rating goodsWithDifferentId(Long goodsId) {
+        List<Long> ids = fetchRatingIdsWithCountLessThanOrEqual7();
+        ids.remove(goodsId);
+
+        if (ids.isEmpty()) {
+            return null;
+        }
+
+        Long randomId = getRandomId(ids);
+        return queryFactory.selectFrom(QRating.rating)
+                .where(QRating.rating.ratingId.eq(randomId))
+                .fetchOne();
+    }
+
+    private List<Long> fetchRatingIdsWithCountLessThanOrEqual7() {
+        QRating qRating = QRating.rating;
+        return queryFactory.select(qRating.ratingId)
+                .from(qRating)
+                .where(qRating.ratingCount.loe(7))
+                .orderBy(qRating.ratingCount.asc())
+                .fetch();
     }
 
     private Long getRandomId(List<Long> ids) {

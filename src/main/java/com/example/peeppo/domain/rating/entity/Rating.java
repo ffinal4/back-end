@@ -1,7 +1,6 @@
 package com.example.peeppo.domain.rating.entity;
 
 import com.example.peeppo.domain.goods.entity.Goods;
-import com.example.peeppo.domain.goods.entity.WantedGoods;
 import com.example.peeppo.domain.image.entity.Image;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
@@ -38,5 +37,10 @@ public class Rating {
         this.ratingCount = 0L;
         this.goods = goods;
         this.image = image;
+    }
+    public void update(Long ratingPrice){
+        this.sumRatingPrice += ratingPrice;
+        this.ratingCount += 1;
+        this.avgRatingPrice = sumRatingPrice / this.ratingCount;
     }
 }
