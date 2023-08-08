@@ -1,25 +1,29 @@
-package com.example.peeppo.global.security;
+package com.example.peeppo.global.security.jwt;
 
 import com.example.peeppo.domain.user.dto.LoginRequestDto;
 import com.example.peeppo.domain.user.entity.UserRoleEnum;
-import com.example.peeppo.global.utils.JwtUtil;
+import com.example.peeppo.global.security.UserDetailsImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
 
 @Slf4j(topic = "로그인 및 JWT 생성")
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final JwtUtil jwtUtil;
+    private final RedisTemplate redisTemplate;
 
 
     @Override
@@ -27,10 +31,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         log.info("request uri: {}", request.getRequestURI());
 
         try {
-             LoginRequestDto requestDto = new ObjectMapper().readValue(request.getInputStream(), LoginRequestDto.class);
+            LoginRequestDto requestDto = new ObjectMapper().readValue(request.getInputStream(), LoginRequestDto.class);
 
             UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
-                    requestDto.getUsername(),
+                    requestDto.getEmail(),
                     requestDto.getPassword()
             );
             return getAuthenticationManager().authenticate(usernamePasswordAuthenticationToken);
@@ -52,10 +56,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         String refreshToken = jwtUtil.createRefreshToken(username);
         response.addHeader(JwtUtil.REFRESH_TOKEN, refreshToken);
-        // redis에 저장
-//        if(redisService.getRefreshToken(userId) == null) {
-//            redisService.setRefreshToken(new RefreshToken(refreshToken, userId));
-//        }
+
+        redisTemplate.opsForValue()
+                .set(username, refreshToken, 5, TimeUnit.MINUTES); //나중에 3일로 바꾸기
+        redisTemplate.opsForValue()
+                .set(refreshToken, username, 5, TimeUnit.MINUTES);
 
         response.setStatus(200);
         new ObjectMapper().writeValue(response.getOutputStream(), ("로그인 성공"));

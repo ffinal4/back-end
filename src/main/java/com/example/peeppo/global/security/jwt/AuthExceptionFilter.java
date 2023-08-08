@@ -1,4 +1,4 @@
-package com.example.peeppo.global.jwt;
+package com.example.peeppo.global.security.jwt;
 
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
