@@ -2,6 +2,7 @@ package com.example.peeppo.domain.auction.dto;
 
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.goods.entity.Goods;
+import com.example.peeppo.domain.image.entity.Image;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -24,5 +25,6 @@ public class AuctionListResponseDto {
         this.location = auction.getGoods().getLocation();
         this.title = auction.getGoods().getTitle();
         this.content = auction.getGoods().getContent();
+        this.image = auction.getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
     }
 }

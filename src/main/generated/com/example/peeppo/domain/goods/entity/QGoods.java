@@ -37,6 +37,8 @@ public class QGoods extends EntityPathBase<Goods> {
 
     public final NumberPath<Long> goodsId = createNumber("goodsId", Long.class);
 
+    public final ListPath<com.example.peeppo.domain.image.entity.Image, com.example.peeppo.domain.image.entity.QImage> image = this.<com.example.peeppo.domain.image.entity.Image, com.example.peeppo.domain.image.entity.QImage>createList("image", com.example.peeppo.domain.image.entity.Image.class, com.example.peeppo.domain.image.entity.QImage.class, PathInits.DIRECT2);
+
     public final BooleanPath isDeleted = createBoolean("isDeleted");
 
     public final StringPath location = createString("location");
