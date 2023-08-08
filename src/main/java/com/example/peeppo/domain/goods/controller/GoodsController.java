@@ -3,6 +3,7 @@ package com.example.peeppo.domain.goods.controller;
 import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.service.GoodsService;
 import com.example.peeppo.global.responseDto.ApiResponse;
+import com.example.peeppo.global.responseDto.GoodsResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -19,9 +20,10 @@ public class GoodsController {
     @PostMapping
     public ApiResponse<GoodsResponseDto> goodsCreate(@RequestPart(value = "data") GoodsRequestDto goodsRequestDto,
                                                      @RequestPart(value = "images") List<MultipartFile> images,
-                                                     @RequestPart(value = "wanted")WantedRequestDto wantedRequestDto) {
+                                                     @RequestPart(value = "wanted")WantedRequestDto wantedRequestDto,
+                                                     @RequestPart(value = "sellerprice")SellerPriceDto sellerPriceDto) {
 
-        return goodsService.goodsCreate(goodsRequestDto, images, wantedRequestDto);
+        return goodsService.goodsCreate(goodsRequestDto, images, wantedRequestDto, sellerPriceDto);
     }
 
     // 전체 게시물 조회
