@@ -19,9 +19,6 @@ public class User {
     @Column(nullable = false, unique = true)
     private String nickname;
 
-    @Column(nullable = false)
-    private String name;
-
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -37,7 +34,6 @@ public class User {
 
     public User(SignupRequestDto requestDto, String encodedPassword, UserRoleEnum role) {
         this.nickname = requestDto.getNickname();
-        this.name = requestDto.getName();
         this.email = requestDto.getEmail();
         this.password = encodedPassword;
         this.role = role;

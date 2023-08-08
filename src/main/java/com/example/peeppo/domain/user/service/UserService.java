@@ -4,21 +4,17 @@ import com.example.peeppo.domain.user.dto.*;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.entity.UserRoleEnum;
 import com.example.peeppo.domain.user.repository.UserRepository;
-import com.example.peeppo.global.jwt.JwtUtil;
-import jakarta.annotation.Resource;
+import com.example.peeppo.global.security.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.springframework.http.HttpStatus.OK;
@@ -36,7 +32,7 @@ public class UserService {
         String email = signupRequestDto.getEmail();
         boolean validateDuplicateEmail = userRepository.findByEmail(email).isEmpty();
 
-        if(!validateDuplicateEmail){
+        if (!validateDuplicateEmail) {
             ResponseDto response = new ResponseDto("중복된 이메일입니다.", HttpStatus.BAD_REQUEST.value(), "BAD");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(response);
         }
@@ -51,9 +47,15 @@ public class UserService {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
+    //닉네임 중복체크
     public ResponseEntity<CheckResponseDto> checkValidateNickname(SignupRequestDto signupRequestDto) {
         String nickname = signupRequestDto.getNickname();
         boolean validateDuplicateNickname = isDuplicatedNickname(nickname);
+
+        if (!validateDuplicateNickname) {
+            throw new IllegalStateException("중복된 이름입니다.");
+        }
+
         CheckResponseDto response = new CheckResponseDto("중복되지 않은 이름입니다.", validateDuplicateNickname, OK.value(), "OK");
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
@@ -82,6 +84,20 @@ public class UserService {
         redisTemplate.opsForValue()
                 .set(logoutRequestDto.getAccessToken(), "logout", expiration, TimeUnit.MILLISECONDS);
 
+        return new ResponseDto("로그아웃 되었습니다.", HttpStatus.OK.value(), "OK");
+    }
+
+    //회원정보 페이지
+    public ResponseEntity<MyPageResponseDto> mypage(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않는 userId 입니다."));
+
+        MyPageResponseDto myPageResponseDto = new MyPageResponseDto(user);
+
+        return ResponseEntity.status(HttpStatus.OK.value()).body(myPageResponseDto);
+    }
+
+    public ResponseDto updatemypage(Long userId) {
         return new ResponseDto("로그아웃 되었습니다.", HttpStatus.OK.value(), "OK");
     }
 }

@@ -1,9 +1,9 @@
 package com.example.peeppo.global.config;
 
-import com.example.peeppo.global.jwt.AuthExceptionFilter;
-import com.example.peeppo.global.jwt.JwtAuthenticationFilter;
-import com.example.peeppo.global.jwt.JwtAuthorizationFilter;
-import com.example.peeppo.global.jwt.JwtUtil;
+import com.example.peeppo.global.security.jwt.AuthExceptionFilter;
+import com.example.peeppo.global.security.jwt.JwtAuthenticationFilter;
+import com.example.peeppo.global.security.jwt.JwtAuthorizationFilter;
+import com.example.peeppo.global.security.jwt.JwtUtil;
 import com.example.peeppo.global.security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -35,7 +35,6 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
-    private final RedisTemplate redisTemplate;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final static String LOGIN_URL = "/api/users/login";
 

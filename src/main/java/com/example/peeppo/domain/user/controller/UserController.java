@@ -1,9 +1,6 @@
 package com.example.peeppo.domain.user.controller;
 
-import com.example.peeppo.domain.user.dto.CheckResponseDto;
-import com.example.peeppo.domain.user.dto.LogoutRequestDto;
-import com.example.peeppo.domain.user.dto.ResponseDto;
-import com.example.peeppo.domain.user.dto.SignupRequestDto;
+import com.example.peeppo.domain.user.dto.*;
 import com.example.peeppo.domain.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,15 +8,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/users")
+@RequestMapping("/api")
 public class UserController {
 
     private final UserService userService;
@@ -38,5 +32,16 @@ public class UserController {
     @PostMapping("/users/logout")
     public ResponseDto logout(@RequestBody @Valid LogoutRequestDto logoutRequestDto, HttpServletRequest req, HttpServletResponse res) {
         return userService.logout(req, res, logoutRequestDto);
+    }
+
+    //회원정보 페이지
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<MyPageResponseDto> mypage(@PathVariable Long userId) {
+        return userService.mypage(userId);
+    }
+
+    @PatchMapping("/users/{userId}")
+    public ResponseDto updatemypage(@PathVariable Long userId) {
+        return userService.updatemypage(userId);
     }
 }
