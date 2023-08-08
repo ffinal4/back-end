@@ -13,8 +13,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Image extends Timestamped {
 
-    // Long으로 고칠 것
     @Id
+    @JoinColumn(name = "image_key")
     private String imageKey;
 
     @Column(nullable = false)

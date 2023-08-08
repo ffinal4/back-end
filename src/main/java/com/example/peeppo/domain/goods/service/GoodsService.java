@@ -14,7 +14,7 @@ import com.example.peeppo.domain.rating.helper.RatingHelper;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
-import com.example.peeppo.global.responseDto.GoodsResponseDto;
+import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.global.responseDto.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CachePut;
@@ -54,13 +54,14 @@ public class GoodsService {
 
         wantedGoodsRepository.save(wantedGoods);
 
-        ratingHelper.createRating(sellerPriceDto.getSellerPrice());
-
         List<String> imageUuids = imageHelper
                 .saveImagesToS3AndRepository(images, amazonS3, bucket, goods)
                 .stream()
                 .map(Image::getImageUrl)
                 .collect(Collectors.toList());
+
+        Image image = imageHelper.getImage(imageUuids.get(0));
+        ratingHelper.createRating(sellerPriceDto.getSellerPrice(), goods, image);
 
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUuids, wantedGoods), null);
     }
@@ -187,9 +188,8 @@ public class GoodsService {
     }
 
     public WantedGoods findWantedGoods(Long wantedId) {
-        WantedGoods wantedGoods = wantedGoodsRepository.findById(wantedId).orElseThrow(() ->
+        return wantedGoodsRepository.findById(wantedId).orElseThrow(() ->
                 new NullPointerException("해당 게시글은 존재하지 않습니다."));
-        return wantedGoods;
     }
 
 

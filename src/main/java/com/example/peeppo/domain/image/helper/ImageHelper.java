@@ -77,6 +77,10 @@ public class ImageHelper {
         imageRepository.deleteAll(imageList);
     }
 
+    public Image getImage(String imageUrl){
+        return imageRepository.findByImageUrl(imageUrl);
+    }
+
     public boolean validateFile(MultipartFile file) {
         // 지원하는 파일 확장자 리스트
         List<String> fileExtensions = Arrays.asList("jpg", "png", "webp", "heif", "gif", "jpeg");
@@ -103,7 +107,6 @@ public class ImageHelper {
         }
         return true;
     }
-
 
     private static String getUuid() {
         return UUID.randomUUID().toString().replaceAll("-", "");

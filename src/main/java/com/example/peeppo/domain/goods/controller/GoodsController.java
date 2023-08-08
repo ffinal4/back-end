@@ -3,7 +3,7 @@ package com.example.peeppo.domain.goods.controller;
 import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.service.GoodsService;
 import com.example.peeppo.global.responseDto.ApiResponse;
-import com.example.peeppo.global.responseDto.GoodsResponseDto;
+import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
