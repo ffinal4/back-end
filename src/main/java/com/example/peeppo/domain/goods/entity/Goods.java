@@ -3,12 +3,16 @@ package com.example.peeppo.domain.goods.entity;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.goods.dto.GoodsRequestDto;
 import com.example.peeppo.domain.goods.enums.Category;
+import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.global.utils.Timestamped;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
+
+import java.util.List;
 
 import static jakarta.persistence.FetchType.LAZY;
 
@@ -41,6 +45,10 @@ public class Goods extends Timestamped {
     @OneToOne(mappedBy = "goods")
     @JoinColumn(name = "auction_id")
     private Auction auction;
+
+    @OneToMany(mappedBy = "goods")
+    private List<Image> image;
+
 
     public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods) {
         this.title = requestDto.getTitle();

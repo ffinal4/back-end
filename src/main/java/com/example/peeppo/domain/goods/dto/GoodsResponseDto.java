@@ -3,6 +3,7 @@ package com.example.peeppo.domain.goods.dto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.entity.WantedGoods;
 import com.example.peeppo.domain.goods.enums.Category;
+import com.example.peeppo.domain.image.entity.Image;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -47,6 +48,7 @@ public class GoodsResponseDto {
         this.goodsCondition = goods.getGoodsCondition();
         this.tradeType = goods.getTradeType();
         this.createdAt = goods.getCreatedAt();
+        this.images = goods.getImage().stream().map(Image::getImageUrl).toList();
         this.modifiedAt = goods.getModifiedAt();
     }
 }

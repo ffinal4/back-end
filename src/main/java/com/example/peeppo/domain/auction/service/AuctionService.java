@@ -39,6 +39,7 @@ public class AuctionService {
     }
 
     public List<AuctionListResponseDto> findAllAuction() {
+
             return auctionRepository.findAll().stream().map(AuctionListResponseDto::new).toList();
     }
 
