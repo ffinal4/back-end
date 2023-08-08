@@ -5,7 +5,6 @@ import com.example.peeppo.domain.auction.dto.AuctionResponseDto;
 import com.example.peeppo.domain.auction.service.AuctionService;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

@@ -24,6 +24,8 @@ public class QGoods extends EntityPathBase<Goods> {
 
     public final com.example.peeppo.global.utils.QTimestamped _super = new com.example.peeppo.global.utils.QTimestamped(this);
 
+    public final com.example.peeppo.domain.auction.entity.QAuction auction;
+
     public final EnumPath<com.example.peeppo.domain.goods.enums.Category> category = createEnum("category", com.example.peeppo.domain.goods.enums.Category.class);
 
     public final StringPath content = createString("content");
@@ -68,6 +70,7 @@ public class QGoods extends EntityPathBase<Goods> {
 
     public QGoods(Class<? extends Goods> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
+        this.auction = inits.isInitialized("auction") ? new com.example.peeppo.domain.auction.entity.QAuction(forProperty("auction"), inits.get("auction")) : null;
         this.wantedGoods = inits.isInitialized("wantedGoods") ? new QWantedGoods(forProperty("wantedGoods")) : null;
     }
 

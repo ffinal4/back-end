@@ -18,22 +18,41 @@ public class QAuction extends EntityPathBase<Auction> {
 
     private static final long serialVersionUID = -922263153L;
 
+    private static final PathInits INITS = PathInits.DIRECT2;
+
     public static final QAuction auction = new QAuction("auction");
+
+    public final com.example.peeppo.global.utils.QTimestamped _super = new com.example.peeppo.global.utils.QTimestamped(this);
 
     public final NumberPath<Long> auctionId = createNumber("auctionId", Long.class);
 
-    public final ListPath<AuctionList, QAuctionList> auctionList = this.<AuctionList, QAuctionList>createList("auctionList", AuctionList.class, QAuctionList.class, PathInits.DIRECT2);
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
+
+    public final com.example.peeppo.domain.goods.entity.QGoods goods;
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
     public QAuction(String variable) {
-        super(Auction.class, forVariable(variable));
+        this(Auction.class, forVariable(variable), INITS);
     }
 
     public QAuction(Path<? extends Auction> path) {
-        super(path.getType(), path.getMetadata());
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
     public QAuction(PathMetadata metadata) {
-        super(Auction.class, metadata);
+        this(metadata, PathInits.getFor(metadata, INITS));
+    }
+
+    public QAuction(PathMetadata metadata, PathInits inits) {
+        this(Auction.class, metadata, inits);
+    }
+
+    public QAuction(Class<? extends Auction> type, PathMetadata metadata, PathInits inits) {
+        super(type, metadata, inits);
+        this.goods = inits.isInitialized("goods") ? new com.example.peeppo.domain.goods.entity.QGoods(forProperty("goods"), inits.get("goods")) : null;
     }
 
 }

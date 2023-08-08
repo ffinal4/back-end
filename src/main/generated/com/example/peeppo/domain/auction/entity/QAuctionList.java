@@ -46,7 +46,7 @@ public class QAuctionList extends EntityPathBase<AuctionList> {
 
     public QAuctionList(Class<? extends AuctionList> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.auction = inits.isInitialized("auction") ? new QAuction(forProperty("auction")) : null;
+        this.auction = inits.isInitialized("auction") ? new QAuction(forProperty("auction"), inits.get("auction")) : null;
         this.goods = inits.isInitialized("goods") ? new com.example.peeppo.domain.goods.entity.QGoods(forProperty("goods"), inits.get("goods")) : null;
     }
 

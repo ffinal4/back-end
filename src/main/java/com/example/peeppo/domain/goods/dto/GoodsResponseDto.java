@@ -37,4 +37,16 @@ public class GoodsResponseDto {
         this.images = images;
         this.wantedGoods = wantedGoods;
     }
+
+    public GoodsResponseDto(Goods goods) {
+        this.goodsId = goods.getGoodsId();
+        this.title = goods.getTitle();
+        this.content = goods.getContent();
+        this.category = goods.getCategory();
+        this.location = goods.getLocation();
+        this.goodsCondition = goods.getGoodsCondition();
+        this.tradeType = goods.getTradeType();
+        this.createdAt = goods.getCreatedAt();
+        this.modifiedAt = goods.getModifiedAt();
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.peeppo.domain.goods.entity;
 
+import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.goods.dto.GoodsRequestDto;
 import com.example.peeppo.domain.goods.enums.Category;
 import com.example.peeppo.global.utils.Timestamped;
@@ -36,6 +37,10 @@ public class Goods extends Timestamped {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "wanted_id")
     private WantedGoods wantedGoods;
+
+    @OneToOne(mappedBy = "goods")
+    @JoinColumn(name = "auction_id")
+    private Auction auction;
 
     public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods) {
         this.title = requestDto.getTitle();
