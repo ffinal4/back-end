@@ -2,8 +2,10 @@ package com.example.peeppo.domain.goods.dto;
 
 import com.example.peeppo.domain.goods.entity.Goods;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class GoodsListResponseDto {
     private Long goodsId;
     private String location;

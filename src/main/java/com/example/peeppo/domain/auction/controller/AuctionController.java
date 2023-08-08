@@ -32,4 +32,10 @@ public class AuctionController {
     public AuctionResponseDto getAuction(@PathVariable("auctionId")Long auctionId){
         return auctionService.findAuctionById(auctionId);
     }
+
+    @DeleteMapping("/{auctionId}")
+    public String deleteAuction(@PathVariable("auctionId") Long auctionId){
+        auctionService.deleteAuction(auctionId);
+        return "삭제성공";
+    }
 }

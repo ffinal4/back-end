@@ -23,7 +23,7 @@ public class Auction extends Timestamped {
     private List<AuctionList> auctionList = new ArrayList<AuctionList>();
 //두 객체중 하나의 객체만 테이블을 관리할 수 있도록 정하는 것이 MappedBy 옵션
 */
-    @OneToOne
+    @OneToOne(cascade = CascadeType.DETACH)
     @JoinColumn(name = "goods_id")
     private Goods goods;
 

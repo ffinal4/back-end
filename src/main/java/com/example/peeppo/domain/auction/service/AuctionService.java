@@ -46,4 +46,8 @@ public class AuctionService {
         Auction auction = auctionRepository.findById(auctionId).orElse(null);
         return new AuctionResponseDto(auction, auction.getGoods());
     }
+
+    public void deleteAuction(Long auctionId) {
+        auctionRepository.deleteById(auctionId);
+    }
 }
