@@ -9,6 +9,9 @@ import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class AuctionService {
@@ -27,5 +30,9 @@ public class AuctionService {
 
     public Goods findGoodsId(Long goodsId) {
         return goodsRepository.findById(goodsId).orElse(null);
+    }
+
+    public List<AuctionResponseDto> findAllAuction() {
+        return auctionRepository.findAll().stream().map(AuctionResponseDto::new).toList();
     }
 }
