@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Slf4j
 @RestController
@@ -30,7 +33,9 @@ public class UserController {
     }
 
     @PostMapping("/users/logout")
-    public ResponseDto logout(@RequestBody @Valid LogoutRequestDto logoutRequestDto, HttpServletRequest req, HttpServletResponse res) {
+    public ResponseDto logout(@RequestBody @Valid LogoutRequestDto logoutRequestDto,
+                              HttpServletRequest req,
+                              HttpServletResponse res) {
         return userService.logout(req, res, logoutRequestDto);
     }
 
@@ -41,7 +46,14 @@ public class UserController {
     }
 
     @PatchMapping("/users/{userId}")
-    public ResponseDto updatemypage(@PathVariable Long userId) {
-        return userService.updatemypage(userId);
+    public ResponseDto updatemypage(@PathVariable Long userId,
+                                    @RequestPart(value = "data") @Valid MyPageRequestDto myPageRequestDto,
+                                    @RequestPart(value = "image") MultipartFile multipartFile) throws IOException {
+        return userService.updatemypage(userId, myPageRequestDto, multipartFile);
+    }
+
+    @DeleteMapping("/users/{userId}")
+    public ResponseEntity<ResponseDto> deletemypage(@PathVariable Long userId) {
+        return userService.deletemypage(userId);
     }
 }

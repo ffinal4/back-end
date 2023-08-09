@@ -1,7 +1,11 @@
 package com.example.peeppo.domain.user.dto;
 
 import com.example.peeppo.domain.user.entity.User;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+@Getter
+@RequiredArgsConstructor
 public class MyPageResponseDto {
 
     String nickname;
