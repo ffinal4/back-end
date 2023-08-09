@@ -76,7 +76,9 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         return web -> {
             web.ignoring()
                     .requestMatchers("/api/users/**")
-                    .requestMatchers(HttpMethod.GET, "/api/goods/**");
+                    .requestMatchers(HttpMethod.GET, "/api/goods/**")
+                    .requestMatchers("/api/auction/**");
+
         };
     }
 

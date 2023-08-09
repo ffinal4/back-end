@@ -46,7 +46,7 @@ public class JwtUtil {
     private final RedisTemplate redisTemplate;
 
     // accessToken 만료시간
-    private final long TOKEN_TIME = 60 * 1000L; // 3 * 24 * 60 * 60 * 1000L; // 30분으로 변경해두기
+    private final long TOKEN_TIME = 3 * 24 * 60 * 60 * 1000L; // 3 * 24 * 60 * 60 * 1000L; // 30분으로 변경해두기
 
     // refreshToken 만료시간
     private final long REFRESH_TOKEN_TIME = 3 * 24 * 60 * 60 * 1000L; // 3일
