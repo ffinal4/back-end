@@ -12,6 +12,7 @@ public class GoodsListResponseDto {
     private String title;
     private String content;
     // 사용자 이름
+    private String nickname;
     private String image;
 
     public GoodsListResponseDto(Goods goods, String image) {
@@ -20,5 +21,6 @@ public class GoodsListResponseDto {
         this.content = goods.getContent();
         this.location = goods.getLocation();
         this.image = image;
+        this.nickname = goods.getUser().getNickname();
     }
 }

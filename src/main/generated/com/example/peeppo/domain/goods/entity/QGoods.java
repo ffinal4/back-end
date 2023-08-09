@@ -50,7 +50,7 @@ public class QGoods extends EntityPathBase<Goods> {
 
     public final StringPath tradeType = createString("tradeType");
 
-    public final NumberPath<Long> userId = createNumber("userId", Long.class);
+    public final com.example.peeppo.domain.user.entity.QUser user;
 
     public final QWantedGoods wantedGoods;
 
@@ -73,6 +73,7 @@ public class QGoods extends EntityPathBase<Goods> {
     public QGoods(Class<? extends Goods> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.auction = inits.isInitialized("auction") ? new com.example.peeppo.domain.auction.entity.QAuction(forProperty("auction"), inits.get("auction")) : null;
+        this.user = inits.isInitialized("user") ? new com.example.peeppo.domain.user.entity.QUser(forProperty("user")) : null;
         this.wantedGoods = inits.isInitialized("wantedGoods") ? new QWantedGoods(forProperty("wantedGoods")) : null;
     }
 
