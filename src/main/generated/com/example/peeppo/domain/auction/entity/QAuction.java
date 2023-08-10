@@ -33,6 +33,8 @@ public class QAuction extends EntityPathBase<Auction> {
 
     public final com.example.peeppo.domain.goods.entity.QGoods goods;
 
+    public final NumberPath<Long> lowPrice = createNumber("lowPrice", Long.class);
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 

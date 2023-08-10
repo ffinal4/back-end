@@ -39,7 +39,7 @@ public class AuctionService {
         GoodsResponseDto goodsResponseDto = new GoodsResponseDto(getGoods);
         LocalDateTime auctionEndTime = calAuctionEndTime(auctionRequestDto.getEndTime()); // 마감기한 계산
         log.info("{}" , auctionEndTime);
-        Auction auction = new Auction(getGoods, auctionEndTime); // 경매와 마감기한 생성
+        Auction auction = new Auction(getGoods, auctionEndTime, auctionRequestDto); // 경매와 마감기한 생성
         auctionRepository.save(auction);
         return new AuctionResponseDto(auction, goodsResponseDto);
     }
