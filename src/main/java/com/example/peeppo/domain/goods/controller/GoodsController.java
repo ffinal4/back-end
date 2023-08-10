@@ -23,7 +23,7 @@ public class GoodsController {
     public ApiResponse<GoodsResponseDto> goodsCreate(@RequestPart(value = "data") GoodsRequestDto goodsRequestDto,
                                                      @RequestPart(value = "images") List<MultipartFile> images,
                                                      @RequestPart(value = "wanted")WantedRequestDto wantedRequestDto,
-                                                     @RequestPart(value = "sellerprice")SellerPriceDto sellerPriceDto,
+                                                     @RequestPart(value = "sellerPrice")SellerPriceDto sellerPriceDto,
                                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         return goodsService.goodsCreate(goodsRequestDto, images, wantedRequestDto, sellerPriceDto, userDetails.getUser());

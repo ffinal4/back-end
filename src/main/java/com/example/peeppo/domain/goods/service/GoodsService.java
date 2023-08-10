@@ -10,8 +10,10 @@ import com.example.peeppo.domain.goods.repository.WantedGoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.helper.ImageHelper;
 import com.example.peeppo.domain.image.repository.ImageRepository;
+import com.example.peeppo.domain.rating.helper.RatingHelper;
+import com.example.peeppo.domain.user.entity.User;
+import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
-import com.example.peeppo.global.responseDto.GoodsResponseDto;
 import com.example.peeppo.global.responseDto.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CachePut;
@@ -38,12 +40,14 @@ public class GoodsService {
     private final AmazonS3 amazonS3;
     private final String bucket;
     private final UserRepository userRepository;
+    private final RatingHelper ratingHelper;
 
     @Transactional
     public ApiResponse<GoodsResponseDto> goodsCreate(GoodsRequestDto goodsRequestDto,
                                                      List<MultipartFile> images,
-                                                     WantedRequestDto wantedRequestDto, User user,
-                                                     SellerPriceDto sellerPriceDto) {
+                                                     WantedRequestDto wantedRequestDto,
+                                                     SellerPriceDto sellerPriceDto,
+                                                     User user) {
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
         Goods goods = new Goods(goodsRequestDto, wantedGoods, user);
         goodsRepository.save(goods);
