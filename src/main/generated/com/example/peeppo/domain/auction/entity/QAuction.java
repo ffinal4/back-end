@@ -24,6 +24,8 @@ public class QAuction extends EntityPathBase<Auction> {
 
     public final com.example.peeppo.global.utils.QTimestamped _super = new com.example.peeppo.global.utils.QTimestamped(this);
 
+    public final DateTimePath<java.time.LocalDateTime> auctionEndTime = createDateTime("auctionEndTime", java.time.LocalDateTime.class);
+
     public final NumberPath<Long> auctionId = createNumber("auctionId", Long.class);
 
     //inherited

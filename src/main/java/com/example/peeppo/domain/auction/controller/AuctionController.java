@@ -2,6 +2,7 @@ package com.example.peeppo.domain.auction.controller;
 
 
 import com.example.peeppo.domain.auction.dto.AuctionListResponseDto;
+import com.example.peeppo.domain.auction.dto.AuctionRequestDto;
 import com.example.peeppo.domain.auction.dto.AuctionResponseDto;
 import com.example.peeppo.domain.auction.entity.AuctionList;
 import com.example.peeppo.domain.auction.service.AuctionService;
@@ -19,8 +20,9 @@ public class AuctionController {
     private final AuctionService auctionService;
 
     @PostMapping("/{goodsId}")
-    public AuctionResponseDto createAuction(@PathVariable("goodsId") Long goodsId){
-        return auctionService.createAuction(goodsId);
+    public AuctionResponseDto createAuction(@PathVariable("goodsId") Long goodsId,
+                                            @RequestBody AuctionRequestDto auctionRequestDto){
+        return auctionService.createAuction(goodsId, auctionRequestDto);
     }
 
     @GetMapping

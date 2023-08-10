@@ -1,11 +1,13 @@
 package com.example.peeppo.domain.auction.entity;
 
+import com.example.peeppo.domain.auction.dto.AuctionRequestDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.global.utils.Timestamped;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +20,9 @@ public class Auction extends Timestamped {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long auctionId;
 
+    @Column
+    private LocalDateTime auctionEndTime;
+
 /*
     @OneToMany(mappedBy = "auction")
     private List<AuctionList> auctionList = new ArrayList<AuctionList>();
@@ -29,5 +34,10 @@ public class Auction extends Timestamped {
 
     public Auction(Goods goods){
         this.goods = goods;
+    }
+
+    public Auction(Goods getGoods, LocalDateTime auctionEndTime) {
+        this.goods = getGoods;
+        this.auctionEndTime = auctionEndTime;
     }
 }
