@@ -10,9 +10,6 @@ import com.example.peeppo.domain.goods.repository.WantedGoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.helper.ImageHelper;
 import com.example.peeppo.domain.image.repository.ImageRepository;
-import com.example.peeppo.domain.rating.helper.RatingHelper;
-import com.example.peeppo.domain.user.entity.User;
-import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.responseDto.GoodsResponseDto;
 import com.example.peeppo.global.responseDto.PageResponse;
@@ -36,20 +33,19 @@ import java.util.stream.Collectors;
 public class GoodsService {
     private final GoodsRepository goodsRepository;
     private final ImageRepository imageRepository;
-    private final UserRepository userRepository;
     private final WantedGoodsRepository wantedGoodsRepository;
     private final ImageHelper imageHelper;
-    private final RatingHelper ratingHelper;
     private final AmazonS3 amazonS3;
     private final String bucket;
+    private final UserRepository userRepository;
 
     @Transactional
     public ApiResponse<GoodsResponseDto> goodsCreate(GoodsRequestDto goodsRequestDto,
                                                      List<MultipartFile> images,
-                                                     WantedRequestDto wantedRequestDto,
+                                                     WantedRequestDto wantedRequestDto, User user,
                                                      SellerPriceDto sellerPriceDto) {
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
-        Goods goods = new Goods(goodsRequestDto, wantedGoods);
+        Goods goods = new Goods(goodsRequestDto, wantedGoods, user);
         goodsRepository.save(goods);
 
         wantedGoodsRepository.save(wantedGoods);
@@ -62,7 +58,7 @@ public class GoodsService {
                 .map(Image::getImageUrl)
                 .collect(Collectors.toList());
 
-        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUuids, wantedGoods), null);
+        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUuids, wantedGoods, user), null);
     }
 
     @CachePut(key = "#page", value = "allGoods")
@@ -105,10 +101,14 @@ public class GoodsService {
 
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods), null);
     }
+    public User findUserId(Long userId){
+        return userRepository.findById(userId).orElse(null);
+    }
 
     public ApiResponse<List<GoodsListResponseDto>> getMyGoods(Long userId, int page, int size, String sortBy, boolean isAsc) {
         Pageable pageable = paging(page, size, sortBy, isAsc);
-        Page<Goods> goodsList = goodsRepository.findAllByUserIdAndIsDeletedFalse(userId, pageable);
+        User user = findUserId(userId);
+        Page<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalse(user, pageable);
         List<GoodsListResponseDto> myGoods = new ArrayList<>();
         for (Goods goods : goodsList) {
             Image firstImage = imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goods.getGoodsId());

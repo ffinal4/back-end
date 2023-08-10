@@ -2,10 +2,12 @@ package com.example.peeppo.domain.goods.controller;
 
 import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.service.GoodsService;
+import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.responseDto.ApiResponse;
-import com.example.peeppo.global.responseDto.GoodsResponseDto;
+import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,9 +23,10 @@ public class GoodsController {
     public ApiResponse<GoodsResponseDto> goodsCreate(@RequestPart(value = "data") GoodsRequestDto goodsRequestDto,
                                                      @RequestPart(value = "images") List<MultipartFile> images,
                                                      @RequestPart(value = "wanted")WantedRequestDto wantedRequestDto,
-                                                     @RequestPart(value = "sellerprice")SellerPriceDto sellerPriceDto) {
+                                                     @RequestPart(value = "sellerprice")SellerPriceDto sellerPriceDto,
+                                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        return goodsService.goodsCreate(goodsRequestDto, images, wantedRequestDto, sellerPriceDto);
+        return goodsService.goodsCreate(goodsRequestDto, images, wantedRequestDto, sellerPriceDto, userDetails.getUser());
     }
 
     // 전체 게시물 조회

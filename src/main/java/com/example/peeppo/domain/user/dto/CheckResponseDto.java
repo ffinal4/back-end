@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class EmailCheckResponseDto {
+public class CheckResponseDto {
 
     private String msg;
 

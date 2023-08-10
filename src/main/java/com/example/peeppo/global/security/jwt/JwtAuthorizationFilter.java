@@ -1,6 +1,7 @@
-package com.example.peeppo.global.security;
+package com.example.peeppo.global.security.jwt;
 
-import com.example.peeppo.global.utils.JwtUtil;
+import com.example.peeppo.global.security.UserDetailsImpl;
+import com.example.peeppo.global.security.UserDetailsServiceImpl;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -16,7 +17,6 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
 
 @Slf4j(topic = "JWT 검증 및 인가")
 @RequiredArgsConstructor
@@ -28,11 +28,12 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
         String tokenValue = jwtUtil.getJwtFromHeader(req);
         if (StringUtils.hasText(tokenValue)) {
-            if (!jwtUtil.validateToken(tokenValue, req, res)) {
+            if (!jwtUtil.validateToken(req, res, tokenValue)) {
                 return;
             }
 
             Claims info = jwtUtil.getUserInfoFromToken(tokenValue);
+            log.info("info:{}", info.getSubject());
 
             try {
                 setAuthentication(info.getSubject());
@@ -45,6 +46,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(req, res);
     }
+
     // 인증 처리
     public void setAuthentication(String username) {
         Authentication authentication = createAuthentication(username);
