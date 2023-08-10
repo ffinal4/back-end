@@ -1,5 +1,6 @@
 package com.example.peeppo.domain.goods.service;
 
+import com.amazonaws.services.kms.model.NotFoundException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.entity.Goods;
@@ -12,6 +13,7 @@ import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
+import com.example.peeppo.global.responseDto.GoodsResponseDto;
 import com.example.peeppo.global.responseDto.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CachePut;
@@ -48,6 +50,8 @@ public class GoodsService {
         goodsRepository.save(goods);
 
         wantedGoodsRepository.save(wantedGoods);
+
+        ratingHelper.createRating(sellerPriceDto.getSellerPrice());
 
         List<String> imageUuids = imageHelper
                 .saveImagesToS3AndRepository(images, amazonS3, bucket, goods)
@@ -102,7 +106,7 @@ public class GoodsService {
         return userRepository.findById(userId).orElse(null);
     }
 
-   public ApiResponse<List<GoodsListResponseDto>> getMyGoods(Long userId, int page, int size, String sortBy, boolean isAsc) {
+    public ApiResponse<List<GoodsListResponseDto>> getMyGoods(Long userId, int page, int size, String sortBy, boolean isAsc) {
         Pageable pageable = paging(page, size, sortBy, isAsc);
         User user = findUserId(userId);
         Page<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalse(user, pageable);
@@ -149,6 +153,31 @@ public class GoodsService {
         return new ApiResponse<>(true, new DeleteResponseDto("삭제되었습니다"), null);
     }
 
+    public Goods getGoodsById(Long goodsId, Long userId) {
+        // 상품 조회
+        Goods goods = goodsRepository.findById(goodsId).orElse(null);
+        if (goods == null) {
+            throw new NotFoundException("존재하지 않는 상품입니다.");
+        }
+
+        // 사용자 조회
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            // 사용자가 존재하지 않을 경우 예외 처리
+            throw new NotFoundException("User not found");
+        }
+
+        // 최근 본 목록에 상품 ID를 추가
+//        List<Long> recentlyViewedGoodsIds = user.getRecentlyViewedGoodsIds();
+//        if (!recentlyViewedGoodsIds.contains(goodsId)) {
+//            recentlyViewedGoodsIds.add(goodsId);
+//            user.setRecentlyViewedGoodsIds(recentlyViewedGoodsIds);
+//            userRepository.save(user);
+//        }
+
+        return goods;
+    }
+
     public Goods findGoods(Long goodsId) {
         Goods goods = goodsRepository.findById(goodsId).orElseThrow(() ->
                 new NullPointerException("해당 게시글은 존재하지 않습니다."));
@@ -157,6 +186,7 @@ public class GoodsService {
         }
         return goods;
     }
+
     public WantedGoods findWantedGoods(Long wantedId) {
         WantedGoods wantedGoods = wantedGoodsRepository.findById(wantedId).orElseThrow(() ->
                 new NullPointerException("해당 게시글은 존재하지 않습니다."));
@@ -168,6 +198,7 @@ public class GoodsService {
         // 정렬
         Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sort = Sort.by(direction, sortBy);
+
         // pageable 생성
         return PageRequest.of(page, size, sort);
     }
