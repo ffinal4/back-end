@@ -19,6 +19,7 @@ public class GoodsResponseDto {
     private String location;
     private String goodsCondition;
     private String tradeType;
+    private Long sellerPrice;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
     private List<String> images;
@@ -32,6 +33,25 @@ public class GoodsResponseDto {
         this.location = goods.getLocation();
         this.goodsCondition = goods.getGoodsCondition();
         this.tradeType = goods.getTradeType();
+        this.createdAt = goods.getCreatedAt();
+        this.modifiedAt = goods.getModifiedAt();
+        this.images = images;
+        this.wantedGoods = wantedGoods;
+    }
+
+    public GoodsResponseDto(Goods goods,
+                            List<String> images,
+                            WantedGoods wantedGoods,
+                            SellerPriceRequestDto sellerPriceRequestDto) {
+
+        this.goodsId = goods.getGoodsId();
+        this.title = goods.getTitle();
+        this.content = goods.getContent();
+        this.category = goods.getCategory();
+        this.location = goods.getLocation();
+        this.goodsCondition = goods.getGoodsCondition();
+        this.tradeType = goods.getTradeType();
+        this.sellerPrice = sellerPriceRequestDto.getSellerPrice();
         this.createdAt = goods.getCreatedAt();
         this.modifiedAt = goods.getModifiedAt();
         this.images = images;

@@ -1,4 +1,4 @@
-package com.example.peeppo.domain.rating.repository;
+package com.example.peeppo.domain.rating.repository.ratingRepository;
 
 import com.example.peeppo.domain.rating.entity.Rating;
 import org.springframework.data.jpa.repository.JpaRepository;

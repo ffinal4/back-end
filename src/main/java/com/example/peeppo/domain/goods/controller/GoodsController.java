@@ -20,10 +20,10 @@ public class GoodsController {
     @PostMapping
     public ApiResponse<GoodsResponseDto> goodsCreate(@RequestPart(value = "data") GoodsRequestDto goodsRequestDto,
                                                      @RequestPart(value = "images") List<MultipartFile> images,
-                                                     @RequestPart(value = "wanted")WantedRequestDto wantedRequestDto,
-                                                     @RequestPart(value = "sellerprice")SellerPriceDto sellerPriceDto) {
+                                                     @RequestPart(value = "wanted") WantedRequestDto wantedRequestDto,
+                                                     @RequestPart(value = "sellerPrice") SellerPriceRequestDto sellerPriceRequestDto) {
 
-        return goodsService.goodsCreate(goodsRequestDto, images, wantedRequestDto, sellerPriceDto);
+        return goodsService.goodsCreate(goodsRequestDto, images, wantedRequestDto, sellerPriceRequestDto);
     }
 
     // 전체 게시물 조회

@@ -3,7 +3,7 @@ package com.example.peeppo.domain.rating.helper;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.rating.entity.Rating;
-import com.example.peeppo.domain.rating.repository.RatingRepository;
+import com.example.peeppo.domain.rating.repository.ratingRepository.RatingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -47,7 +47,7 @@ public class GoodsService {
     public ApiResponse<GoodsResponseDto> goodsCreate(GoodsRequestDto goodsRequestDto,
                                                      List<MultipartFile> images,
                                                      WantedRequestDto wantedRequestDto,
-                                                     SellerPriceDto sellerPriceDto) {
+                                                     SellerPriceRequestDto sellerPriceRequestDto) {
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
         Goods goods = new Goods(goodsRequestDto, wantedGoods);
         goodsRepository.save(goods);
@@ -61,9 +61,10 @@ public class GoodsService {
                 .collect(Collectors.toList());
 
         Image image = imageHelper.getImage(imageUuids.get(0));
-        ratingHelper.createRating(sellerPriceDto.getSellerPrice(), goods, image);
+        ratingHelper.createRating(sellerPriceRequestDto.getSellerPrice(), goods, image);
 
-        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUuids, wantedGoods), null);
+        GoodsResponseDto responseDto = new GoodsResponseDto(goods, imageUuids, wantedGoods, sellerPriceRequestDto);
+        return new ApiResponse<>(true,responseDto , null);
     }
 
     @CachePut(key = "#page", value = "allGoods")

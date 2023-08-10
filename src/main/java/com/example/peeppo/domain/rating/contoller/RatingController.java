@@ -13,16 +13,17 @@ import org.springframework.web.bind.annotation.*;
 public class RatingController {
     private final RatingService ratingService;
 
-    @GetMapping
-    public ApiResponse<RatingResponseDto> randomRatingGoods() {
-        return ratingService.randomRatingGoods();
+    @GetMapping("/user/{userId}")
+    public ApiResponse<RatingResponseDto> randomRatingGoods(@PathVariable Long userId) {
+        return ratingService.randomRatingGoods(userId);
 
     }
-    @PostMapping("/{goodsId}")
-    public ApiResponse<RatingResponseDto> nextRandomRatingGoods(@PathVariable Long goodsId,
+    @PostMapping("/user/{userId}/goods/{goodsId}")
+    public ApiResponse<RatingResponseDto> nextRandomRatingGoods(@PathVariable(value = "userId")  Long userId,
+                                                                @PathVariable(value = "goodsId") Long goodsId,
                                                                 @RequestBody RatingRequestDto ratingRequestDto){
 
-        return ratingService.nextRandomRatingGoods(goodsId, ratingRequestDto);
+        return ratingService.nextRandomRatingGoods(userId, goodsId, ratingRequestDto);
 
     }
 
