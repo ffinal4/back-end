@@ -4,6 +4,7 @@ import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.goods.dto.GoodsRequestDto;
 import com.example.peeppo.domain.goods.enums.Category;
 import com.example.peeppo.domain.image.entity.Image;
+import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.utils.Timestamped;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
@@ -35,9 +36,13 @@ public class Goods extends Timestamped {
     @Enumerated(EnumType.STRING) // ENUM타입을 String으로 넣음
     private Category category;
 
-    private Long userId; // 유저부분 완료 시 수정할 것
     private boolean isDeleted;
 //    @OneToOne(fetch = FetchType.LAZY)
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "wanted_id")
     private WantedGoods wantedGoods;
@@ -58,6 +63,17 @@ public class Goods extends Timestamped {
         this.tradeType = requestDto.getTradeType();
         this.category = requestDto.getCategory();
         this.wantedGoods = wantedGoods;
+    }
+
+    public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods, User user) {
+        this.title = requestDto.getTitle();
+        this.content = requestDto.getContent();
+        this.location = requestDto.getLocation();
+        this.goodsCondition = requestDto.getGoodsCondition();
+        this.tradeType = requestDto.getTradeType();
+        this.category = requestDto.getCategory();
+        this.wantedGoods = wantedGoods;
+        this.user = user;
     }
 
     public void update(GoodsRequestDto requestDto) {

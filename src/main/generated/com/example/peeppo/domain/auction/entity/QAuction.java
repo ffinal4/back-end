@@ -24,12 +24,16 @@ public class QAuction extends EntityPathBase<Auction> {
 
     public final com.example.peeppo.global.utils.QTimestamped _super = new com.example.peeppo.global.utils.QTimestamped(this);
 
+    public final DateTimePath<java.time.LocalDateTime> auctionEndTime = createDateTime("auctionEndTime", java.time.LocalDateTime.class);
+
     public final NumberPath<Long> auctionId = createNumber("auctionId", Long.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
     public final com.example.peeppo.domain.goods.entity.QGoods goods;
+
+    public final NumberPath<Long> lowPrice = createNumber("lowPrice", Long.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;

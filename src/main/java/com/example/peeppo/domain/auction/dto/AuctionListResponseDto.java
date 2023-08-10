@@ -6,11 +6,16 @@ import com.example.peeppo.domain.image.entity.Image;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Getter
 @NoArgsConstructor
 public class AuctionListResponseDto {
 
     private Long auctionId;
+    private LocalDateTime auctionEndTime;
+    private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
     private Long goodsId;
     private String location;
     private String title;
@@ -21,6 +26,9 @@ public class AuctionListResponseDto {
 
     public AuctionListResponseDto(Auction auction) {
         this.auctionId = auction.getAuctionId();
+        this.auctionEndTime = auction.getAuctionEndTime();
+        this.createdAt = auction.getCreatedAt();
+        this.modifiedAt = auction.getModifiedAt();
         this.goodsId = auction.getGoods().getGoodsId();
         this.location = auction.getGoods().getLocation();
         this.title = auction.getGoods().getTitle();

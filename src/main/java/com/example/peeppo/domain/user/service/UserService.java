@@ -1,5 +1,6 @@
 package com.example.peeppo.domain.user.service;
 
+import com.example.peeppo.domain.image.service.UploadService;
 import com.example.peeppo.domain.user.dto.*;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.entity.UserRoleEnum;
@@ -14,7 +15,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import static org.springframework.http.HttpStatus.OK;
@@ -27,6 +30,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final RedisTemplate redisTemplate;
+    private final UploadService uploadService;
 
     public ResponseEntity<ResponseDto> signup(SignupRequestDto signupRequestDto) {
         String email = signupRequestDto.getEmail();
@@ -90,14 +94,33 @@ public class UserService {
     //회원정보 페이지
     public ResponseEntity<MyPageResponseDto> mypage(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 userId 입니다."));
+                () -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
         MyPageResponseDto myPageResponseDto = new MyPageResponseDto(user);
 
         return ResponseEntity.status(HttpStatus.OK.value()).body(myPageResponseDto);
     }
 
-    public ResponseDto updatemypage(Long userId) {
-        return new ResponseDto("로그아웃 되었습니다.", HttpStatus.OK.value(), "OK");
+    public ResponseDto updatemypage(Long userId, MyPageRequestDto myPageRequestDto, MultipartFile multipartFile) throws IOException {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+        String encodedPassword = passwordEncoder.encode(myPageRequestDto.getPassword());
+        String updateUserImg = uploadService.upload(multipartFile);
+        user.upload(myPageRequestDto, updateUserImg, encodedPassword);
+
+        userRepository.save(user);
+
+        return new ResponseDto("개인정보가 수정되었습니다.", HttpStatus.OK.value(), "OK");
+    }
+
+    public ResponseEntity<ResponseDto> deletemypage(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+        userRepository.deleteById(userId);
+
+        ResponseDto response = new ResponseDto("탈퇴 완료", HttpStatus.OK.value(), "OK");
+        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 }
