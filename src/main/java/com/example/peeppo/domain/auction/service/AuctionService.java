@@ -11,7 +11,9 @@ import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -61,7 +63,7 @@ public class AuctionService {
     }
 
     public Goods findGoodsId(Long goodsId) {
-        return goodsRepository.findById(goodsId).orElseThrow(()-> new NullPointerException("해당하는 물품은 존재하지 않습니다"));
+        return goodsRepository.findById(goodsId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당하는 물품은 존재하지 않습니다"));
     }
 
     public List<AuctionListResponseDto> findAllAuction() {
@@ -75,7 +77,7 @@ public class AuctionService {
     }
 
     public Auction findAuctionId(Long auctionId){
-       return auctionRepository.findById(auctionId).orElseThrow(()-> new NullPointerException("해당하는 경매는 존재하지 않습니다"));
+       return auctionRepository.findById(auctionId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당하는 물품은 존재하지 않습니다"));
     }
 
     public void deleteAuction(Long auctionId, User user) {
