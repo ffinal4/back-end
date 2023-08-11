@@ -10,4 +10,6 @@ public interface ImageRepository extends JpaRepository<Image, Long> {
     List<Image> deleteByGoodsGoodsId(Long goodsId);
 
     Image findFirstByGoodsGoodsIdOrderByCreatedAtAsc(Long goodsId);
+
+    Image findByImageUrl(String imageUrl);
 }

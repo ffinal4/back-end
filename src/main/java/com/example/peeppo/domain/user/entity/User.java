@@ -5,12 +5,16 @@ import com.example.peeppo.domain.user.dto.SignupRequestDto;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.DynamicUpdate;
 
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = PROTECTED)
+@DynamicUpdate
+@Slf4j
 public class User {
 
     @Id
@@ -37,6 +41,9 @@ public class User {
     @Enumerated(value = EnumType.STRING)
     private UserRoleEnum role;
 
+    @Column
+    private Long maxRatingCount = 0L;
+
     public User(SignupRequestDto requestDto, String encodedPassword, UserRoleEnum role) {
         this.nickname = requestDto.getNickname();
         this.email = requestDto.getEmail();
@@ -50,5 +57,10 @@ public class User {
         this.location = myPageRequestDto.getLocation();
         this.userImg = userImg;
         this.password = encodedPassword;
+    }
+    public void maxCountUpdate(Long currentCount){
+        if(this.maxRatingCount < currentCount){
+            this.maxRatingCount = currentCount;
+        }
     }
 }
