@@ -4,6 +4,7 @@ import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.entity.WantedGoods;
+import com.example.peeppo.domain.user.entity.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,17 +21,28 @@ public class AuctionResponseDto {
     private GoodsResponseDto goodsResponseDto;
 
 
+
+
     public AuctionResponseDto(Auction auction, GoodsResponseDto goods){
         this.auctionId = auction.getAuctionId();
         this.goodsResponseDto = goods;
         this.auctionEndTime = auction.getAuctionEndTime();
         this.createdAt = auction.getCreatedAt();
         this.modifiedAt = auction.getModifiedAt();
+
     }
 
     public AuctionResponseDto(Auction auction, Goods goods) {
         this.auctionId = auction.getAuctionId();
         this.goodsResponseDto = new GoodsResponseDto(goods);
+        this.auctionEndTime = auction.getAuctionEndTime();
+        this.createdAt = auction.getCreatedAt();
+        this.modifiedAt = auction.getModifiedAt();
+    }
+
+    public AuctionResponseDto(Auction auction, GoodsResponseDto goodsResponseDto, User user) {
+        this.auctionId = auction.getAuctionId();
+        this.goodsResponseDto = goodsResponseDto;
         this.auctionEndTime = auction.getAuctionEndTime();
         this.createdAt = auction.getCreatedAt();
         this.modifiedAt = auction.getModifiedAt();

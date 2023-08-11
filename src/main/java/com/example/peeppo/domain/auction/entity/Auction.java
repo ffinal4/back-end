@@ -2,6 +2,7 @@ package com.example.peeppo.domain.auction.entity;
 
 import com.example.peeppo.domain.auction.dto.AuctionRequestDto;
 import com.example.peeppo.domain.goods.entity.Goods;
+import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.utils.Timestamped;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
@@ -29,6 +30,10 @@ public class Auction extends Timestamped {
     @Column
     private Long lowPrice;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
 /*
     @OneToMany(mappedBy = "auction")
     private List<AuctionList> auctionList = new ArrayList<AuctionList>();
@@ -48,4 +53,10 @@ public class Auction extends Timestamped {
         this.lowPrice = auctionRequestDto.getLowPrice();
     }
 
+    public Auction(Goods getGoods, LocalDateTime auctionEndTime, AuctionRequestDto auctionRequestDto, User user) {
+        this.goods = getGoods;
+        this.auctionEndTime = auctionEndTime;
+        this.lowPrice = auctionRequestDto.getLowPrice();
+        this.user = user;
+    }
 }
