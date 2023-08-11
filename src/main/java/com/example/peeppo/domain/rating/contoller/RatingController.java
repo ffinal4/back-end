@@ -17,20 +17,8 @@ import java.util.List;
 public class RatingController {
     private final RatingService ratingService;
 
-    @GetMapping
-    public ApiResponse<RatingResponseDto> randomRatingGoods(@PathVariable Long userId,
-                                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        return ratingService.randomRatingGoods(userId, userDetails);
-
-    }
-
-    @PostMapping("/ratinglist")
-    public ApiResponse<List<RatingResponseDto>> firstRatingList(@PathVariable Long userId,
-                                                                @AuthenticationPrincipal UserDetailsImpl userDetails){
-
-        return ratingService.randomRatingList(userId, userDetails);
-    }
+//    @PostMapping("/ratinglist")
 
     @PostMapping
     public ApiResponse<RatingResponseDto> nextRandomRatingGoods(@PathVariable(value = "userId")  Long userId,
@@ -38,6 +26,23 @@ public class RatingController {
                                                                 @AuthenticationPrincipal UserDetailsImpl userDetails){
 
         return ratingService.nextRandomRatingGoods(userId, ratingRequestDto, userDetails);
+
+    }
+
+//    @PostMapping("/")
+
+    @GetMapping("/ratinglist")
+    public ApiResponse<List<RatingResponseDto>> firstRatingList(@PathVariable Long userId,
+                                                                @AuthenticationPrincipal UserDetailsImpl userDetails){
+
+        return ratingService.randomRatingList(userId, userDetails);
+    }
+
+    @GetMapping
+    public ApiResponse<RatingResponseDto> randomRatingGoods(@PathVariable Long userId,
+                                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        return ratingService.randomRatingGoods(userId, userDetails);
 
     }
 

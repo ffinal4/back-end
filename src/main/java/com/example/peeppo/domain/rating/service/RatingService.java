@@ -30,7 +30,7 @@ public class RatingService {
     public ApiResponse<List<RatingResponseDto>> randomRatingList(Long userId, UserDetailsImpl userDetails) {
         userCheck(userId, userDetails.getUser().getUserId());
 
-        List<Rating> ratingList = ratingRepository.getRandomRatingsFromRatingsWithCountLessThanOrEqual7();
+        List<Rating> ratingList = ratingRepository.getRandomRatingsFromRatingsWithCountLessThanOrEqual7(userId);
 
         List<RatingResponseDto> ratingResponseDtoList = new ArrayList<>();
         for (Rating rating : ratingList) {
@@ -48,7 +48,7 @@ public class RatingService {
         userCheck(userId, userDetails.getUser().getUserId());
 
         Set<Long> UserRatedGoods = userRatingRelationRepository.findUserCheckedGoodsByUserId(userId);
-        Rating rating = ratingRepository.findRandomRatingWithCountLessThanOrEqual7(UserRatedGoods);
+        Rating rating = ratingRepository.findRandomRatingWithCountLessThanOrEqual7(UserRatedGoods, userId, 0);
 
         User user = userHelper.getUser(userId);
         Goods goods = rating.getGoods();
@@ -73,7 +73,11 @@ public class RatingService {
 
         // 이후 문제 생성
         Set<Long> UserRatedGoods = userRatingRelationRepository.findUserCheckedGoodsByUserId(userId);
-        Rating rating = ratingRepository.findRandomRatingWithCountLessThanOrEqual7(UserRatedGoods);
+        Rating rating = ratingRepository.findRandomRatingWithCountLessThanOrEqual7(UserRatedGoods, userId, 0);
+
+        User user = userHelper.getUser(userId);
+        UserRatingRelation userRatingRelation = new UserRatingRelation(user, rating);
+        userRatingRelationRepository.save(userRatingRelation);
 
         Goods goods = rating.getGoods();
         String imageUrl = rating.getImage().getImageUrl();

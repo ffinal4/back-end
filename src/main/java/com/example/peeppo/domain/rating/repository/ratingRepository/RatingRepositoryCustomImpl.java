@@ -1,6 +1,5 @@
 package com.example.peeppo.domain.rating.repository.ratingRepository;
 
-import com.amazonaws.services.s3.transfer.Copy;
 import com.example.peeppo.domain.rating.entity.QRating;
 import com.example.peeppo.domain.rating.entity.Rating;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -13,14 +12,32 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RatingRepositoryCustomImpl implements RatingRepositoryCustom {
     private final JPAQueryFactory queryFactory;
-
+    private static final int MAX_RECURSION_COUNT = 20;
 
     @Override
-    public Rating findRandomRatingWithCountLessThanOrEqual7(Set<Long> UserRatedGoods) {
+    public List<Rating> getRandomRatingsFromRatingsWithCountLessThanOrEqual7(Long userId) {
         List<Long> ids = fetchRatingIdsWithCountLessThanOrEqual7();
-        if(ids == null){
+        List<Rating> randomRatings = new ArrayList<>();
 
+        while (randomRatings.size() < 5 && !ids.isEmpty()) {
+            Long randomId = getRandomId(ids);
+
+            Rating randomRating = fetchRandomRating(randomId, userId);
+            if (randomRating != null) {
+                randomRatings.add(randomRating);
+            }
+            ids.remove(randomId);
         }
+
+        return randomRatings;
+    }
+
+    @Override
+    public Rating findRandomRatingWithCountLessThanOrEqual7(Set<Long> UserRatedGoods, Long userId, int recursionCount) {
+        if (recursionCount >= MAX_RECURSION_COUNT) {
+            throw new RuntimeException("평가 가능한 물품이 없습니다. 잠시 후 시도해주세요");
+        }
+        List<Long> ids = fetchRatingIdsWithCountLessThanOrEqual7();
         ids.removeAll(UserRatedGoods);
 
         if (ids.isEmpty()) {
@@ -28,35 +45,15 @@ public class RatingRepositoryCustomImpl implements RatingRepositoryCustom {
         }
 
         Long randomId = getRandomId(ids);
-        return queryFactory.selectFrom(QRating.rating)
-                .where(QRating.rating.ratingId.eq(randomId))
-                .fetchOne();
-    }
 
-    @Override
-    public List<Rating> getRandomRatingsFromRatingsWithCountLessThanOrEqual7() {
-        List<Long> ids = fetchRatingIdsWithCountLessThanOrEqual7();
-        List<Rating> randomRatings = new ArrayList<>();
-        Random random = new Random();
-        QRating qRating = QRating.rating;
-
-        while (randomRatings.size() < 5 && !ids.isEmpty()) {
-            int randomIndex = random.nextInt(ids.size());
-            Long randomId = ids.get(randomIndex);
-
-            Rating randomRating = queryFactory.selectFrom(qRating)
-                    .where(qRating.ratingId.eq(randomId))
-                    .fetchOne();
-
-            if (randomRating != null) {
-                randomRatings.add(randomRating);
-                ids.remove(randomIndex);
-            }
+        Rating randomRating = fetchRandomRating(randomId, userId);
+        if (randomRating != null) {
+            return randomRating;
+        } else {
+            ids.remove(randomId);
+            return findRandomRatingWithCountLessThanOrEqual7(UserRatedGoods, userId, ++recursionCount);
         }
-
-        return randomRatings;
     }
-
 
     private List<Long> fetchRatingIdsWithCountLessThanOrEqual7() {
         QRating qRating = QRating.rating;
@@ -67,9 +64,16 @@ public class RatingRepositoryCustomImpl implements RatingRepositoryCustom {
                 .fetch();
     }
 
+    private Rating fetchRandomRating(Long ratingId, Long userId) {
+        QRating qRating = QRating.rating;
+        return queryFactory.selectFrom(qRating)
+                .where(qRating.ratingId.eq(ratingId)
+                        .and(qRating.goods.user.userId.ne(userId)))
+                .fetchOne();
+    }
+
     private Long getRandomId(List<Long> ids) {
         int randomIndex = ThreadLocalRandom.current().nextInt(ids.size());
         return ids.get(randomIndex);
     }
-
 }
