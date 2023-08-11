@@ -27,11 +27,6 @@ public class AuctionService {
     private final AuctionRepository auctionRepository;
 
     public AuctionResponseDto createAuction(Long goodsId, AuctionRequestDto auctionRequestDto, User user) {
-        //회원저장, 상품저장, 주문저장 ( 다 new 해주고 order 저장)
-/*        Goods getGoods = findGoodsId(goodsId);
-        Auction auction = new Auction(); // 부모 생성 및 저장
-        AuctionList auctionList = new AuctionList(getGoods,auction); // 자식 저장
-        auctionRepository.save(auctionList);*/
         Goods getGoods = findGoodsId(goodsId);
         GoodsResponseDto goodsResponseDto = new GoodsResponseDto(getGoods);
         LocalDateTime auctionEndTime = calAuctionEndTime(auctionRequestDto.getEndTime()); // 마감기한 계산
@@ -41,6 +36,7 @@ public class AuctionService {
         return new AuctionResponseDto(auction, goodsResponseDto,user);
     }
 
+    // 마감시간 계산
     public LocalDateTime calAuctionEndTime(String auctionTIme){
         String t = auctionTIme;
         LocalDateTime now = LocalDateTime.now();
@@ -62,30 +58,36 @@ public class AuctionService {
         return daysLater;
     }
 
+    // 물품 찾아서 Goods 리턴
     public Goods findGoodsId(Long goodsId) {
         return goodsRepository.findById(goodsId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당하는 물품은 존재하지 않습니다"));
     }
 
+    // 경매 전체 조회
     public List<AuctionListResponseDto> findAllAuction() {
 
             return auctionRepository.findAll().stream().map(AuctionListResponseDto::new).toList();
     }
 
+    // 경매 상세 조회
     public AuctionResponseDto findAuctionById(Long auctionId) {
         Auction auction = findAuctionId(auctionId);
         return new AuctionResponseDto(auction, auction.getGoods());
     }
 
+    // 경매 찾아서 Auction 리턴
     public Auction findAuctionId(Long auctionId){
        return auctionRepository.findById(auctionId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당하는 물품은 존재하지 않습니다"));
     }
 
+    // 경매 삭제
     public void deleteAuction(Long auctionId, User user) {
         Auction auction = findAuctionId(auctionId);
         checkUsername(auctionId, user);
         auctionRepository.delete(auction);
     }
 
+    // 경매 등록한 유저가 맞는지 확인
     public void checkUsername(Long id, User user){
         Auction auction = findAuctionId(id);
         if(!(auction.getUser().getUserId().equals(user.getUserId()))){

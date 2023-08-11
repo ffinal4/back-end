@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 public class AuctionListResponseDto {
 
     private Long auctionId;
+    private String nickname;
     private LocalDateTime auctionEndTime;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
@@ -20,12 +21,12 @@ public class AuctionListResponseDto {
     private String location;
     private String title;
     private String content;
-    // 사용자 이름
     private String image;
 
 
     public AuctionListResponseDto(Auction auction) {
         this.auctionId = auction.getAuctionId();
+        this.nickname = auction.getUser().getNickname();
         this.auctionEndTime = auction.getAuctionEndTime();
         this.createdAt = auction.getCreatedAt();
         this.modifiedAt = auction.getModifiedAt();

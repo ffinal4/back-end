@@ -15,7 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 public class AuctionResponseDto {
     private Long auctionId;
-    private String nickname;
     private LocalDateTime auctionEndTime;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
@@ -47,7 +46,6 @@ public class AuctionResponseDto {
         this.auctionEndTime = auction.getAuctionEndTime();
         this.createdAt = auction.getCreatedAt();
         this.modifiedAt = auction.getModifiedAt();
-        this.nickname = user.getNickname();
     }
 }
 
