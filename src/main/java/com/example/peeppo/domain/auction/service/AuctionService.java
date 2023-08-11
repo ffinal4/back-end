@@ -1,5 +1,6 @@
 package com.example.peeppo.domain.auction.service;
 
+import com.example.peeppo.domain.auction.dto.TimeRemaining;
 import com.example.peeppo.domain.auction.dto.AuctionListResponseDto;
 import com.example.peeppo.domain.auction.dto.AuctionRequestDto;
 import com.example.peeppo.domain.auction.dto.AuctionResponseDto;
@@ -16,6 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -33,7 +36,7 @@ public class AuctionService {
         log.info("{}" , auctionEndTime);
         Auction auction = new Auction(getGoods, auctionEndTime, auctionRequestDto, user); // 경매와 마감기한 생성
         auctionRepository.save(auction);
-        return new AuctionResponseDto(auction, goodsResponseDto,user);
+        return new AuctionResponseDto(auction, goodsResponseDto,user, countDownTime(auction));
     }
 
     // 마감시간 계산
@@ -58,6 +61,27 @@ public class AuctionService {
         return daysLater;
     }
 
+    // 남은 시간 카운트다운 계산
+    public TimeRemaining countDownTime(Auction auction){
+        LocalDateTime now = LocalDateTime.now();
+  /*      Duration diff = Duration.between(auction.getAuctionEndTime(), now);
+
+        long days = diff.toDays();
+        long hours = diff.toHours() % 24;
+        long minutes = diff.toMinutes() % 60;
+        long seconds = diff.toSeconds() % 60;
+
+        System.out.printf("일: %d, 시간: %d, 분: %d, 초: %d", days, hours, minutes, seconds);
+        return new TimeRemaining(days, hours, minutes, seconds);
+  */
+        long days = ChronoUnit.DAYS.between(now, auction.getAuctionEndTime());
+        long hours = ChronoUnit.HOURS.between(now, auction.getAuctionEndTime());
+        long minutes = ChronoUnit.MINUTES.between(now, auction.getAuctionEndTime());
+        long seconds = ChronoUnit.SECONDS.between(now, auction.getAuctionEndTime());
+
+        return new TimeRemaining(days, hours % 24, minutes % 60, seconds % 60);
+    }
+
     // 물품 찾아서 Goods 리턴
     public Goods findGoodsId(Long goodsId) {
         return goodsRepository.findById(goodsId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당하는 물품은 존재하지 않습니다"));
@@ -65,14 +89,22 @@ public class AuctionService {
 
     // 경매 전체 조회
     public List<AuctionListResponseDto> findAllAuction() {
+        List<AuctionListResponseDto> auctionResponseDtoList = new ArrayList<>();
+        List<Auction> auctionList = auctionRepository.findAll();
+        for(Auction auction : auctionList){
 
-            return auctionRepository.findAll().stream().map(AuctionListResponseDto::new).toList();
+            TimeRemaining timeRemaining = countDownTime(auction);
+
+            AuctionListResponseDto auctionListResponseDto = new AuctionListResponseDto(auction, timeRemaining);
+            auctionResponseDtoList.add(auctionListResponseDto);
+        }
+        return auctionResponseDtoList;
     }
 
     // 경매 상세 조회
     public AuctionResponseDto findAuctionById(Long auctionId) {
         Auction auction = findAuctionId(auctionId);
-        return new AuctionResponseDto(auction, auction.getGoods());
+        return new AuctionResponseDto(auction, auction.getGoods(), countDownTime(auction));
     }
 
     // 경매 찾아서 Auction 리턴
