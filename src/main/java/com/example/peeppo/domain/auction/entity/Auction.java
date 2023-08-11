@@ -6,13 +6,10 @@ import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.utils.Timestamped;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -42,6 +39,7 @@ public class Auction extends Timestamped {
     @OneToOne(cascade = CascadeType.DETACH) // 부모가 삭제되어도 자식은 남아있도록
     @JoinColumn(name = "goods_id")
     private Goods goods;
+
 
     public Auction(Goods goods){
         this.goods = goods;

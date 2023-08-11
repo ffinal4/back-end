@@ -1,7 +1,6 @@
 package com.example.peeppo.domain.auction.dto;
 
 import com.example.peeppo.domain.auction.entity.Auction;
-import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.image.entity.Image;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,8 +22,11 @@ public class AuctionListResponseDto {
     private String content;
     private String image;
 
+    private TimeRemaining timeRemaining;
 
-    public AuctionListResponseDto(Auction auction) {
+
+
+    public AuctionListResponseDto(Auction auction, TimeRemaining timeRemaining) {
         this.auctionId = auction.getAuctionId();
         this.nickname = auction.getUser().getNickname();
         this.auctionEndTime = auction.getAuctionEndTime();
@@ -35,5 +37,8 @@ public class AuctionListResponseDto {
         this.title = auction.getGoods().getTitle();
         this.content = auction.getGoods().getContent();
         this.image = auction.getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
+        this.timeRemaining = timeRemaining;
     }
+
+
 }
