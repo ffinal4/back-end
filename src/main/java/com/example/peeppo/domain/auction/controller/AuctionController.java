@@ -6,8 +6,10 @@ import com.example.peeppo.domain.auction.dto.AuctionRequestDto;
 import com.example.peeppo.domain.auction.dto.AuctionResponseDto;
 import com.example.peeppo.domain.auction.entity.AuctionList;
 import com.example.peeppo.domain.auction.service.AuctionService;
+import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,8 +23,9 @@ public class AuctionController {
 
     @PostMapping("/{goodsId}")
     public AuctionResponseDto createAuction(@PathVariable("goodsId") Long goodsId,
-                                            @RequestBody AuctionRequestDto auctionRequestDto){
-        return auctionService.createAuction(goodsId, auctionRequestDto);
+                                            @RequestBody AuctionRequestDto auctionRequestDto,
+                                            @AuthenticationPrincipal UserDetailsImpl userDetails){
+            return auctionService.createAuction(goodsId, auctionRequestDto, userDetails.getUser());
     }
 
     @GetMapping

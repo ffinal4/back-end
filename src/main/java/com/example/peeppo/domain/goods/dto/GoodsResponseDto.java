@@ -53,6 +53,7 @@ public class GoodsResponseDto {
         this.tradeType = goods.getTradeType();
         this.createdAt = goods.getCreatedAt();
         this.images = goods.getImage().stream().map(Image::getImageUrl).toList();
+        this.wantedGoods = goods.getWantedGoods();
         this.modifiedAt = goods.getModifiedAt();
     }
 

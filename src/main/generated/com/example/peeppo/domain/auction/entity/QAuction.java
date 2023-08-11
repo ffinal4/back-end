@@ -38,6 +38,8 @@ public class QAuction extends EntityPathBase<Auction> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
+    public final com.example.peeppo.domain.user.entity.QUser user;
+
     public QAuction(String variable) {
         this(Auction.class, forVariable(variable), INITS);
     }
@@ -57,6 +59,7 @@ public class QAuction extends EntityPathBase<Auction> {
     public QAuction(Class<? extends Auction> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.goods = inits.isInitialized("goods") ? new com.example.peeppo.domain.goods.entity.QGoods(forProperty("goods"), inits.get("goods")) : null;
+        this.user = inits.isInitialized("user") ? new com.example.peeppo.domain.user.entity.QUser(forProperty("user")) : null;
     }
 
 }
