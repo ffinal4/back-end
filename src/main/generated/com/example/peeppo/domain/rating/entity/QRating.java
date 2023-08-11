@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
@@ -17,9 +18,15 @@ public class QRating extends EntityPathBase<Rating> {
 
     private static final long serialVersionUID = 557124099L;
 
+    private static final PathInits INITS = PathInits.DIRECT2;
+
     public static final QRating rating = new QRating("rating");
 
     public final NumberPath<Long> avgRatingPrice = createNumber("avgRatingPrice", Long.class);
+
+    public final com.example.peeppo.domain.goods.entity.QGoods goods;
+
+    public final com.example.peeppo.domain.image.entity.QImage image;
 
     public final NumberPath<Long> ratingCount = createNumber("ratingCount", Long.class);
 
@@ -30,15 +37,25 @@ public class QRating extends EntityPathBase<Rating> {
     public final NumberPath<Long> sumRatingPrice = createNumber("sumRatingPrice", Long.class);
 
     public QRating(String variable) {
-        super(Rating.class, forVariable(variable));
+        this(Rating.class, forVariable(variable), INITS);
     }
 
     public QRating(Path<? extends Rating> path) {
-        super(path.getType(), path.getMetadata());
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
     public QRating(PathMetadata metadata) {
-        super(Rating.class, metadata);
+        this(metadata, PathInits.getFor(metadata, INITS));
+    }
+
+    public QRating(PathMetadata metadata, PathInits inits) {
+        this(Rating.class, metadata, inits);
+    }
+
+    public QRating(Class<? extends Rating> type, PathMetadata metadata, PathInits inits) {
+        super(type, metadata, inits);
+        this.goods = inits.isInitialized("goods") ? new com.example.peeppo.domain.goods.entity.QGoods(forProperty("goods"), inits.get("goods")) : null;
+        this.image = inits.isInitialized("image") ? new com.example.peeppo.domain.image.entity.QImage(forProperty("image"), inits.get("image")) : null;
     }
 
 }
