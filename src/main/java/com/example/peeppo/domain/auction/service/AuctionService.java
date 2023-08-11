@@ -61,7 +61,7 @@ public class AuctionService {
     }
 
     public Goods findGoodsId(Long goodsId) {
-        return goodsRepository.findById(goodsId).orElse(null);
+        return goodsRepository.findById(goodsId).orElseThrow(()-> new NullPointerException("해당하는 물품은 존재하지 않습니다"));
     }
 
     public List<AuctionListResponseDto> findAllAuction() {
@@ -78,8 +78,16 @@ public class AuctionService {
        return auctionRepository.findById(auctionId).orElseThrow(()-> new NullPointerException("해당하는 경매는 존재하지 않습니다"));
     }
 
-    public void deleteAuction(Long auctionId) {
+    public void deleteAuction(Long auctionId, User user) {
         Auction auction = findAuctionId(auctionId);
+        checkUsername(auctionId, user);
         auctionRepository.delete(auction);
+    }
+
+    public void checkUsername(Long id, User user){
+        Auction auction = findAuctionId(id);
+        if(!(auction.getUser().getUserId().equals(user.getUserId()))){
+            throw new IllegalArgumentException("경매 취소는 작성자만 삭제가 가능합니다");
+        }
     }
 }

@@ -6,6 +6,7 @@ import com.example.peeppo.domain.auction.dto.AuctionRequestDto;
 import com.example.peeppo.domain.auction.dto.AuctionResponseDto;
 import com.example.peeppo.domain.auction.entity.AuctionList;
 import com.example.peeppo.domain.auction.service.AuctionService;
+import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 
@@ -39,8 +40,9 @@ public class AuctionController {
     }
 
     @DeleteMapping("/{auctionId}")
-    public String deleteAuction(@PathVariable("auctionId") Long auctionId){
-        auctionService.deleteAuction(auctionId);
+    public String deleteAuction(@PathVariable("auctionId") Long auctionId,
+                                @AuthenticationPrincipal UserDetailsImpl userDetails){
+        auctionService.deleteAuction(auctionId, userDetails.getUser());
         return "삭제성공";
     }
 }
