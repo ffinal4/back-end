@@ -64,16 +64,6 @@ public class AuctionService {
     // 남은 시간 카운트다운 계산
     public TimeRemaining countDownTime(Auction auction){
         LocalDateTime now = LocalDateTime.now();
-  /*      Duration diff = Duration.between(auction.getAuctionEndTime(), now);
-
-        long days = diff.toDays();
-        long hours = diff.toHours() % 24;
-        long minutes = diff.toMinutes() % 60;
-        long seconds = diff.toSeconds() % 60;
-
-        System.out.printf("일: %d, 시간: %d, 분: %d, 초: %d", days, hours, minutes, seconds);
-        return new TimeRemaining(days, hours, minutes, seconds);
-  */
         long days = ChronoUnit.DAYS.between(now, auction.getAuctionEndTime());
         long hours = ChronoUnit.HOURS.between(now, auction.getAuctionEndTime());
         long minutes = ChronoUnit.MINUTES.between(now, auction.getAuctionEndTime());
