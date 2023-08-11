@@ -2,7 +2,6 @@ package com.example.peeppo.domain.goods.controller;
 
 import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.service.GoodsService;
-import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -23,10 +22,10 @@ public class GoodsController {
     public ApiResponse<GoodsResponseDto> goodsCreate(@RequestPart(value = "data") GoodsRequestDto goodsRequestDto,
                                                      @RequestPart(value = "images") List<MultipartFile> images,
                                                      @RequestPart(value = "wanted")WantedRequestDto wantedRequestDto,
-                                                     @RequestPart(value = "sellerPrice")SellerPriceDto sellerPriceDto,
+                                                     @RequestPart(value = "sellerPrice") SellerPriceRequestDto sellerPriceRequestDto,
                                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        return goodsService.goodsCreate(goodsRequestDto, images, wantedRequestDto, sellerPriceDto, userDetails.getUser());
+        return goodsService.goodsCreate(goodsRequestDto, images, wantedRequestDto, sellerPriceRequestDto, userDetails.getUser());
     }
 
     // 전체 게시물 조회

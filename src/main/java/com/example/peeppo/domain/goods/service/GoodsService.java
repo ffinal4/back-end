@@ -46,7 +46,7 @@ public class GoodsService {
     public ApiResponse<GoodsResponseDto> goodsCreate(GoodsRequestDto goodsRequestDto,
                                                      List<MultipartFile> images,
                                                      WantedRequestDto wantedRequestDto,
-                                                     SellerPriceDto sellerPriceDto,
+                                                     SellerPriceRequestDto sellerPriceRequestDto,
                                                      User user) {
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
         Goods goods = new Goods(goodsRequestDto, wantedGoods, user);
@@ -54,13 +54,14 @@ public class GoodsService {
 
         wantedGoodsRepository.save(wantedGoods);
 
-        ratingHelper.createRating(sellerPriceDto.getSellerPrice());
-
         List<String> imageUuids = imageHelper
                 .saveImagesToS3AndRepository(images, amazonS3, bucket, goods)
                 .stream()
                 .map(Image::getImageUrl)
                 .collect(Collectors.toList());
+
+        Image image = imageHelper.getImage(imageUuids.get(0));
+        ratingHelper.createRating(sellerPriceRequestDto.getSellerPrice(), goods, image);
 
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUuids, wantedGoods, user), null);
     }
