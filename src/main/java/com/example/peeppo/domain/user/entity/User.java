@@ -25,6 +25,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column
+    private String location;
+
 //    @Column(nullable = false)
 //    private String emailImg;
 
@@ -37,5 +40,6 @@ public class User {
         this.email = requestDto.getEmail();
         this.password = encodedPassword;
         this.role = role;
+        this.location = requestDto.getLocation();
     }
 }
