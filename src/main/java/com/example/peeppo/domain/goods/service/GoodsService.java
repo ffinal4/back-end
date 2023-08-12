@@ -112,7 +112,11 @@ public class GoodsService {
         List<String> imageUrls = images.stream()
                 .map(Image::getImageUrl)
                 .collect(Collectors.toList());
+        if(goodsRecent.size() >= MAX_RECENT_GOODS) {
+            goodsRecent.remove(0);
+        }
         goodsRecent.add(Long.toString(goods.getGoodsId())); // 조회시에 리스트에 추가 !
+
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods), null);
     }
 
@@ -221,9 +225,6 @@ public class GoodsService {
     public List<GoodsRecentDto> recentGoods(HttpServletResponse response) {
         List<GoodsRecentDto> goodsRecentDtos = new ArrayList<>();
         // 조회하면 리스트에 id, productname add 해주기
-        if(goodsRecent.size() > MAX_RECENT_GOODS) {
-            goodsRecent.remove(0);
-        }
 
         Cookie goodsCookie = new Cookie(RECENT_GOODS, UriUtils.encode(String.join(",", goodsRecent), "UTF-8")); // 문자열만 저장 가능
         goodsCookie.setMaxAge(24 * 60 * 60); // 하루동안 저장
