@@ -13,6 +13,7 @@ import com.example.peeppo.global.security.UserDetailsImpl;
 import com.example.peeppo.global.utils.ResponseUtils;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,9 +36,12 @@ public class AuctionController {
     }
 
     @GetMapping
-    public ApiResponse<List<AuctionListResponseDto>> allAuction(){
+    public ApiResponse<Page<AuctionListResponseDto>> allAuction(@RequestParam("page") int page,
+                                                                @RequestParam("size") int size,
+                                                                @RequestParam("sortBy") String sortBy,
+                                                                @RequestParam("isAsc") boolean isAsc){
 
-        return ResponseUtils.ok(auctionService.findAllAuction());
+        return ResponseUtils.ok(auctionService.findAllAuction(page -1, size, sortBy, isAsc));
     }
 
     @GetMapping("/{auctionId}")
