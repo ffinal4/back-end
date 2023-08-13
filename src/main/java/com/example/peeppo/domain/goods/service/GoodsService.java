@@ -15,6 +15,8 @@ import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.responseDto.PageResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -25,8 +27,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriUtils;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,6 +46,10 @@ public class GoodsService {
     private final String bucket;
     private final UserRepository userRepository;
     private final RatingHelper ratingHelper;
+    private static final String RECENT_GOODS = "goods";
+    private static final int MAX_RECENT_GOODS = 4;
+    //private List<Long> goodsRecent = new ArrayList<>();
+    private List<String> goodsRecent = new ArrayList<>();
 
     @Transactional
     public ApiResponse<GoodsResponseDto> goodsCreate(GoodsRequestDto goodsRequestDto,
@@ -103,9 +112,14 @@ public class GoodsService {
         List<String> imageUrls = images.stream()
                 .map(Image::getImageUrl)
                 .collect(Collectors.toList());
+        if(goodsRecent.size() >= MAX_RECENT_GOODS) {
+            goodsRecent.remove(0);
+        }
+        goodsRecent.add(Long.toString(goods.getGoodsId())); // 조회시에 리스트에 추가 !
 
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods), null);
     }
+
     public User findUserId(Long userId){
         return userRepository.findById(userId).orElse(null);
     }
@@ -206,4 +220,22 @@ public class GoodsService {
         // pageable 생성
         return PageRequest.of(page, size, sort);
     }
+
+
+    public List<GoodsRecentDto> recentGoods(HttpServletResponse response) {
+        List<GoodsRecentDto> goodsRecentDtos = new ArrayList<>();
+        // 조회하면 리스트에 id, productname add 해주기
+
+        Cookie goodsCookie = new Cookie(RECENT_GOODS, UriUtils.encode(String.join(",", goodsRecent), "UTF-8")); // 문자열만 저장 가능
+        goodsCookie.setMaxAge(24 * 60 * 60); // 하루동안 저장
+        response.addCookie(goodsCookie); // 전송
+
+        for(String id : goodsRecent){
+            Goods goods =  goodsRepository.findById(Long.parseLong(id)).orElse(null);
+            GoodsRecentDto goodsRecentDto = new GoodsRecentDto(goods);
+            goodsRecentDtos.add(goodsRecentDto);
+        }
+        return goodsRecentDtos;
+    }
+
 }
