@@ -45,17 +45,17 @@ public class AuctionService {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime daysLater = null;
         switch (t) {
-            case "2일":
-                System.out.println("2일");
-                daysLater = now.plusDays(2);
+            case "30분":
+                System.out.println("30분");
+                daysLater = now.plusMinutes(30);
                 break;
-            case "12시간":
-                System.out.println("12");
-                daysLater = now.plusHours(12);
+            case "1시간":
+                System.out.println("1시간");
+                daysLater = now.plusHours(1);
                 break;
-            case "1일":
-                System.out.println("1일");
-                daysLater = now.plusDays(1);
+            case "3시간":
+                System.out.println("3시간");
+                daysLater = now.plusHours(3);
                 break;
         }
         return daysLater;
