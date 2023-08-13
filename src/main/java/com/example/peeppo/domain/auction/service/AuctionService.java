@@ -10,8 +10,13 @@ import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.user.entity.User;
+import com.example.peeppo.global.responseDto.PageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -78,17 +83,26 @@ public class AuctionService {
     }
 
     // 경매 전체 조회
-    public List<AuctionListResponseDto> findAllAuction() {
+    public Page<AuctionListResponseDto> findAllAuction(int i, int size, String sortBy, boolean isAsc) {
+        Pageable pageable = paging(i, size, sortBy, isAsc);
+        Page<Auction> auctionPage = auctionRepository.findAll(pageable);
         List<AuctionListResponseDto> auctionResponseDtoList = new ArrayList<>();
-        List<Auction> auctionList = auctionRepository.findAll();
-        for(Auction auction : auctionList){
+
+        for(Auction auction : auctionPage){
 
             TimeRemaining timeRemaining = countDownTime(auction);
 
             AuctionListResponseDto auctionListResponseDto = new AuctionListResponseDto(auction, timeRemaining);
             auctionResponseDtoList.add(auctionListResponseDto);
         }
-        return auctionResponseDtoList;
+        return new PageResponse<>(auctionResponseDtoList, pageable, auctionPage.getTotalElements());
+    }
+
+    private Pageable paging(int page, int size, String sortBy, boolean isAsc) {
+        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, sortBy);
+
+        return PageRequest.of(page,size,sort);
     }
 
     // 경매 상세 조회
