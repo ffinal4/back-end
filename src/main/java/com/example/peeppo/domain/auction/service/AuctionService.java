@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
@@ -42,7 +43,9 @@ public class AuctionService {
     private final AuctionRepository auctionRepository;
     private final BidRepository bidRepository;
 
+
     public AuctionResponseDto createAuction(Long goodsId, AuctionRequestDto auctionRequestDto, User user) {
+        checkGoodsUsername(goodsId, user);
         Goods getGoods = findGoodsId(goodsId);
         GoodsResponseDto goodsResponseDto = new GoodsResponseDto(getGoods);
         LocalDateTime auctionEndTime = calAuctionEndTime(auctionRequestDto.getEndTime()); // 마감기한 계산
@@ -135,25 +138,36 @@ public class AuctionService {
     }
 
     // 경매 삭제 (경매 입찰 취소)
+    @Transactional
     public void deleteAuction(Long auctionId, User user) {
         Auction auction = findAuctionId(auctionId);
-        auction.getGoods().changeStatus(ONSALE);
         checkUsername(auctionId, user);
+        auction.getGoods().changeStatus(ONSALE);
         auctionRepository.delete(auction);
     }
 
     // 경매 입찰 성공 ( 경매물품과 입찰물품의 상태를 둘 다 soldout으로 변경해라 )
-    public void endAuction(Long auctionId, Long bidId) {
+    @Transactional
+    public void endAuction(Long auctionId, Long bidId, User user) {
         Auction auction = findAuctionId(auctionId);
-
+        //Bid bid = findBidId(bidId);
+        //bid.getGoods().changeStatus(SOLDOUT);
+        checkUsername(auctionId, user);
         auction.getGoods().changeStatus(SOLDOUT);
-
+        auction.changeDeleteStatus(true);
     }
 
     // 경매 등록한 유저가 맞는지 확인
     public void checkUsername(Long id, User user){
         Auction auction = findAuctionId(id);
         if(!(auction.getUser().getUserId().equals(user.getUserId()))){
+            throw new IllegalArgumentException("경매 취소는 작성자만 삭제가 가능합니다");
+        }
+    }
+
+    public void checkGoodsUsername(Long id, User user){
+        Goods goods = findGoodsId(id);
+        if(!(goods.getUser().getUserId().equals(user.getUserId()))){
             throw new IllegalArgumentException("경매 취소는 작성자만 삭제가 가능합니다");
         }
     }

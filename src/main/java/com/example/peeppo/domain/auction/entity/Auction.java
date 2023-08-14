@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 
@@ -40,6 +41,9 @@ public class Auction extends Timestamped {
     @JoinColumn(name = "goods_id")
     private Goods goods;
 
+    @ColumnDefault("false")
+    private Boolean isDeleted;
+
 
     public Auction(Goods goods){
         this.goods = goods;
@@ -47,14 +51,20 @@ public class Auction extends Timestamped {
 
     public Auction(Goods getGoods, LocalDateTime auctionEndTime,  AuctionRequestDto auctionRequestDto) {
         this.goods = getGoods;
+        this.isDeleted = false;
         this.auctionEndTime = auctionEndTime;
         this.lowPrice = auctionRequestDto.getLowPrice();
     }
 
     public Auction(Goods getGoods, LocalDateTime auctionEndTime, AuctionRequestDto auctionRequestDto, User user) {
         this.goods = getGoods;
+        this.isDeleted = false;
         this.auctionEndTime = auctionEndTime;
         this.lowPrice = auctionRequestDto.getLowPrice();
         this.user = user;
+    }
+
+    public void changeDeleteStatus(boolean b) {
+        this.isDeleted = b;
     }
 }
