@@ -14,6 +14,8 @@ import com.example.peeppo.domain.bid.repository.QueryRepository;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.image.repository.ImageRepository;
+import com.example.peeppo.domain.rating.entity.Rating;
+import com.example.peeppo.domain.rating.repository.ratingRepository.RatingRepository;
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
@@ -42,6 +44,7 @@ public class BidService {
     private final ImageRepository imageRepository;
     private final QueryRepository queryRepository;
     private final ChoiceBidRepository choiceBidRepository;
+    private final RatingRepository ratingRepository;
 
     public ResponseEntity<ResponseDto> bidding(User user, Long auctionId, BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
 
@@ -49,7 +52,7 @@ public class BidService {
         List<Bid> List = new ArrayList<>();
 
         //경매 진행 여부
-//        if (auction.getGoods().getGoodsStatus().equals(GoodsStatus.ONAUCTION.getStatus())) {
+        if (auction.getGoods().getGoodsStatus().equals(GoodsStatus.ONAUCTION.getStatus())) {
             if (!auction.getUser().getUserId().equals(user.getUserId())) {
                 for (Long goodsId : bidGoodsListRequestDto.getGoodsId()) {
                     Goods goods = getGoods(goodsId);
@@ -58,35 +61,28 @@ public class BidService {
                     if (goods.isDeleted()) {
                         continue;                           //여기도 고민
                     }
-                    if(!goods.getUser().equals(user)){
+                    if (!goods.getUser().equals(user)) {
                         throw new IllegalAccessException();
                     }
 
-//                    if(goods.getGoodsStatus().equals(GoodsStatus.ONSALE.getStatus())){
+                    if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE.getStatus())) {
+                        Rating rating = ratingRepository.findByGoodsGoodsId(goodsId);
                         //시작가보다 낮을 경우
-//                    if (auction.getLowPrice() > ) {
-//
-//                    }
+                        if (auction.getLowPrice() > rating.getAvgRatingPrice()) {
+                            throw new IllegalAccessException();
+                        }
                         List.add(new Bid(user, auction, goods, goodsImg));
-//                    }
-//                    else {
-//                        throw new IllegalAccessException(); //어떤 예외처리를 할까
-//                    }
+                        goods.changeStatus(GoodsStatus.BIDDING);
+                    } else {
+                        throw new IllegalAccessException();
+                    }
                 }
+            } else {
+                throw new IllegalAccessException();
             }
-            else {
-                throw new IllegalAccessException(); //어떤 예외처리를 할까
-            }
-//        }
-//        else {
-//            throw new IllegalAccessException(); //어떤 예외처리를 할까
-//        }
-
-//        //시작가보다 낮을 경우
-//        if(auction.getGoods().getGoodsRating() > goods.getGoodsRating()){
-//            return;
-//        }
-//        else {
+        } else {
+            throw new IllegalAccessException();
+        }
 
         bidRepository.saveAll(List);
 
@@ -112,15 +108,14 @@ public class BidService {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
-    //경매자가 선택, try문을 하는게 깔끔하려나?
+    //경매자가 선택
     public ResponseEntity<ResponseDto> choiceBids(User user, Long auctionId, ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
         Auction auction = getAuction(auctionId);
         List<Choice> bidsList = new ArrayList<>();
 
         if (auction.getUser().getUserId().equals(user.getUserId())) {
             getBiddingList(choiceRequestDto, auction, bidsList);
-        }
-        else {
+        } else {
             throw new IllegalAccessException();
         }
 
@@ -140,8 +135,7 @@ public class BidService {
             }
 
             getBiddingList(choiceRequestDto, auction, bidsList);
-        }
-        else {
+        } else {
             throw new IllegalAccessException();
         }
 
@@ -149,27 +143,11 @@ public class BidService {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
-    //Bid update해줌
-    private List<Bid> biddingList(List<Bid> bidList, BidGoodsListRequestDto bidGoodsListRequestDto, User
-            user, Auction auction) {
-        for (Long goodsId : bidGoodsListRequestDto.getGoodsId()) {
-            Goods goods = getGoods(goodsId);
-            String goodsImg = String.valueOf(imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goodsId));
-
-            if (goods.isDeleted()) {
-                continue;
-            }
-            bidList.add(new Bid(user, auction, goods, goodsImg));
-        }
-
-        return bidList;
-    }
-
     private void getBiddingList(ChoiceRequestDto choiceRequestDto, Auction auction, List<Choice> bidsList) throws IllegalAccessException {
         for (Long bidId : choiceRequestDto.getbidId()) {
             Bid bid = getBid(bidId);
 
-            if(!auction.getAuctionId().equals(bid.getAuction().getAuctionId())){
+            if (!auction.getAuctionId().equals(bid.getAuction().getAuctionId())) {
                 throw new IllegalAccessException();
             }
             bidsList.add(new Choice(bid, auction));
@@ -209,13 +187,4 @@ public class BidService {
 
         return PageRequest.of(page, size, sort);
     }
-
-    public void validateAuctionPeriod(Auction auction) {
-    }
-
-//    public void validateGoods(Goods goods) {
-//        if (!goods.getGoodsStatus().equals(GoodsStatus.ONSALE.getStatus())) {
-//            throw new IllegalArgumentException();
-//        }
-//    }
 }
