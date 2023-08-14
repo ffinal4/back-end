@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class AuctionResponseDto {
     private Long auctionId;
+    private Boolean deleteStatus;
     private LocalDateTime auctionEndTime;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
@@ -24,6 +25,7 @@ public class AuctionResponseDto {
 
     public AuctionResponseDto(Auction auction, GoodsResponseDto goodsResponseDto, User user, TimeRemaining countDownTime) {
         this.auctionId = auction.getAuctionId();
+        this.deleteStatus = auction.getIsDeleted();
         this.goodsResponseDto = goodsResponseDto;
         this.auctionEndTime = auction.getAuctionEndTime();
         this.createdAt = auction.getCreatedAt();
@@ -33,6 +35,7 @@ public class AuctionResponseDto {
 
     public AuctionResponseDto(Auction auction, Goods goods, TimeRemaining countDownTime, Long bidCount) {
         this.auctionId = auction.getAuctionId();
+        this.deleteStatus = auction.getIsDeleted();
         this.goodsResponseDto = new GoodsResponseDto(goods);
         this.auctionEndTime = auction.getAuctionEndTime();
         this.createdAt = auction.getCreatedAt();
