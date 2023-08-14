@@ -16,6 +16,8 @@ public class AuctionResponseDto {
     private LocalDateTime auctionEndTime;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
+
+    private Long bidCount;
     private GoodsResponseDto goodsResponseDto;
     private TimeRemaining leftTime;
 
@@ -29,13 +31,14 @@ public class AuctionResponseDto {
         this.leftTime = countDownTime;
     }
 
-    public AuctionResponseDto(Auction auction, Goods goods, TimeRemaining countDownTime) {
+    public AuctionResponseDto(Auction auction, Goods goods, TimeRemaining countDownTime, Long bidCount) {
         this.auctionId = auction.getAuctionId();
         this.goodsResponseDto = new GoodsResponseDto(goods);
         this.auctionEndTime = auction.getAuctionEndTime();
         this.createdAt = auction.getCreatedAt();
         this.modifiedAt = auction.getModifiedAt();
         this.leftTime = countDownTime;
+        this.bidCount = bidCount;
     }
 }
 

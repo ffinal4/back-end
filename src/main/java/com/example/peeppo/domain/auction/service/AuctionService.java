@@ -7,6 +7,7 @@ import com.example.peeppo.domain.auction.dto.AuctionResponseDto;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.bid.entity.Bid;
+import com.example.peeppo.domain.bid.repository.BidRepository;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
@@ -34,6 +35,7 @@ public class AuctionService {
 
     private final GoodsRepository goodsRepository;
     private final AuctionRepository auctionRepository;
+    private final BidRepository bidRepository;
 
     public AuctionResponseDto createAuction(Long goodsId, AuctionRequestDto auctionRequestDto, User user) {
         Goods getGoods = findGoodsId(goodsId);
@@ -83,6 +85,10 @@ public class AuctionService {
         return goodsRepository.findById(goodsId).orElseThrow(()-> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당하는 물품은 존재하지 않습니다"));
     }
 
+    public Long findBidCount(Long id){
+        return bidRepository.countByAuction_AuctionId(id);
+    }
+
     // 경매 전체 조회
     public Page<AuctionListResponseDto> findAllAuction(int i, int size, String sortBy, boolean isAsc) {
         Pageable pageable = paging(i, size, sortBy, isAsc);
@@ -93,7 +99,7 @@ public class AuctionService {
 
             TimeRemaining timeRemaining = countDownTime(auction);
 
-            AuctionListResponseDto auctionListResponseDto = new AuctionListResponseDto(auction, timeRemaining);
+            AuctionListResponseDto auctionListResponseDto = new AuctionListResponseDto(auction, timeRemaining, findBidCount(auction.getAuctionId()));
             auctionResponseDtoList.add(auctionListResponseDto);
         }
         return new PageResponse<>(auctionResponseDtoList, pageable, auctionPage.getTotalElements());
@@ -109,7 +115,7 @@ public class AuctionService {
     // 경매 상세 조회
     public AuctionResponseDto findAuctionById(Long auctionId) {
         Auction auction = findAuctionId(auctionId);
-        return new AuctionResponseDto(auction, auction.getGoods(), countDownTime(auction));
+        return new AuctionResponseDto(auction, auction.getGoods(), countDownTime(auction), findBidCount(auctionId));
     }
 
     // 경매 찾아서 Auction 리턴
