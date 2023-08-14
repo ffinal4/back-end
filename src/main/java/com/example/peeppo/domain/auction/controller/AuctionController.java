@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 import static com.example.peeppo.global.stringCode.SuccessCodeEnum.AUCTION_DELETE_SUCCESS;
+import static com.example.peeppo.global.stringCode.SuccessCodeEnum.AUCTION_END_SUCCESS;
 
 @RestController
 @RequiredArgsConstructor
@@ -49,6 +50,18 @@ public class AuctionController {
         return ResponseUtils.ok(auctionService.findAuctionById(auctionId));
     }
 
+    // 경매 별 입찰 물품
+   // @GetMapping("/{auctionId}/pick/{bidId}")
+
+    // 경매 정상 종료 -> 우선 입찰 물품 전체 보여주기 -> 입찰 물품 선택
+    @DeleteMapping("/{auctionId}/pick/{bidId}")
+    public ApiResponse<?> endAuction(@PathVariable("auctionId") Long auctionId,
+                                     @PathVariable("bidId") Long bidId){
+        auctionService.endAuction(auctionId, bidId);
+        return ResponseUtils.ok(ResponseUtils.okWithMessage(AUCTION_END_SUCCESS));
+    }
+
+    // 경매 비정상 종료 ( 입찰 취소 ) -> 여기에 포인트 차감 로직 추가 필요
     @DeleteMapping("/{auctionId}")
     public ApiResponse<?> deleteAuction(@PathVariable("auctionId") Long auctionId,
                                 @AuthenticationPrincipal UserDetailsImpl userDetails){
