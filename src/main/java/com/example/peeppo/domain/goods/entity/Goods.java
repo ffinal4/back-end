@@ -9,6 +9,7 @@ import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.utils.Timestamped;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -68,7 +69,7 @@ public class Goods extends Timestamped {
         this.wantedGoods = wantedGoods;
     }
 
-    public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods, User user) {
+    public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods, User user, GoodsStatus goodsStatus) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.location = requestDto.getLocation();
@@ -76,6 +77,7 @@ public class Goods extends Timestamped {
         this.tradeType = requestDto.getTradeType();
         this.category = requestDto.getCategory();
         this.wantedGoods = wantedGoods;
+        this.goodsStatus = goodsStatus;
         this.user = user;
     }
 
@@ -83,5 +85,9 @@ public class Goods extends Timestamped {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.location = requestDto.getLocation();
+    }
+
+    public void changeStatus(GoodsStatus goodsStatus) {
+        this.goodsStatus = goodsStatus;
     }
 }

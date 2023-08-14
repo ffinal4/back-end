@@ -2,6 +2,7 @@ package com.example.peeppo.domain.goods.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.example.peeppo.domain.bid.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.entity.WantedGoods;
@@ -58,7 +59,7 @@ public class GoodsService {
                                                      SellerPriceRequestDto sellerPriceRequestDto,
                                                      User user) {
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
-        Goods goods = new Goods(goodsRequestDto, wantedGoods, user);
+        Goods goods = new Goods(goodsRequestDto, wantedGoods, user, GoodsStatus.ONSALE);
         goodsRepository.save(goods);
 
         wantedGoodsRepository.save(wantedGoods);
