@@ -17,8 +17,8 @@ public class UserHelper {
 
 
     @Transactional
-    public void userRatingCheck(User user, Long ratingCount){
-        user.maxCountUpdate(ratingCount);
+    public void userRatingCheck(User user, Long ratingCount, Long userPoint){
+        user.maxCountUpdate(ratingCount, userPoint);
     }
 
 }

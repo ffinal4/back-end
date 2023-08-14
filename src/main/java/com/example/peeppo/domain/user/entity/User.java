@@ -44,6 +44,9 @@ public class User {
     @Column
     private Long maxRatingCount = 0L;
 
+    @Column
+    private Long userPoint = 0L;
+
     public User(SignupRequestDto requestDto, String encodedPassword, UserRoleEnum role) {
         this.nickname = requestDto.getNickname();
         this.email = requestDto.getEmail();
@@ -58,9 +61,13 @@ public class User {
         this.userImg = userImg;
         this.password = encodedPassword;
     }
-    public void maxCountUpdate(Long currentCount){
+    public void maxCountUpdate(Long currentCount, Long userPoint){
         if(this.maxRatingCount < currentCount){
             this.maxRatingCount = currentCount;
         }
+        this.userPoint += userPoint;
+    }
+    public void maxCountUpdate(Long userPoint){
+        this.userPoint += userPoint;
     }
 }
