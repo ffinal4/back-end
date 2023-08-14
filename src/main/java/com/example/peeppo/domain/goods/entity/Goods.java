@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.goods.entity;
 
 import com.example.peeppo.domain.auction.entity.Auction;
+import com.example.peeppo.domain.bid.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.dto.GoodsRequestDto;
 import com.example.peeppo.domain.goods.enums.Category;
 import com.example.peeppo.domain.image.entity.Image;
@@ -54,6 +55,8 @@ public class Goods extends Timestamped {
     @OneToMany(mappedBy = "goods")
     private List<Image> image;
 
+    @Enumerated(EnumType.STRING)
+    private GoodsStatus goodsStatus;
 
     public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods) {
         this.title = requestDto.getTitle();
