@@ -6,7 +6,6 @@ import com.example.peeppo.domain.goods.enums.Category;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.utils.Timestamped;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,8 +13,6 @@ import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.List;
-
-import static jakarta.persistence.FetchType.LAZY;
 
 
 @Entity
