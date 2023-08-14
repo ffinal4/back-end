@@ -26,27 +26,9 @@ public class BidController {
     @PostMapping("/auction/{auctionId}/bid")
     public ResponseEntity<ResponseDto> bidding(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                @PathVariable Long auctionId,
-                                               @Valid @RequestBody BidGoodsListRequestDto bidGoodsListRequestDto) {
+                                               @Valid @RequestBody BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
 
         return bidService.bidding(userDetails.getUser(), auctionId, bidGoodsListRequestDto);
-    }
-
-    //나중에 지울 것
-    @PutMapping("/auction/{auctionId}/bid/{bidId}")
-    public ResponseEntity<ResponseDto> updateBid(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                 @PathVariable Long auctionId,
-                                                 @PathVariable Long bidId,
-                                                 @Valid @RequestBody BidGoodsListRequestDto bidGoodsListRequestDto) {
-
-        return bidService.updateBid(userDetails.getUser(), auctionId, bidId, bidGoodsListRequestDto);
-    }
-
-    //나중에 지울 것
-    @DeleteMapping("/auction/{auctionId}/bid")
-    public ResponseEntity<ResponseDto> deleteBid(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                 @PathVariable Long auctionId) {
-
-        return bidService.deleteBid(userDetails.getUser(), auctionId);
     }
 
     //전체조회
@@ -60,20 +42,20 @@ public class BidController {
         return bidService.BidList(auctionId, page - 1, size, sortBy, isAsc);
     }
 
-    @PutMapping("/auction/{auctionId}/choice/bids")
-    public ResponseEntity<ResponseDto> choiceUpdateBids(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                        @PathVariable Long auctionId,
-                                                        @Valid @RequestBody ChoiceRequestDto choiceRequestDto) {
-
-        return bidService.choiceUpdateBids(userDetails.getUser(), auctionId, choiceRequestDto);
-    }
-
     @PostMapping("/auction/{auctionId}/choice/bids")
     public ResponseEntity<ResponseDto> choiceBids(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                   @PathVariable Long auctionId,
-                                                  @Valid @RequestBody ChoiceRequestDto choiceRequestDto) {
+                                                  @Valid @RequestBody ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
 
         return bidService.choiceBids(userDetails.getUser(), auctionId, choiceRequestDto);
+    }
+
+    @PutMapping("/auction/{auctionId}/choice/bids")
+    public ResponseEntity<ResponseDto> choiceUpdateBids(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                        @PathVariable Long auctionId,
+                                                        @Valid @RequestBody ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
+
+        return bidService.choiceUpdateBids(userDetails.getUser(), auctionId, choiceRequestDto);
     }
 
     //나중에 전체 조회로 하는게 맞겠지?

@@ -27,7 +27,7 @@ public class Choice {
     @JoinColumn(name = "auction_id")
     private Auction auction;
 
-    @OneToOne(cascade = CascadeType.DETACH) //맞나?
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bid_id")
     private Bid bid;
 
