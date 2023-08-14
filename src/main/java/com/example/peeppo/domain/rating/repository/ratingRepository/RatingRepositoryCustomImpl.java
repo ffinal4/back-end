@@ -5,75 +5,56 @@ import com.example.peeppo.domain.rating.entity.Rating;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 
-import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Set;
 
 @RequiredArgsConstructor
 public class RatingRepositoryCustomImpl implements RatingRepositoryCustom {
     private final JPAQueryFactory queryFactory;
-    private static final int MAX_RECURSION_COUNT = 20;
-
     @Override
-    public List<Rating> getRandomRatingsFromRatingsWithCountLessThanOrEqual7(Long userId) {
-        List<Long> ids = fetchRatingIdsWithCountLessThanOrEqual7();
-        List<Rating> randomRatings = new ArrayList<>();
+    public Rating findRandomRatingWithCountLessThanOrEqual3(Set<Long> userRatedGoods) {
 
-        while (randomRatings.size() < 5 && !ids.isEmpty()) {
-            Long randomId = getRandomId(ids);
+        //ratingCount 3 이하이며, 가장 낮은 게시물을 가져옴
+        Long randomId = fetchMinRatingId(userRatedGoods);
 
-            Rating randomRating = fetchRandomRating(randomId, userId);
-            if (randomRating != null) {
-                randomRatings.add(randomRating);
-            }
-            ids.remove(randomId);
-        }
+        // 전체 게시물 중 평가한적 없는 게시물을 가져옴
+        randomId = (randomId == null) ? fetchNotRatedGoods(userRatedGoods) : randomId;
 
-        return randomRatings;
+        Rating randomRating = fetchRandomRating(randomId);
+
+        return randomRating;
     }
 
-    @Override
-    public Rating findRandomRatingWithCountLessThanOrEqual7(Set<Long> UserRatedGoods, Long userId, int recursionCount) {
-        if (recursionCount >= MAX_RECURSION_COUNT) {
-            throw new RuntimeException("평가 가능한 물품이 없습니다. 잠시 후 시도해주세요");
-        }
-        List<Long> ids = fetchRatingIdsWithCountLessThanOrEqual7();
-        ids.removeAll(UserRatedGoods);
-
-        if (ids.isEmpty()) {
-            return null;
-        }
-
-        Long randomId = getRandomId(ids);
-
-        Rating randomRating = fetchRandomRating(randomId, userId);
-        if (randomRating != null) {
-            return randomRating;
-        } else {
-            ids.remove(randomId);
-            return findRandomRatingWithCountLessThanOrEqual7(UserRatedGoods, userId, ++recursionCount);
-        }
-    }
-
-    private List<Long> fetchRatingIdsWithCountLessThanOrEqual7() {
+    private Long fetchMinRatingId(Set<Long> userRatedGoods) {
         QRating qRating = QRating.rating;
-        return queryFactory.select(qRating.ratingId)
+        return queryFactory.select(qRating.goods.goodsId)
                 .from(qRating)
-                .where(qRating.ratingCount.loe(7))
-                .orderBy(qRating.ratingCount.asc())
-                .fetch();
-    }
-
-    private Rating fetchRandomRating(Long ratingId, Long userId) {
-        QRating qRating = QRating.rating;
-        return queryFactory.selectFrom(qRating)
-                .where(qRating.ratingId.eq(ratingId)
-                        .and(qRating.goods.user.userId.ne(userId)))
+                .where(qRating.ratingCount.loe(3)
+                        .and(qRating.goods.user.userId.notIn(userRatedGoods)))
                 .fetchOne();
     }
 
-    private Long getRandomId(List<Long> ids) {
-        int randomIndex = ThreadLocalRandom.current().nextInt(ids.size());
-        return ids.get(randomIndex);
+    private Long fetchNotRatedGoods(Set<Long> userRatedGoods) {
+        QRating qRating = QRating.rating;
+        return queryFactory.select(qRating.goods.goodsId)
+                .from(qRating)
+                .where(qRating.goods.user.userId.notIn(userRatedGoods))
+                .fetchOne();
     }
+
+    private Rating fetchRandomRating(Long ratingId) {
+        QRating qRating = QRating.rating;
+        return queryFactory.selectFrom(qRating)
+                .where(qRating.ratingId.eq(ratingId))
+                .fetchOne();
+    }
+
+    public List<Rating> findByRatingCountGreaterThanEqual(Long ratingCount) {
+        QRating qRating = QRating.rating;
+        return queryFactory
+                .selectFrom(qRating)
+                .where(qRating.ratingCount.goe(ratingCount)) // goe: 크거나 같다
+                .fetch();
+    }
+
 }

@@ -7,7 +7,8 @@ import java.util.Set;
 
 public interface RatingRepositoryCustom {
 
-    Rating findRandomRatingWithCountLessThanOrEqual7(Set<Long> UserRatedGoods, Long userId, int recursionCount);
+    Rating findRandomRatingWithCountLessThanOrEqual3(Set<Long> UserRatedGoods);
 
-    List<Rating> getRandomRatingsFromRatingsWithCountLessThanOrEqual7(Long userId);
+    List<Rating> findByRatingCountGreaterThanEqual(Long ratingCount);
+
 }
