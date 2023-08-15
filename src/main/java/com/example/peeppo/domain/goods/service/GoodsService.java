@@ -11,7 +11,6 @@ import com.example.peeppo.domain.goods.repository.WantedGoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.helper.ImageHelper;
 import com.example.peeppo.domain.image.repository.ImageRepository;
-import com.example.peeppo.domain.rating.helper.RatingHelper;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
@@ -56,7 +55,6 @@ public class GoodsService {
     public ApiResponse<GoodsResponseDto> goodsCreate(GoodsRequestDto goodsRequestDto,
                                                      List<MultipartFile> images,
                                                      WantedRequestDto wantedRequestDto,
-                                                     SellerPriceRequestDto sellerPriceRequestDto,
                                                      User user) {
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
         Goods goods = new Goods(goodsRequestDto, wantedGoods, user, GoodsStatus.ONSALE);
@@ -71,7 +69,7 @@ public class GoodsService {
                 .collect(Collectors.toList());
 
         Image image = imageHelper.getImage(imageUuids.get(0));
-        ratingHelper.createRating(sellerPriceRequestDto.getSellerPrice(), goods, image);
+//        ratingHelper.createRating(sellerPriceRequestDto.getSellerPrice(), goods, image);
 
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUuids, wantedGoods, user), null);
     }
@@ -79,10 +77,9 @@ public class GoodsService {
     @CachePut(key = "#page", value = "allGoods")
     @Cacheable(key = "#page", value = "allGoods", condition = "#page == 0", cacheManager = "cacheManager")
     public Page<GoodsListResponseDto> allGoods(int page, int size, String sortBy, boolean isAsc) {
-        // 페이징 되어있는 걸 쿼리DSL 사용
-
+      
         Pageable pageable = paging(page, size, sortBy, isAsc);
-        Page<Goods> goodsPage = goodsRepository.findAllByIsDeletedFalse(pageable);
+        Page<Goods> goodsPage = goodsRepository.findAllByDeletedIsFalse(pageable);
         List<GoodsListResponseDto> goodsResponseList = new ArrayList<>();
 
         for (Goods goods : goodsPage.getContent()) {
@@ -128,7 +125,7 @@ public class GoodsService {
     public ApiResponse<List<GoodsListResponseDto>> getMyGoods(Long userId, int page, int size, String sortBy, boolean isAsc) {
         Pageable pageable = paging(page, size, sortBy, isAsc);
         User user = findUserId(userId);
-        Page<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalse(user, pageable);
+        Page<Goods> goodsList = goodsRepository.findAllByUserAndDeletedIsFalse(user, pageable);
         List<GoodsListResponseDto> myGoods = new ArrayList<>();
         for (Goods goods : goodsList) {
             Image firstImage = imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goods.getGoodsId());
