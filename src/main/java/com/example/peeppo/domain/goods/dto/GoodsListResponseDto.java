@@ -15,6 +15,7 @@ public class GoodsListResponseDto {
     private String nickname;
     private String image;
 
+
     public GoodsListResponseDto(Goods goods, String image) {
         this.goodsId = goods.getGoodsId();
         this.title = goods.getTitle();

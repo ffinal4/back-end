@@ -44,6 +44,7 @@ public class GoodsService {
     private final AmazonS3 amazonS3;
     private final String bucket;
     private final UserRepository userRepository;
+
     private final RatingHelper ratingHelper;
     private static final String RECENT_GOODS = "goods";
     private static final int MAX_RECENT_GOODS = 4;
@@ -54,7 +55,6 @@ public class GoodsService {
     public ApiResponse<GoodsResponseDto> goodsCreate(GoodsRequestDto goodsRequestDto,
                                                      List<MultipartFile> images,
                                                      WantedRequestDto wantedRequestDto,
-                                                     SellerPriceRequestDto sellerPriceRequestDto,
                                                      User user) {
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
         Goods goods = new Goods(goodsRequestDto, wantedGoods, user, GoodsStatus.ONSALE);
@@ -69,7 +69,7 @@ public class GoodsService {
                 .collect(Collectors.toList());
 
         Image image = imageHelper.getImage(imageUuids.get(0));
-        ratingHelper.createRating(sellerPriceRequestDto.getSellerPrice(), goods, image);
+//        ratingHelper.createRating(sellerPriceRequestDto.getSellerPrice(), goods, image);
 
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUuids, wantedGoods, user), null);
     }
@@ -77,8 +77,7 @@ public class GoodsService {
     @CachePut(key = "#page", value = "allGoods")
     @Cacheable(key = "#page", value = "allGoods", condition = "#page == 0", cacheManager = "cacheManager")
     public Page<GoodsListResponseDto> allGoods(int page, int size, String sortBy, boolean isAsc) {
-        // 페이징 되어있는 걸 쿼리DSL 사용
-
+      
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Goods> goodsPage = goodsRepository.findAllByIsDeletedFalse(pageable);
         List<GoodsListResponseDto> goodsResponseList = new ArrayList<>();

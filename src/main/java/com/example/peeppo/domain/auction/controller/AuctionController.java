@@ -5,10 +5,11 @@ import com.amazonaws.Response;
 import com.example.peeppo.domain.auction.dto.*;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.entity.AuctionList;
+import com.example.peeppo.domain.auction.dto.AuctionListResponseDto;
+import com.example.peeppo.domain.auction.dto.AuctionRequestDto;
+import com.example.peeppo.domain.auction.dto.AuctionResponseDto;
+import com.example.peeppo.domain.auction.dto.TestListResponseDto;
 import com.example.peeppo.domain.auction.service.AuctionService;
-import com.example.peeppo.domain.bid.dto.BidListResponseDto;
-import com.example.peeppo.domain.user.dto.ResponseDto;
-import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import com.example.peeppo.global.utils.ResponseUtils;
@@ -18,8 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 import static com.example.peeppo.global.stringCode.SuccessCodeEnum.AUCTION_DELETE_SUCCESS;
 import static com.example.peeppo.global.stringCode.SuccessCodeEnum.AUCTION_END_SUCCESS;
@@ -52,15 +51,13 @@ public class AuctionController {
         return ResponseUtils.ok(auctionService.findAuctionById(auctionId));
     }
 
-    // 경매 별 입찰 물품
-    // @GetMapping("/{auctionId}/pick/{bidId}")
-
     // 경매 정상 종료 -> 우선 입찰 물품 전체 보여주기 -> 입찰 물품 선택
     @DeleteMapping("/{auctionId}/pick/{bidId}")
     public ApiResponse<?> endAuction(@PathVariable("auctionId") Long auctionId,
                                      @PathVariable("bidId") Long bidId,
                                      @AuthenticationPrincipal UserDetailsImpl userDetails) throws IllegalAccessException {
         auctionService.endAuction(auctionId, bidId, userDetails.getUser());
+
         return ResponseUtils.ok(ResponseUtils.okWithMessage(AUCTION_END_SUCCESS));
     }
 

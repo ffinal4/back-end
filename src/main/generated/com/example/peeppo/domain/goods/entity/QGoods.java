@@ -48,6 +48,8 @@ public class QGoods extends EntityPathBase<Goods> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
+    public final NumberPath<Long> sellerPrice = createNumber("sellerPrice", Long.class);
+
     public final StringPath title = createString("title");
 
     public final StringPath tradeType = createString("tradeType");

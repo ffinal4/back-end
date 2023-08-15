@@ -14,7 +14,6 @@ import com.example.peeppo.domain.bid.repository.QueryRepository;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.image.repository.ImageRepository;
-import com.example.peeppo.domain.rating.entity.Rating;
 import com.example.peeppo.domain.rating.repository.ratingRepository.RatingRepository;
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
@@ -64,8 +63,7 @@ public class BidService {
                         throw new IllegalAccessException();
                     }
 
-                    if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {
-                        Rating rating = ratingRepository.findByGoodsGoodsId(goodsId);
+                    if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {//Rating rating = ratingRepository.findByRatingGoodsId(goodsId);
                         //시작가보다 낮을 경우
 //                        if (auction.getLowPrice() > rating.getAvgRatingPrice()) {   //평균가 이상함
 //                            throw new IllegalAccessException();

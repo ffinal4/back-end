@@ -34,6 +34,7 @@ public class Goods extends Timestamped {
     @Enumerated(EnumType.STRING) // ENUM타입을 String으로 넣음
     private Category category;
 
+    private Long sellerPrice;
     private boolean isDeleted;
 //    @OneToOne(fetch = FetchType.LAZY)
 
@@ -55,7 +56,9 @@ public class Goods extends Timestamped {
     @Enumerated(EnumType.STRING)
     private GoodsStatus goodsStatus;
 
-    public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods) {
+
+
+    public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods){
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.location = requestDto.getLocation();
@@ -72,6 +75,7 @@ public class Goods extends Timestamped {
         this.goodsCondition = requestDto.getGoodsCondition();
         this.tradeType = requestDto.getTradeType();
         this.category = requestDto.getCategory();
+        this.sellerPrice = requestDto.getSellerPrice();
         this.wantedGoods = wantedGoods;
         this.goodsStatus = goodsStatus;
         this.user = user;
@@ -87,3 +91,5 @@ public class Goods extends Timestamped {
         this.goodsStatus = goodsStatus;
     }
 }
+
+
