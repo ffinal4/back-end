@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.auction.entity;
 
 import com.example.peeppo.domain.auction.dto.AuctionRequestDto;
+import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.utils.Timestamped;
@@ -26,6 +27,9 @@ public class Auction extends Timestamped {
     @Min(1000)
     @Column
     private Long lowPrice;
+
+    @Enumerated(EnumType.STRING)
+    private AuctionStatus auctionStatus;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
@@ -56,5 +60,9 @@ public class Auction extends Timestamped {
         this.auctionEndTime = auctionEndTime;
         this.lowPrice = auctionRequestDto.getLowPrice();
         this.user = user;
+    }
+
+    public void changeAuctionStatus(AuctionStatus auctionStatus) {
+        this.auctionStatus = auctionStatus;
     }
 }

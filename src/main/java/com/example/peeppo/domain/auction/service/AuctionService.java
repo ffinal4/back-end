@@ -2,16 +2,13 @@ package com.example.peeppo.domain.auction.service;
 
 import com.example.peeppo.domain.auction.dto.*;
 import com.example.peeppo.domain.auction.entity.Auction;
-import com.example.peeppo.domain.auction.entity.AuctionList;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
-import com.example.peeppo.domain.bid.dto.BidListResponseDto;
 import com.example.peeppo.domain.bid.entity.Bid;
-import com.example.peeppo.domain.bid.enums.GoodsStatus;
+import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.bid.repository.BidRepository;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
-import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.responseDto.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +27,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.peeppo.domain.bid.enums.GoodsStatus.ONSALE;
-import static com.example.peeppo.domain.bid.enums.GoodsStatus.SOLDOUT;
+import static com.example.peeppo.domain.auction.enums.AuctionStatus.CANCEL;
+import static com.example.peeppo.domain.auction.enums.AuctionStatus.REQUEST;
+import static com.example.peeppo.domain.bid.enums.BidStatus.FAIL;
+import static com.example.peeppo.domain.bid.enums.BidStatus.SUCCESS;
+import static com.example.peeppo.domain.goods.enums.GoodsStatus.ONSALE;
+import static com.example.peeppo.domain.goods.enums.GoodsStatus.SOLDOUT;
 
 
 @Slf4j
@@ -138,17 +139,34 @@ public class AuctionService {
     // 경매 삭제 (경매 입찰 취소)
     public void deleteAuction(Long auctionId, User user) {
         Auction auction = findAuctionId(auctionId);
+
         auction.getGoods().changeStatus(ONSALE);
+        auction.changeAuctionStatus(CANCEL);
+
+        List<Bid> bidList = bidRepository.findBidByAuctionAuctionId(auctionId);
+
+        for(Bid bid : bidList){
+            bid.changeBidStatus(FAIL);
+            bid.getGoods().changeStatus(ONSALE);
+        }
+
         checkUsername(auctionId, user);
         auctionRepository.delete(auction);
     }
 
     // 경매 입찰 성공 ( 경매물품과 입찰물품의 상태를 둘 다 soldout으로 변경해라 )
-    public void endAuction(Long auctionId, Long bidId) {
+    public void endAuction(Long auctionId, Long bidId, User user) throws IllegalAccessException {
         Auction auction = findAuctionId(auctionId);
 
-        auction.getGoods().changeStatus(SOLDOUT);
+        if (auction.getUser().getUserId().equals(user.getUserId())) {
+            Bid bid = findBidId(bidId);
+            bid.changeBidStatus(SUCCESS);
 
+            auction.changeAuctionStatus(REQUEST);
+            auction.getGoods().changeStatus(SOLDOUT);
+        } else {
+            throw new IllegalAccessException();
+        }
     }
 
     // 경매 등록한 유저가 맞는지 확인

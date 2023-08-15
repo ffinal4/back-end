@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.bid.entity;
 
 import com.example.peeppo.domain.auction.entity.Auction;
+import com.example.peeppo.domain.bid.enums.BidStatus;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -24,6 +25,9 @@ public class Bid {
     private String location;
 
     private String goodsImg;
+
+    @Enumerated(EnumType.STRING)
+    private BidStatus bidStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -53,5 +57,9 @@ public class Bid {
         this.user = user;
         this.auction = auction;
         this.goods = goods;
+    }
+
+    public void changeBidStatus(BidStatus bidStatus) {
+        this.bidStatus = bidStatus;
     }
 }

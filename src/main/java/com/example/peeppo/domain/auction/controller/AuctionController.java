@@ -2,10 +2,7 @@ package com.example.peeppo.domain.auction.controller;
 
 
 import com.amazonaws.Response;
-import com.example.peeppo.domain.auction.dto.AuctionListResponseDto;
-import com.example.peeppo.domain.auction.dto.AuctionRequestDto;
-import com.example.peeppo.domain.auction.dto.AuctionResponseDto;
-import com.example.peeppo.domain.auction.dto.TestListResponseDto;
+import com.example.peeppo.domain.auction.dto.*;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.entity.AuctionList;
 import com.example.peeppo.domain.auction.service.AuctionService;
@@ -61,8 +58,9 @@ public class AuctionController {
     // 경매 정상 종료 -> 우선 입찰 물품 전체 보여주기 -> 입찰 물품 선택
     @DeleteMapping("/{auctionId}/pick/{bidId}")
     public ApiResponse<?> endAuction(@PathVariable("auctionId") Long auctionId,
-                                     @PathVariable("bidId") Long bidId) {
-        auctionService.endAuction(auctionId, bidId);
+                                     @PathVariable("bidId") Long bidId,
+                                     @AuthenticationPrincipal UserDetailsImpl userDetails) throws IllegalAccessException {
+        auctionService.endAuction(auctionId, bidId, userDetails.getUser());
         return ResponseUtils.ok(ResponseUtils.okWithMessage(AUCTION_END_SUCCESS));
     }
 
