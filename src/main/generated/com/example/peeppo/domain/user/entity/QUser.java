@@ -35,6 +35,8 @@ public class QUser extends EntityPathBase<User> {
 
     public final StringPath userImg = createString("userImg");
 
+    public final NumberPath<Long> userPoint = createNumber("userPoint", Long.class);
+
     public QUser(String variable) {
         super(User.class, forVariable(variable));
     }
