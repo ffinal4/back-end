@@ -54,11 +54,11 @@ public class User {
         this.email = requestDto.getEmail();
         this.password = encodedPassword;
         this.role = role;
+        this.location = requestDto.getLocation();
     }
 
     public void upload(MyPageRequestDto myPageRequestDto, String userImg, String encodedPassword) {
         this.nickname = myPageRequestDto.getNickname();
-        this.password = myPageRequestDto.getPassword();
         this.location = myPageRequestDto.getLocation();
         this.userImg = userImg;
         this.password = encodedPassword;

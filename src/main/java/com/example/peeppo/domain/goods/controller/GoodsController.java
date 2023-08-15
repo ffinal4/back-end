@@ -4,6 +4,7 @@ import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.service.GoodsService;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -67,5 +68,10 @@ public class GoodsController {
     @DeleteMapping("/{goodsId}")
     public ApiResponse<DeleteResponseDto> deleteGoods(@PathVariable Long goodsId) {
         return goodsService.deleteGoods(goodsId);
+    }
+
+    @GetMapping("/recent")
+    public List<GoodsRecentDto> recentGoods(HttpServletResponse response){
+        return goodsService.recentGoods(response);
     }
 }

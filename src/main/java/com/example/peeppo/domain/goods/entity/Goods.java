@@ -1,21 +1,20 @@
 package com.example.peeppo.domain.goods.entity;
 
 import com.example.peeppo.domain.auction.entity.Auction;
+import com.example.peeppo.domain.bid.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.dto.GoodsRequestDto;
 import com.example.peeppo.domain.goods.enums.Category;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.utils.Timestamped;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.List;
-
-import static jakarta.persistence.FetchType.LAZY;
 
 
 @Entity
@@ -55,7 +54,23 @@ public class Goods extends Timestamped {
     @OneToMany(mappedBy = "goods")
     private List<Image> image;
 
+
     public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods, User user) {
+
+    @Enumerated(EnumType.STRING)
+    private GoodsStatus goodsStatus;
+
+    public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods) {
+        this.title = requestDto.getTitle();
+        this.content = requestDto.getContent();
+        this.location = requestDto.getLocation();
+        this.goodsCondition = requestDto.getGoodsCondition();
+        this.tradeType = requestDto.getTradeType();
+        this.category = requestDto.getCategory();
+        this.wantedGoods = wantedGoods;
+    }
+
+    public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods, User user, GoodsStatus goodsStatus) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.location = requestDto.getLocation();
@@ -64,6 +79,7 @@ public class Goods extends Timestamped {
         this.category = requestDto.getCategory();
         this.sellerPrice = requestDto.getSellerPrice();
         this.wantedGoods = wantedGoods;
+        this.goodsStatus = goodsStatus;
         this.user = user;
     }
 
@@ -71,5 +87,9 @@ public class Goods extends Timestamped {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.location = requestDto.getLocation();
+    }
+
+    public void changeStatus(GoodsStatus goodsStatus) {
+        this.goodsStatus = goodsStatus;
     }
 }
