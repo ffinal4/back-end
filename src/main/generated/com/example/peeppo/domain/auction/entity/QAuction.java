@@ -24,6 +24,8 @@ public class QAuction extends EntityPathBase<Auction> {
 
     public final com.example.peeppo.global.utils.QTimestamped _super = new com.example.peeppo.global.utils.QTimestamped(this);
 
+    public final DateTimePath<java.time.LocalDateTime> auctionEndTime = createDateTime("auctionEndTime", java.time.LocalDateTime.class);
+
     public final NumberPath<Long> auctionId = createNumber("auctionId", Long.class);
 
     //inherited
@@ -31,8 +33,14 @@ public class QAuction extends EntityPathBase<Auction> {
 
     public final com.example.peeppo.domain.goods.entity.QGoods goods;
 
+    public final BooleanPath isDeleted = createBoolean("isDeleted");
+
+    public final NumberPath<Long> lowPrice = createNumber("lowPrice", Long.class);
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
+
+    public final com.example.peeppo.domain.user.entity.QUser user;
 
     public QAuction(String variable) {
         this(Auction.class, forVariable(variable), INITS);
@@ -53,6 +61,7 @@ public class QAuction extends EntityPathBase<Auction> {
     public QAuction(Class<? extends Auction> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.goods = inits.isInitialized("goods") ? new com.example.peeppo.domain.goods.entity.QGoods(forProperty("goods"), inits.get("goods")) : null;
+        this.user = inits.isInitialized("user") ? new com.example.peeppo.domain.user.entity.QUser(forProperty("user")) : null;
     }
 
 }

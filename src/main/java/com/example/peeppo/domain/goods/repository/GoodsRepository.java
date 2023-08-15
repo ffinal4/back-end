@@ -8,11 +8,15 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+
 import java.util.Optional;
 
-public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsRepositoryCustom {
-    Page<Goods> findAllByDeletedIsFalse(Pageable pageable);
-    Page<Goods> findAllByUserAndDeletedIsFalse(User user, Pageable pageable);
+import java.util.Collection;
+import java.util.List;
+
+public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsRepositoryCustom{
+    Page<Goods> findAllByIsDeletedFalse(Pageable pageable);
+    Page<Goods> findAllByUserAndIsDeletedFalse(User user, Pageable pageable);
 
     @Query(value = "select g1.* " +
             "from goods g1 " +
@@ -29,4 +33,13 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
     Goods findRandomGoods(@Param("targetUser") User user);
 
     Optional<Goods> findByGoodsId(Long goodsId);
+
+   // Goods findDistinctByTitle(String title);
+
+    // Page<Goods> findGoodsByUser(@Param("userId") Long userId);
+
+
+//    List<Goods> findAllByLocationIdAndIsDeletedFalseOrderByGoodsIdDesc(Long locationId);
+
+
 }
