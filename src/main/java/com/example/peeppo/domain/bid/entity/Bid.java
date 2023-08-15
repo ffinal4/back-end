@@ -3,6 +3,7 @@ package com.example.peeppo.domain.bid.entity;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.user.entity.User;
+import com.example.peeppo.global.utils.Timestamped;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,7 @@ import static lombok.AccessLevel.PROTECTED;
 @Entity
 @Getter
 @NoArgsConstructor(access = PROTECTED)
-public class Bid {
+public class Bid extends Timestamped {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

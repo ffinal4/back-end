@@ -1,17 +1,11 @@
 package com.example.peeppo.domain.auction.controller;
 
 
-import com.amazonaws.Response;
 import com.example.peeppo.domain.auction.dto.AuctionListResponseDto;
 import com.example.peeppo.domain.auction.dto.AuctionRequestDto;
 import com.example.peeppo.domain.auction.dto.AuctionResponseDto;
 import com.example.peeppo.domain.auction.dto.TestListResponseDto;
-import com.example.peeppo.domain.auction.entity.Auction;
-import com.example.peeppo.domain.auction.entity.AuctionList;
 import com.example.peeppo.domain.auction.service.AuctionService;
-import com.example.peeppo.domain.bid.dto.BidListResponseDto;
-import com.example.peeppo.domain.user.dto.ResponseDto;
-import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import com.example.peeppo.global.utils.ResponseUtils;
@@ -21,8 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 import static com.example.peeppo.global.stringCode.SuccessCodeEnum.AUCTION_DELETE_SUCCESS;
 import static com.example.peeppo.global.stringCode.SuccessCodeEnum.AUCTION_END_SUCCESS;
