@@ -17,5 +17,6 @@ public class MyPageResponseDto {
         this.nickname = user.getNickname();
         this.email = user.getEmail();
         this.password = user.getPassword();
+        this.location = user.getLocation();
     }
 }

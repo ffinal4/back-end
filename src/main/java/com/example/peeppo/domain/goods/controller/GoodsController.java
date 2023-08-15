@@ -2,9 +2,9 @@ package com.example.peeppo.domain.goods.controller;
 
 import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.service.GoodsService;
-import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.responseDto.ApiResponse;
-import com.example.peeppo.global.responseDto.GoodsResponseDto;
+import com.example.peeppo.global.security.UserDetailsImpl;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,7 +22,8 @@ public class GoodsController {
     @PostMapping
     public ApiResponse<GoodsResponseDto> goodsCreate(@RequestPart(value = "data") GoodsRequestDto goodsRequestDto,
                                                      @RequestPart(value = "images") List<MultipartFile> images,
-                                                     @RequestPart(value = "wanted")WantedRequestDto wantedRequestDto) {
+                                                     @RequestPart(value = "wanted")WantedRequestDto wantedRequestDto,
+                                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         return goodsService.goodsCreate(goodsRequestDto, images, wantedRequestDto, userDetails.getUser());
     }
@@ -67,5 +68,10 @@ public class GoodsController {
     @DeleteMapping("/{goodsId}")
     public ApiResponse<DeleteResponseDto> deleteGoods(@PathVariable Long goodsId) {
         return goodsService.deleteGoods(goodsId);
+    }
+
+    @GetMapping("/recent")
+    public List<GoodsRecentDto> recentGoods(HttpServletResponse response){
+        return goodsService.recentGoods(response);
     }
 }

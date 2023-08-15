@@ -2,6 +2,7 @@ package com.example.peeppo.domain.goods.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.example.peeppo.domain.bid.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.entity.WantedGoods;
@@ -13,8 +14,9 @@ import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
-import com.example.peeppo.global.responseDto.GoodsResponseDto;
 import com.example.peeppo.global.responseDto.PageResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -25,8 +27,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.UriUtils;
 
+import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,18 +45,22 @@ public class GoodsService {
     private final AmazonS3 amazonS3;
     private final String bucket;
     private final UserRepository userRepository;
+    private final RatingHelper ratingHelper;
+    private static final String RECENT_GOODS = "goods";
+    private static final int MAX_RECENT_GOODS = 4;
+    //private List<Long> goodsRecent = new ArrayList<>();
+    private List<String> goodsRecent = new ArrayList<>();
 
     @Transactional
     public ApiResponse<GoodsResponseDto> goodsCreate(GoodsRequestDto goodsRequestDto,
                                                      List<MultipartFile> images,
-                                                     WantedRequestDto wantedRequestDto, User user) {
+                                                     WantedRequestDto wantedRequestDto,
+                                                     User user) {
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
-        Goods goods = new Goods(goodsRequestDto, wantedGoods, user);
+        Goods goods = new Goods(goodsRequestDto, wantedGoods, user, GoodsStatus.ONSALE);
         goodsRepository.save(goods);
 
         wantedGoodsRepository.save(wantedGoods);
-
-        ratingHelper.createRating(sellerPriceDto.getSellerPrice());
 
         List<String> imageUuids = imageHelper
                 .saveImagesToS3AndRepository(images, amazonS3, bucket, goods)
@@ -59,16 +68,17 @@ public class GoodsService {
                 .map(Image::getImageUrl)
                 .collect(Collectors.toList());
 
+//        ratingHelper.createRating(sellerPriceRequestDto.getSellerPrice(), goods, image);
+
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUuids, wantedGoods, user), null);
     }
 
     @CachePut(key = "#page", value = "allGoods")
     @Cacheable(key = "#page", value = "allGoods", condition = "#page == 0", cacheManager = "cacheManager")
     public Page<GoodsListResponseDto> allGoods(int page, int size, String sortBy, boolean isAsc) {
-        // 페이징 되어있는 걸 쿼리DSL 사용
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
-        Page<Goods> goodsPage = goodsRepository.findAllByIsDeletedFalse(pageable);
+        Page<Goods> goodsPage = goodsRepository.findAllByDeletedIsFalse(pageable);
         List<GoodsListResponseDto> goodsResponseList = new ArrayList<>();
 
         for (Goods goods : goodsPage.getContent()) {
@@ -99,9 +109,14 @@ public class GoodsService {
         List<String> imageUrls = images.stream()
                 .map(Image::getImageUrl)
                 .collect(Collectors.toList());
+        if(goodsRecent.size() >= MAX_RECENT_GOODS) {
+            goodsRecent.remove(0);
+        }
+        goodsRecent.add(Long.toString(goods.getGoodsId())); // 조회시에 리스트에 추가 !
 
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods), null);
     }
+
     public User findUserId(Long userId){
         return userRepository.findById(userId).orElse(null);
     }
@@ -109,7 +124,7 @@ public class GoodsService {
     public ApiResponse<List<GoodsListResponseDto>> getMyGoods(Long userId, int page, int size, String sortBy, boolean isAsc) {
         Pageable pageable = paging(page, size, sortBy, isAsc);
         User user = findUserId(userId);
-        Page<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalse(user, pageable);
+        Page<Goods> goodsList = goodsRepository.findAllByUserAndDeletedIsFalse(user, pageable);
         List<GoodsListResponseDto> myGoods = new ArrayList<>();
         for (Goods goods : goodsList) {
             Image firstImage = imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goods.getGoodsId());
@@ -202,4 +217,22 @@ public class GoodsService {
         // pageable 생성
         return PageRequest.of(page, size, sort);
     }
+
+
+    public List<GoodsRecentDto> recentGoods(HttpServletResponse response) {
+        List<GoodsRecentDto> goodsRecentDtos = new ArrayList<>();
+        // 조회하면 리스트에 id, productname add 해주기
+
+        Cookie goodsCookie = new Cookie(RECENT_GOODS, UriUtils.encode(String.join(",", goodsRecent), "UTF-8")); // 문자열만 저장 가능
+        goodsCookie.setMaxAge(24 * 60 * 60); // 하루동안 저장
+        response.addCookie(goodsCookie); // 전송
+
+        for(String id : goodsRecent){
+            Goods goods =  goodsRepository.findById(Long.parseLong(id)).orElse(null);
+            GoodsRecentDto goodsRecentDto = new GoodsRecentDto(goods);
+            goodsRecentDtos.add(goodsRecentDto);
+        }
+        return goodsRecentDtos;
+    }
+
 }

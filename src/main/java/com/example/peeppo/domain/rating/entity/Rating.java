@@ -1,5 +1,8 @@
 package com.example.peeppo.domain.rating.entity;
 
+import com.example.peeppo.domain.goods.entity.Goods;
+import com.example.peeppo.domain.image.entity.Image;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,22 +16,15 @@ public class Rating {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long ratingId;
-    private Long sellerPrice;
-    private Long sumRatingPrice;
-    private Long avgRatingPrice;
-    private Long ratingCount;
+    private Long expectedPrice;
 
-    public Rating(Long sellerPrice){
-        this.sellerPrice = sellerPrice;
-        this.sumRatingPrice = 0L;
-        this.avgRatingPrice = 0L;
-        this.ratingCount = 0L;
+    @ManyToOne
+    @JoinColumn(name = "rating_goods_id", nullable = false)
+    @JsonBackReference
+    private RatingGoods ratingGoods;
 
+    public Rating(Long expectedPrice, RatingGoods ratingGoods) {
+        this.expectedPrice = expectedPrice;
+        this.ratingGoods = ratingGoods;
     }
-
-//    public Rating(Long ratingPrice) {
-//        this.ratingCount += 1;
-//        this.sumRatingPrice += ratingPrice;
-//        this.avgRatingPrice = sumRatingPrice/ratingCount;
-//    }
 }
