@@ -96,7 +96,7 @@ public class AuctionService {
 
     // 경매 입찰 수
     public Long findBidCount(Long id){
-        return bidRepository.countByAuction_AuctionId(id);
+        return bidRepository.countByAuctionAuctionId(id);
     }
 
     // 경매 전체 조회
