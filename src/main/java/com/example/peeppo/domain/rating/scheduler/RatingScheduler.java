@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static com.example.peeppo.domain.bid.enums.GoodsStatus.*;
+
 @Component
 @RequiredArgsConstructor
 public class RatingScheduler {
@@ -20,7 +22,7 @@ public class RatingScheduler {
     private final static int TRANSACTION_CHUNK_SIZE = 50;
 
     @Scheduled(cron = "0 0 6 * * SUN") // 매주 일요일 새벽 6시에 실행
-    public void resetPrices()  {
+    public void resetPrices() {
         long cursor = 0L;
         long goodsListSize = 0;
 
@@ -30,8 +32,11 @@ public class RatingScheduler {
             goodsListSize = goodsList.size();
 
             for (Goods goods : goodsList) {
-                ratingHelper.resetGoodsAvgPrice(goods);
-                cursor = goods.getGoodsId();
+                if (goods.getGoodsStatus().equals(CANCEL) ||
+                        goods.getGoodsStatus().equals(ONSALE)) {
+                    ratingHelper.resetGoodsAvgPrice(goods);
+                    cursor = goods.getGoodsId();
+                }
             }
 
         } while (goodsListSize == TRANSACTION_CHUNK_SIZE);
