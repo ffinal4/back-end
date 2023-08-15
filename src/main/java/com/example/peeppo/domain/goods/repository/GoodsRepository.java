@@ -29,6 +29,7 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
             "inner join user u on u.user_id = urr.user_id " +
             "where u.user_id = :#{#targetUser.userId}) " +
             "and g1.user_id <> :#{#targetUser.userId} " +
+            "and g1.is_deleted = false " +
             "order by rand() limit 1", nativeQuery = true)
     Goods findRandomGoods(@Param("targetUser") User user);
 

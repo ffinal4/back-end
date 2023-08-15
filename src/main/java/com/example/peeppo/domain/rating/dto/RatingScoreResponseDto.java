@@ -10,5 +10,9 @@ import lombok.NoArgsConstructor;
 public class RatingScoreResponseDto {
 
     private Long goodsId;
+    private Long currentPoint;
     private Long score;
+    private Long ratingPrice;
+    private Long sellerPrice;
+
 }
