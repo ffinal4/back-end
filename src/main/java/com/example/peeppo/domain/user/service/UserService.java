@@ -52,8 +52,8 @@ public class UserService {
     }
 
     //닉네임 중복체크
-    public ResponseEntity<CheckResponseDto> checkValidateNickname(SignupRequestDto signupRequestDto) {
-        String nickname = signupRequestDto.getNickname();
+    public ResponseEntity<CheckResponseDto> checkValidateNickname(ValidateRequestDto validateRequestDto) {
+        String nickname = validateRequestDto.getNickname();
         boolean validateDuplicateNickname = isDuplicatedNickname(nickname);
 
         if (!validateDuplicateNickname) {
@@ -114,11 +114,16 @@ public class UserService {
         return new ResponseDto("개인정보가 수정되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
-    public ResponseEntity<ResponseDto> deletemypage(Long userId) {
+    public ResponseEntity<ResponseDto> deletemypage(Long userId, User user1) throws IllegalAccessException {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
-        userRepository.deleteById(userId);
+        if(user.getUserId().equals(user1.getUserId())) {
+            userRepository.deleteById(userId);
+        }
+        else {
+            throw new IllegalAccessException();
+        }
 
         ResponseDto response = new ResponseDto("탈퇴 완료", HttpStatus.OK.value(), "OK");
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);

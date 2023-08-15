@@ -67,8 +67,9 @@ public class GoodsController {
     }
 
     @DeleteMapping("/{goodsId}")
-    public ApiResponse<DeleteResponseDto> deleteGoods(@PathVariable Long goodsId) {
-        return goodsService.deleteGoods(goodsId);
+    public ApiResponse<DeleteResponseDto> deleteGoods(@PathVariable Long goodsId,
+                                                      @AuthenticationPrincipal UserDetailsImpl userDetails) throws IllegalAccessException {
+        return goodsService.deleteGoods(goodsId, userDetails.getUser());
     }
 
     @GetMapping("/recent")
