@@ -57,7 +57,6 @@ public class User {
 
     public void upload(MyPageRequestDto myPageRequestDto, String userImg, String encodedPassword) {
         this.nickname = myPageRequestDto.getNickname();
-        this.password = myPageRequestDto.getPassword();
         this.location = myPageRequestDto.getLocation();
         this.userImg = userImg;
         this.password = encodedPassword;
