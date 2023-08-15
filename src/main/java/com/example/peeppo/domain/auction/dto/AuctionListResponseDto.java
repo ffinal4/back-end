@@ -13,6 +13,8 @@ public class AuctionListResponseDto {
 
     private Long auctionId;
     private String nickname;
+
+    private Boolean deleteStatus;
     private LocalDateTime auctionEndTime;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
@@ -22,13 +24,13 @@ public class AuctionListResponseDto {
     private String title;
     private String content;
     private String image;
-
     private TimeRemaining timeRemaining;
 
 
 
     public AuctionListResponseDto(Auction auction, TimeRemaining timeRemaining, Long bidCount) {
         this.auctionId = auction.getAuctionId();
+        this.deleteStatus = auction.getIsDeleted();
         this.nickname = auction.getUser().getNickname();
         this.auctionEndTime = auction.getAuctionEndTime();
         this.createdAt = auction.getCreatedAt();

@@ -28,13 +28,4 @@ public enum Category {
         this.koreanValue = koreanValue;
     }
 
-    public static String getKoreanValueByEnglish(String englishValue) {
-        for (Category category : Category.values()) {
-            if (category.name().equalsIgnoreCase(englishValue)) {
-                return category.getKoreanValue();
-            }
-        }
-        throw new IllegalStateException("카테고리가 올바르지 않습니다");
-    }
-
 }

@@ -13,13 +13,17 @@ import com.example.peeppo.domain.user.helper.UserHelper;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RatingService {
@@ -27,28 +31,12 @@ public class RatingService {
     private final UserRatingRelationRepository userRatingRelationRepository;
     private final UserHelper userHelper;
 
-    public ApiResponse<List<RatingResponseDto>> randomRatingList(Long userId, UserDetailsImpl userDetails) {
-        userCheck(userId, userDetails.getUser().getUserId());
-
-        List<Rating> ratingList = ratingRepository.getRandomRatingsFromRatingsWithCountLessThanOrEqual7(userId);
-
-        List<RatingResponseDto> ratingResponseDtoList = new ArrayList<>();
-        for (Rating rating : ratingList) {
-            Goods goods = rating.getGoods();
-            Image image = rating.getImage();
-            RatingResponseDto responseDto = new RatingResponseDto(goods, image.getImageUrl(), rating.getRatingCount());
-
-            ratingResponseDtoList.add(responseDto);
-        }
-        return new ApiResponse<>(true, ratingResponseDtoList, null);
-    }
-
     @Transactional
     public ApiResponse<RatingResponseDto> randomRatingGoods(Long userId, UserDetailsImpl userDetails) {
         userCheck(userId, userDetails.getUser().getUserId());
 
         Set<Long> UserRatedGoods = userRatingRelationRepository.findUserCheckedGoodsByUserId(userId);
-        Rating rating = ratingRepository.findRandomRatingWithCountLessThanOrEqual7(UserRatedGoods, userId, 0);
+        Rating rating = ratingRepository.findRandomRatingWithCountLessThanOrEqual3(UserRatedGoods);
 
         User user = userHelper.getUser(userId);
         Goods goods = rating.getGoods();
@@ -56,7 +44,10 @@ public class RatingService {
 
         userRatingRelationRepository.save(new UserRatingRelation(user, rating));
 
-        RatingResponseDto ratingResponseDto = new RatingResponseDto(goods, image.getImageUrl(), 0L);
+        RatingResponseDto ratingResponseDto = new RatingResponseDto(goods,
+                image.getImageUrl(),
+                rating.getSellerPrice(),
+                0L);
 
         return new ApiResponse<>(true, ratingResponseDto, null);
     }
@@ -68,52 +59,91 @@ public class RatingService {
 
         userCheck(userId, userDetails.getUser().getUserId());
 
+        User user = userHelper.getUser(userId);
+
         // 이전 문제 가격 반영
-        calculate(ratingRequestDto, userId);
+        calculate(ratingRequestDto, user);
 
         // 이후 문제 생성
         Set<Long> UserRatedGoods = userRatingRelationRepository.findUserCheckedGoodsByUserId(userId);
-        Rating rating = ratingRepository.findRandomRatingWithCountLessThanOrEqual7(UserRatedGoods, userId, 0);
+        Rating rating = ratingRepository.findRandomRatingWithCountLessThanOrEqual3(UserRatedGoods);
 
-        User user = userHelper.getUser(userId);
-        UserRatingRelation userRatingRelation = new UserRatingRelation(user, rating);
-        userRatingRelationRepository.save(userRatingRelation);
+        if (rating == null) {
+            throw new IllegalStateException("평가 가능한 게시물이 없습니다.");
+        }
 
         Goods goods = rating.getGoods();
         String imageUrl = rating.getImage().getImageUrl();
-        Long ratingCount = ratingRequestDto.getRatingCount()+1;
-        RatingResponseDto ratingResponseDto = new RatingResponseDto(goods, imageUrl, ratingCount);
+        Long ratingCount = ratingRequestDto.getRatingCount() + 1;
+        RatingResponseDto ratingResponseDto = new RatingResponseDto(goods,
+                imageUrl,
+                rating.getSellerPrice(),
+                ratingCount);
         return new ApiResponse<>(true, ratingResponseDto, null);
     }
 
 
     @Transactional
-    public void calculate(RatingRequestDto ratingRequestDto, Long userId) {
-        Long ratingCount = ratingRequestDto.getRatingCount();
+    public void calculate(RatingRequestDto ratingRequestDto, User user) {
+        Long ratingCount = ratingRequestDto.getRatingCount() + 1;
         Long goodsId = ratingRequestDto.getGoodsId();
         Long ratingPrice = ratingRequestDto.getRatingPrice();
         Rating rating = ratingRepository.findByGoodsGoodsId(goodsId);
+
+        userRatingRelationRepository.save(new UserRatingRelation(user, rating));
+
         rating.update(ratingPrice);
 
         Long sellerPrice = rating.getSellerPrice();
-        long lowerBound = (long) (sellerPrice * 0.9);
-        long upperBound = (long) (sellerPrice * 1.1);
+        Long lowerBound;
+        Long upperBound;
+        if (sellerPrice > 10000) {
+            lowerBound = Math.round((sellerPrice * 0.9) / 1000.0) * 1000;
+            upperBound = Math.round((sellerPrice * 1.1) / 1000.0) * 1000;
+        } else {
+            lowerBound = sellerPrice - 1000;
+            upperBound = sellerPrice + 1000;
+        }
+        log.info("Lower{}", lowerBound);
+        log.info("Upper{}", upperBound);
         if (ratingPrice >= lowerBound && ratingPrice <= upperBound) {   // 입력한 금액이 +- 10% 이내일 경우
             if (sellerPrice == ratingPrice) {
-                // 입력한 금액이 정확히 일치할 경우 기능 추가구현
+                userHelper.userRatingCheck(user, ratingCount, 10L);
+            } else {
+                userHelper.userRatingCheck(user, ratingCount, 5L);
             }
-            User user = userHelper.getUser(userId);
-            userHelper.userRatingCheck(user, ratingCount+1);
-        }
-        else{
-            throw new IllegalStateException("10%이내의 값이 아닙니다.");
+        } else {
+            userHelper.userRatingCheck(user, ratingCount, 2L);
+            throw new IllegalStateException("10%내외의 값이 아닙니다.");
         }
     }
 
-    public void userCheck(Long userId, Long userImplId){
-        if(!(userId == userImplId)){
+    // 스케줄링
+    @Transactional
+    public void resetPrices() {
+        LocalDateTime now = LocalDateTime.now();
+        DayOfWeek dayOfWeek = now.getDayOfWeek();
+        LocalTime time = now.toLocalTime();
+
+        if (dayOfWeek == DayOfWeek.SUNDAY && time.isBefore(LocalTime.of(6, 0))) {
+            List<Rating> ratingsToUpdate = ratingRepository.findByRatingCountGreaterThanEqual(3L);
+
+            for (Rating rating : ratingsToUpdate) {
+                Long sumPrice = rating.getSumRatingPrice();
+                Long ratingCount = rating.getRatingCount();
+                boolean auctionCheck = rating.getGoods().isAuctioned();
+
+                if (ratingCount > 3 && auctionCheck == false) {
+                    Long newAvgPrice = sumPrice / ratingCount;
+                    rating.setAvgRatingPrice(newAvgPrice);
+                }
+            }
+        }
+    }
+
+    public void userCheck(Long userId, Long userImplId) {
+        if (!(userId == userImplId)) {
             throw new IllegalStateException("유저가 userIdUrl 을 임의로 조작");
         }
     }
-
 }

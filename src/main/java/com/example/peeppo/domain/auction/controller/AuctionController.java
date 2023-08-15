@@ -54,15 +54,14 @@ public class AuctionController {
     public ApiResponse<AuctionResponseDto> getAuction(@PathVariable("auctionId") Long auctionId) {
         return ResponseUtils.ok(auctionService.findAuctionById(auctionId));
     }
-
-    // 경매 별 입찰 물품
-    // @GetMapping("/{auctionId}/pick/{bidId}")
-
+  
     // 경매 정상 종료 -> 우선 입찰 물품 전체 보여주기 -> 입찰 물품 선택
     @DeleteMapping("/{auctionId}/pick/{bidId}")
     public ApiResponse<?> endAuction(@PathVariable("auctionId") Long auctionId,
-                                     @PathVariable("bidId") Long bidId) {
-        auctionService.endAuction(auctionId, bidId);
+                                     @PathVariable("bidId") Long bidId,
+                                     @AuthenticationPrincipal UserDetailsImpl userDetails){
+        auctionService.endAuction(auctionId, bidId, userDetails.getUser());
+      
         return ResponseUtils.ok(ResponseUtils.okWithMessage(AUCTION_END_SUCCESS));
     }
 

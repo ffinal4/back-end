@@ -42,6 +42,11 @@ public class Rating {
     public void update(Long ratingPrice){
         this.sumRatingPrice += ratingPrice;
         this.ratingCount += 1;
-        this.avgRatingPrice = sumRatingPrice / this.ratingCount;
+        // locking 사용할 것
+        if(this.ratingCount <= 3){
+            this.avgRatingPrice = sumRatingPrice / this.ratingCount;
+        }
+
+
     }
 }
