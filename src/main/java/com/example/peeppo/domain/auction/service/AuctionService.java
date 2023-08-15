@@ -46,9 +46,16 @@ public class AuctionService {
     private final BidRepository bidRepository;
 
 
+    @Transactional
     public AuctionResponseDto createAuction(Long goodsId, AuctionRequestDto auctionRequestDto, User user) {
         checkGoodsUsername(goodsId, user);
         Goods getGoods = findGoodsId(goodsId);
+        if(!(getGoods.getGoodsStatus()==ONSALE)){
+            new IllegalArgumentException("해당 물건으로는 경매를 등록할 수 없습니다");
+        }
+        if(!(getGoods.isDeleted())){
+            new IllegalArgumentException("해당 물건은 삭제된 물건입니다.");
+        }
         GoodsResponseDto goodsResponseDto = new GoodsResponseDto(getGoods);
         LocalDateTime auctionEndTime = calAuctionEndTime(auctionRequestDto.getEndTime()); // 마감기한 계산
         log.info("{}", auctionEndTime);
@@ -143,12 +150,9 @@ public class AuctionService {
     @Transactional
     public void deleteAuction(Long auctionId, User user) {
         Auction auction = findAuctionId(auctionId);
-
         auction.getGoods().changeStatus(ONSALE);
         auction.changeAuctionStatus(CANCEL);
-
         List<Bid> bidList = bidRepository.findBidByAuctionAuctionId(auctionId);
-
         for (Bid bid : bidList) {
             bid.changeBidStatus(FAIL);
             bid.getGoods().changeStatus(ONSALE);
