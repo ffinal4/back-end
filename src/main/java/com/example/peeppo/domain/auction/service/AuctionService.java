@@ -2,16 +2,13 @@ package com.example.peeppo.domain.auction.service;
 
 import com.example.peeppo.domain.auction.dto.*;
 import com.example.peeppo.domain.auction.entity.Auction;
-import com.example.peeppo.domain.auction.entity.AuctionList;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
-import com.example.peeppo.domain.bid.dto.BidListResponseDto;
 import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.bid.enums.GoodsStatus;
 import com.example.peeppo.domain.bid.repository.BidRepository;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
-import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.responseDto.PageResponse;
 import lombok.RequiredArgsConstructor;
@@ -182,12 +179,12 @@ public class AuctionService {
 
         PageResponse response = new PageResponse<>(auctionResponseDtoList, pageable, myAuctionPage.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-  
-    public void checkGoodsUsername(Long id, User user){
-        Goods goods = findGoodsId(id);
-        if(!(goods.getUser().getUserId().equals(user.getUserId()))){
-            throw new IllegalArgumentException("경매 취소는 작성자만 삭제가 가능합니다");
-        }
     }
 
+    public void checkGoodsUsername(Long id, User user) {
+        Goods goods = findGoodsId(id);
+        if (!(goods.getUser().getUserId().equals(user.getUserId()))) {
+            throw new IllegalArgumentException("경매 생성은 물품 작성자만 가능합니다");
+        }
+    }
 }

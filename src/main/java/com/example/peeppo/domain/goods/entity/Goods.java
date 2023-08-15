@@ -54,13 +54,12 @@ public class Goods extends Timestamped {
     @OneToMany(mappedBy = "goods")
     private List<Image> image;
 
-
-    public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods, User user) {
-
     @Enumerated(EnumType.STRING)
     private GoodsStatus goodsStatus;
 
-    public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods) {
+
+
+    public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods){
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.location = requestDto.getLocation();
@@ -93,3 +92,5 @@ public class Goods extends Timestamped {
         this.goodsStatus = goodsStatus;
     }
 }
+
+
