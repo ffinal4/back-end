@@ -2,7 +2,7 @@ package com.example.peeppo.domain.goods.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
 import com.amazonaws.services.s3.AmazonS3;
-import com.example.peeppo.domain.bid.enums.GoodsStatus;
+import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.entity.WantedGoods;
@@ -30,9 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.util.UriUtils;
 
-import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -163,10 +161,16 @@ public class GoodsService {
     }
 
     @Transactional
-    public ApiResponse<DeleteResponseDto> deleteGoods(Long goodsId) {
+    public ApiResponse<DeleteResponseDto> deleteGoods(Long goodsId, User user) throws IllegalAccessException {
         Goods goods = findGoods(goodsId);
-        goods.setDeleted(true);
-        goodsRepository.save(goods);
+
+        if(user.getUserId() == goods.getUser().getUserId()) {
+            goods.setDeleted(true);
+            goodsRepository.save(goods);
+        }
+        else {
+            throw new IllegalAccessException();
+        }
 
         return new ApiResponse<>(true, new DeleteResponseDto("삭제되었습니다"), null);
     }

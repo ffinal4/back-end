@@ -28,6 +28,8 @@ public class QBid extends EntityPathBase<Bid> {
 
     public final NumberPath<Long> bidId = createNumber("bidId", Long.class);
 
+    public final EnumPath<com.example.peeppo.domain.bid.enums.BidStatus> bidStatus = createEnum("bidStatus", com.example.peeppo.domain.bid.enums.BidStatus.class);
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 

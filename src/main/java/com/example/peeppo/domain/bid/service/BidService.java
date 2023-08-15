@@ -7,7 +7,7 @@ import com.example.peeppo.domain.bid.dto.BidListResponseDto;
 import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
 import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.bid.entity.Choice;
-import com.example.peeppo.domain.bid.enums.GoodsStatus;
+import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.bid.repository.BidRepository;
 import com.example.peeppo.domain.bid.repository.ChoiceBidRepository;
 import com.example.peeppo.domain.bid.repository.QueryRepository;
@@ -57,7 +57,7 @@ public class BidService {
                     String goodsImg = String.valueOf(imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goodsId));
 
                     if (goods.isDeleted()) {
-                        continue;                           //여기도 고민
+                        throw new IllegalAccessException();        //여기도 고민
                     }
                     if (!goods.getUser().getUserId().equals(user.getUserId())) {
                         throw new IllegalAccessException();
@@ -85,7 +85,6 @@ public class BidService {
 
         ResponseDto response = new ResponseDto("입찰이 완료되었습니다.", HttpStatus.OK.value(), "OK");
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-//        }
     }
 
     public ResponseEntity<Page<BidListResponseDto>> BidList(Long auctionId, int page, int size, String sortBy, boolean isAsc) {

@@ -4,7 +4,7 @@ import com.example.peeppo.domain.auction.dto.*;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.bid.entity.Bid;
-import com.example.peeppo.domain.bid.enums.GoodsStatus;
+import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.bid.repository.BidRepository;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
@@ -28,8 +28,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.peeppo.domain.bid.enums.GoodsStatus.ONSALE;
-import static com.example.peeppo.domain.bid.enums.GoodsStatus.SOLDOUT;
+import static com.example.peeppo.domain.auction.enums.AuctionStatus.CANCEL;
+import static com.example.peeppo.domain.auction.enums.AuctionStatus.REQUEST;
+import static com.example.peeppo.domain.bid.enums.BidStatus.FAIL;
+import static com.example.peeppo.domain.bid.enums.BidStatus.SUCCESS;
+import static com.example.peeppo.domain.goods.enums.GoodsStatus.ONSALE;
+import static com.example.peeppo.domain.goods.enums.GoodsStatus.SOLDOUT;
 
 
 @Slf4j
@@ -139,8 +143,18 @@ public class AuctionService {
     @Transactional
     public void deleteAuction(Long auctionId, User user) {
         Auction auction = findAuctionId(auctionId);
-        checkUsername(auctionId, user);
+
         auction.getGoods().changeStatus(ONSALE);
+        auction.changeAuctionStatus(CANCEL);
+
+        List<Bid> bidList = bidRepository.findBidByAuctionAuctionId(auctionId);
+
+        for (Bid bid : bidList) {
+            bid.changeBidStatus(FAIL);
+            bid.getGoods().changeStatus(ONSALE);
+        }
+
+        checkUsername(auctionId, user);
         auctionRepository.delete(auction);
     }
 
@@ -148,9 +162,12 @@ public class AuctionService {
     @Transactional
     public void endAuction(Long auctionId, Long bidId, User user) {
         Auction auction = findAuctionId(auctionId);
-        //Bid bid = findBidId(bidId);
-        //bid.getGoods().changeStatus(SOLDOUT);
+
         checkUsername(auctionId, user);
+        Bid bid = findBidId(bidId);
+        bid.changeBidStatus(SUCCESS);
+
+        auction.changeAuctionStatus(REQUEST);
         auction.getGoods().changeStatus(SOLDOUT);
         auction.changeDeleteStatus(true);
     }

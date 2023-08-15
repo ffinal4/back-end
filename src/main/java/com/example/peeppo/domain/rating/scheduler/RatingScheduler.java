@@ -3,15 +3,14 @@ package com.example.peeppo.domain.rating.scheduler;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.rating.helper.RatingHelper;
-import com.example.peeppo.domain.rating.service.RatingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.example.peeppo.domain.bid.enums.GoodsStatus.*;
+import static com.example.peeppo.domain.auction.enums.AuctionStatus.CANCEL;
+import static com.example.peeppo.domain.goods.enums.GoodsStatus.ONSALE;
 
 @Component
 @RequiredArgsConstructor
