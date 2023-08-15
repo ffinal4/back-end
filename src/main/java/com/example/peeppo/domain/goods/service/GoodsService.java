@@ -163,7 +163,6 @@ public class GoodsService {
     @Transactional
     public ApiResponse<DeleteResponseDto> deleteGoods(Long goodsId, User user) throws IllegalAccessException {
         Goods goods = findGoods(goodsId);
-
         if(user.getUserId() == goods.getUser().getUserId()) {
             goods.setDeleted(true);
             goodsRepository.save(goods);
@@ -171,7 +170,6 @@ public class GoodsService {
         else {
             throw new IllegalAccessException();
         }
-
         return new ApiResponse<>(true, new DeleteResponseDto("삭제되었습니다"), null);
     }
 
