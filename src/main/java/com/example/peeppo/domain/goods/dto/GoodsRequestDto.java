@@ -15,4 +15,6 @@ public class GoodsRequestDto {
     private String location;
     private String goodsCondition;
     private String tradeType;
+    private Long sellerPrice;
+
 }
