@@ -22,15 +22,23 @@ public class QBid extends EntityPathBase<Bid> {
 
     public static final QBid bid = new QBid("bid");
 
+    public final com.example.peeppo.global.utils.QTimestamped _super = new com.example.peeppo.global.utils.QTimestamped(this);
+
     public final com.example.peeppo.domain.auction.entity.QAuction auction;
 
     public final NumberPath<Long> bidId = createNumber("bidId", Long.class);
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
     public final com.example.peeppo.domain.goods.entity.QGoods goods;
 
     public final StringPath goodsImg = createString("goodsImg");
 
     public final StringPath location = createString("location");
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
     public final StringPath title = createString("title");
 
