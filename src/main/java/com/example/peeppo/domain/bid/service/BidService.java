@@ -52,7 +52,7 @@ public class BidService {
         List<Bid> List = new ArrayList<>();
 
         //경매 진행 여부
-        if (auction.getGoods().getGoodsStatus().equals(GoodsStatus.ONAUCTION.getStatus())) {
+        if (auction.getGoods().getGoodsStatus().equals(GoodsStatus.ONAUCTION)) {
             if (!auction.getUser().getUserId().equals(user.getUserId())) {
                 for (Long goodsId : bidGoodsListRequestDto.getGoodsId()) {
                     Goods goods = getGoods(goodsId);
@@ -61,16 +61,16 @@ public class BidService {
                     if (goods.isDeleted()) {
                         continue;                           //여기도 고민
                     }
-                    if (!goods.getUser().equals(user)) {
+                    if (!goods.getUser().getUserId().equals(user.getUserId())) {
                         throw new IllegalAccessException();
                     }
 
-                    if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE.getStatus())) {
+                    if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {
                         Rating rating = ratingRepository.findByGoodsGoodsId(goodsId);
                         //시작가보다 낮을 경우
-                        if (auction.getLowPrice() > rating.getAvgRatingPrice()) {
-                            throw new IllegalAccessException();
-                        }
+//                        if (auction.getLowPrice() > rating.getAvgRatingPrice()) {   //평균가 이상함
+//                            throw new IllegalAccessException();
+//                        }
                         List.add(new Bid(user, auction, goods, goodsImg));
                         goods.changeStatus(GoodsStatus.BIDDING);
                     } else {
