@@ -255,5 +255,13 @@ public class GoodsService {
         return goodsRecentDtos;
     }
 
-
+    public List<GoodsResponseDto> getMyGoodsWithoutPagenation(User user) {
+        List<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalseAndGoodsStatus(user, GoodsStatus.ONSALE);
+        List<GoodsResponseDto> goodsResponseDtos = new ArrayList<>();
+        for(Goods goods : goodsList){
+            GoodsResponseDto goodsResponseDto = new GoodsResponseDto(goods);
+            goodsResponseDtos.add(goodsResponseDto);
+        }
+        return goodsResponseDtos;
+    }
 }
