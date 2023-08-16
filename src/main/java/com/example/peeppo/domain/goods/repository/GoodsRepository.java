@@ -51,5 +51,9 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
 
     Optional<Goods> findByGoodsId(Long goodsId);
 
+
+    @Query("SELECT g from Goods g ORDER BY g.createdAt desc ")
+    List<Goods> findTop8ByCreatedAt();
     List<Goods> findAllByUserAndIsDeletedFalseAndGoodsStatus(User user, GoodsStatus onsale);
+
 }
