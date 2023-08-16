@@ -1,6 +1,10 @@
 package com.example.peeppo.domain.auction.controller;
 
 
+import com.amazonaws.Response;
+import com.example.peeppo.domain.auction.dto.*;
+import com.example.peeppo.domain.auction.entity.Auction;
+import com.example.peeppo.domain.auction.entity.AuctionList;
 import com.example.peeppo.domain.auction.dto.AuctionListResponseDto;
 import com.example.peeppo.domain.auction.dto.AuctionRequestDto;
 import com.example.peeppo.domain.auction.dto.AuctionResponseDto;
@@ -9,6 +13,7 @@ import com.example.peeppo.domain.auction.service.AuctionService;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import com.example.peeppo.global.utils.ResponseUtils;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.data.domain.Page;
@@ -28,7 +33,7 @@ public class AuctionController {
 
     @PostMapping("/{goodsId}")
     public ApiResponse<AuctionResponseDto> createAuction(@PathVariable("goodsId") Long goodsId,
-                                                         @RequestBody AuctionRequestDto auctionRequestDto,
+                                                         @Valid @RequestBody AuctionRequestDto auctionRequestDto,
                                                          @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseUtils.ok(auctionService.createAuction(goodsId, auctionRequestDto, userDetails.getUser()));
     }
@@ -51,7 +56,7 @@ public class AuctionController {
     @DeleteMapping("/{auctionId}/pick/{bidId}")
     public ApiResponse<?> endAuction(@PathVariable("auctionId") Long auctionId,
                                      @PathVariable("bidId") Long bidId,
-                                     @AuthenticationPrincipal UserDetailsImpl userDetails){
+                                     @AuthenticationPrincipal UserDetailsImpl userDetails) throws IllegalAccessException {
         auctionService.endAuction(auctionId, bidId, userDetails.getUser());
 
         return ResponseUtils.ok(ResponseUtils.okWithMessage(AUCTION_END_SUCCESS));

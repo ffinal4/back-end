@@ -5,7 +5,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface BidRepository extends JpaRepository<Bid, Long> {
     Page<Bid> findAllByAuctionAuctionId(Long auctionId, Pageable pageable);
     Long countByAuctionAuctionId(Long auctionId);
+    List<Bid> findBidByAuctionAuctionId(Long auctionId);
 }

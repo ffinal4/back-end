@@ -1,4 +1,4 @@
-package com.example.peeppo.domain.bid.enums;
+package com.example.peeppo.domain.goods.enums;
 
 import lombok.Getter;
 
@@ -7,14 +7,7 @@ public enum GoodsStatus {
     ONSALE("on sale"),
     SOLDOUT("sold out"),
     ONAUCTION("on auction"),
-    BIDDING("bidding"),
-
-    REQUEST("trading request"),
-    CANCEL("trading cancel"),
-    DONE("trading complete"),
-
-    FAIL("bidding fail"),
-    SUCCESS("bidding success");
+    BIDDING("bidding");
 
     private final String status;
 

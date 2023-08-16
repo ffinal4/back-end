@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -31,9 +33,15 @@ public class RatingService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NullPointerException("존재하지 않는 유저입니다."));
 
-        Goods randomGoods = goodsRepository.findRandomGoods(user);
+        Goods randomGoods = goodsRepository.findRandomGoodsWithLowRatingCount(user);
+        if (randomGoods == null) {
+            randomGoods = goodsRepository.findRandomGoods(user);
+        }
+        if(randomGoods == null){
+            new NullPointerException("평가가능한 상품이 존재하지 않습니다.");
+        }
 
-        RatingResponseDto ratingResponseDto = new RatingResponseDto(randomGoods, user.getCurrentRatingCount());
+        RatingResponseDto ratingResponseDto = new RatingResponseDto(randomGoods);
 
         return new ApiResponse<>(true, ratingResponseDto, null);
     }
@@ -56,11 +64,16 @@ public class RatingService {
         }
 
         // 값 측정이 올바른지 확인 후 포인트 가산
-        long currentCount = ratingHelper
+        List<Long> currentPointAndCurrentCount = ratingHelper
                 .isCorrectedAndUpdateGoodsRating(user, goods, ratingRequestDto.getRatingPrice());
-
+        Long currentPoint = currentPointAndCurrentCount.get(0);
+        Long currentCount = currentPointAndCurrentCount.get(1);
         RatingScoreResponseDto responseDto = new RatingScoreResponseDto(
-                goods.getGoodsId(), currentCount);
+                goods.getGoodsId(),
+                currentPoint,
+                currentCount,
+                ratingRequestDto.getRatingPrice(),
+                goods.getSellerPrice());
         return new ApiResponse<>(true, responseDto, null);
     }
 }

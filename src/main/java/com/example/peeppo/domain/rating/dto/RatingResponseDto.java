@@ -16,10 +16,8 @@ public class RatingResponseDto {
     private String tradeType;
     private String content;
     private String imageUrl;
-    private Long score;
-    private Long sellerPrice;
 
-    public RatingResponseDto(Goods goods, Long score) {
+    public RatingResponseDto(Goods goods) {
         this.goodsId = goods.getGoodsId();
         this.title = goods.getTitle();
         this.category = goods.getCategory();
@@ -28,7 +26,5 @@ public class RatingResponseDto {
         this.tradeType = goods.getTradeType();
         this.content = goods.getContent();
         this.imageUrl = goods.getImage().get(0).getImageUrl();
-        this.sellerPrice = goods.getSellerPrice();
-        this.score = score;
     }
 }

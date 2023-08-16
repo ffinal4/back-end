@@ -8,5 +8,4 @@ import lombok.NoArgsConstructor;
 public class RatingRequestDto {
     private Long goodsId;
     private Long ratingPrice;
-    private Long score;
 }

@@ -13,7 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -24,11 +25,10 @@ public class RatingHelper {
     private final RatingGoodsRepository ratingGoodsRepository;
 
     @Transactional
-    public long isCorrectedAndUpdateGoodsRating(User user, Goods goods, Long expectedPrice) {
+    public List<Long> isCorrectedAndUpdateGoodsRating(User user, Goods goods, Long expectedPrice) {
 
-        // 물품의 평균 레이팅 값 반영
-//        RatingGoods ratingGoods = ratingGoodsRepository.findByGoods(goods)
-//                .orElse(new RatingGoods());
+        List<Long> currentPointAndCurrentCount = new ArrayList<>(2);
+
         RatingGoods ratingGoods = ratingGoodsRepository.findByGoodsForUpdate(goods.getGoodsId())
                 .orElse(new RatingGoods());
         ratingGoods.update(expectedPrice, goods);
@@ -41,12 +41,14 @@ public class RatingHelper {
         UserRatingRelation userRatingRelation = new UserRatingRelation(user, rating);
         userRatingRelationRepository.save(userRatingRelation);
 
-        // 포인트 가산
-        long score = calculate(expectedPrice, goods.getSellerPrice());
-        long currentCount = score != 2 ? user.getCurrentRatingCount() + 1 : 0;
+        Long currentPoint = calculate(expectedPrice, goods.getSellerPrice());
+        Long currentCount = currentPoint != 2 ? user.getCurrentRatingCount() + 1 : 0;
+        currentPointAndCurrentCount.add(currentPoint);
+        currentPointAndCurrentCount.add(currentCount);
 
-        user.countUpdate(currentCount, score);
-        return currentCount;
+
+        user.countUpdate(currentCount, currentPoint);
+        return currentPointAndCurrentCount;
     }
 
     public long calculate(Long expectedPrice, Long sellerPrice) {
@@ -62,11 +64,8 @@ public class RatingHelper {
             upperBound = sellerPrice + 1000;
         }
 
-        log.info("Lower{}", lowerBound);
-        log.info("Upper{}", upperBound);
-
         if (expectedPrice >= lowerBound && expectedPrice <= upperBound) {   // 입력한 금액이 +- 10% 이내일 경우
-            if (sellerPrice.equals(expectedPrice)) {
+            if (sellerPrice == expectedPrice) {
                 score = 10L;
             } else {
                 score = 5L;

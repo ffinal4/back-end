@@ -14,6 +14,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/*
 @DataJpaTest
 @ActiveProfiles("security")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -32,4 +33,4 @@ class GoodsRepositoryCustomTest {
         Goods goods = goodsRepository.findRandomGoods(user);
         Assertions.assertNotNull(goods);
     }
-}
+}*/

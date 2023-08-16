@@ -41,10 +41,10 @@ public class RatingGoods {
         this.ratingCount += 1;
         this.goods = goods;
 
-        if(this.ratingCount <= 3){
-            this.avgRatingPrice = (double) (sumRatingPrice / this.ratingCount);
+        if(this.ratingCount == 3){
+            this.avgRatingPrice = Math.round((sumRatingPrice / this.ratingCount) / 1000.0) * 1000.0;
         }
-        this.nextAvgRatingPrice = (double) sumRatingPrice / this.ratingCount;
+        this.nextAvgRatingPrice = Math.round((sumRatingPrice / this.ratingCount) / 1000.0) * 1000.0;
 
     }
 
