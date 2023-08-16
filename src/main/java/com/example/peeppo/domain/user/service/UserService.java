@@ -93,7 +93,9 @@ public class UserService {
     }
 
     //회원정보 페이지
-    public ResponseEntity<MyPageResponseDto> mypage(User user) {
+
+    public ResponseEntity<MyPageResponseDto> myPage(User user) {
+
         MyPageResponseDto myPageResponseDto = new MyPageResponseDto(user);
 
         return ResponseEntity.status(HttpStatus.OK.value()).body(myPageResponseDto);
