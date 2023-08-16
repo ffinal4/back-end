@@ -74,4 +74,11 @@ public class User {
         this.userPoint += userPoint;
     }
 
+    public void userPointAdd(Long userPoint) {
+        this.userPoint += userPoint;
+    }
+    public void userPointSubtract(Long userPoint){
+        this.userPoint -= userPoint;
+    }
+
 }

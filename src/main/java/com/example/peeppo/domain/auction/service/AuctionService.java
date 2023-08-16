@@ -2,17 +2,15 @@ package com.example.peeppo.domain.auction.service;
 
 import com.example.peeppo.domain.auction.dto.*;
 import com.example.peeppo.domain.auction.entity.Auction;
-import com.example.peeppo.domain.auction.entity.AuctionList;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
-import com.example.peeppo.domain.bid.dto.BidListResponseDto;
 import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.bid.enums.GoodsStatus;
 import com.example.peeppo.domain.bid.repository.BidRepository;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
-import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
+import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.PageResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,10 +41,16 @@ public class AuctionService {
     private final GoodsRepository goodsRepository;
     private final AuctionRepository auctionRepository;
     private final BidRepository bidRepository;
+    private final UserRepository userRepository;
 
-
+    @Transactional
     public AuctionResponseDto createAuction(Long goodsId, AuctionRequestDto auctionRequestDto, User user) {
         checkGoodsUsername(goodsId, user);
+        if (user.getUserPoint() < 10) {
+            new IllegalArgumentException("경매 등록에는 10p가 필요합니다. 현재" + user.getUserPoint() + "포인트를 가지고 있습니다.");
+        }
+        user.userPointSubtract(10L);
+
         Goods getGoods = findGoodsId(goodsId);
         GoodsResponseDto goodsResponseDto = new GoodsResponseDto(getGoods);
         LocalDateTime auctionEndTime = calAuctionEndTime(auctionRequestDto.getEndTime()); // 마감기한 계산
@@ -141,6 +145,12 @@ public class AuctionService {
     // 경매 삭제 (경매 입찰 취소)
     @Transactional
     public void deleteAuction(Long auctionId, User user) {
+        if (user.getUserPoint() < 10) {
+            new IllegalArgumentException("경매 취소에는 10p가 필요합니다. 현재" + user.getUserPoint() + "포인트를 가지고 있습니다.");
+        }
+
+        user.userPointSubtract(10L);
+
         Auction auction = findAuctionId(auctionId);
         checkUsername(auctionId, user);
         auction.getGoods().changeStatus(ONSALE);
@@ -155,6 +165,8 @@ public class AuctionService {
         //bid.getGoods().changeStatus(SOLDOUT);
         checkUsername(auctionId, user);
         auction.getGoods().changeStatus(SOLDOUT);
+
+        user.userPointAdd(10L);
         auction.changeDeleteStatus(true);
     }
 
