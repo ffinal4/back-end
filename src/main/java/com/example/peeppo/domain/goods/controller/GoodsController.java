@@ -4,6 +4,7 @@ import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.service.GoodsService;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
+import com.example.peeppo.global.utils.ResponseUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+
+import static com.example.peeppo.global.stringCode.SuccessCodeEnum.AUCTION_END_SUCCESS;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,7 +48,7 @@ public class GoodsController {
         return goodsService.getGoods(goodsId);
     }
 
-    @GetMapping("pocket")
+    @GetMapping("/pocket")
     public ApiResponse<PocketResponseDto> getMyGoods(@RequestParam("userId") Long userId,
                                                               @RequestParam("page") int page,
                                                               @RequestParam("size") int size,
@@ -60,6 +63,11 @@ public class GoodsController {
                 isAsc,
                 userDetails);
 
+    }
+
+    @GetMapping("/mypocket")
+    public ApiResponse<List<GoodsResponseDto>> getMyGoodsWithoutPagenation(@AuthenticationPrincipal UserDetailsImpl userDetails){
+        return ResponseUtils.ok(goodsService.getMyGoodsWithoutPagenation(userDetails.getUser()));
     }
 
 
