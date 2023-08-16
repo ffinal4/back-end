@@ -42,5 +42,6 @@ public class AuctionResponseDto {
         this.leftTime = countDownTime;
         this.bidCount = bidCount;
     }
+
 }
 

@@ -5,6 +5,7 @@ import com.example.peeppo.domain.bid.entity.Bid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -13,5 +14,10 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
     Long countByAuctionAuctionId(Long auctionId);
     List<Bid> findBidByAuctionAuctionId(Long auctionId);
 
-    List<Auction> findTop3AuctionByBidCount();
+
+    @Query("SELECT b.auction, COUNT(b) AS bidCount " +
+            "FROM Bid b " +
+            "GROUP BY b.auction " +
+            "ORDER BY bidCount DESC")
+    List<Auction> findTop3Auction();
 }
