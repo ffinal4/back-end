@@ -7,20 +7,18 @@ import com.example.peeppo.domain.bid.dto.BidListResponseDto;
 import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
 import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.bid.entity.Choice;
-import com.example.peeppo.domain.bid.enums.GoodsStatus;
+import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.bid.repository.BidRepository;
 import com.example.peeppo.domain.bid.repository.ChoiceBidRepository;
 import com.example.peeppo.domain.bid.repository.QueryRepository;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.image.repository.ImageRepository;
-import com.example.peeppo.domain.rating.entity.Rating;
 import com.example.peeppo.domain.rating.repository.ratingRepository.RatingRepository;
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.PageResponse;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -59,14 +57,13 @@ public class BidService {
                     String goodsImg = String.valueOf(imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goodsId));
 
                     if (goods.isDeleted()) {
-                        continue;                           //여기도 고민
+                        throw new IllegalAccessException();        //여기도 고민
                     }
                     if (!goods.getUser().getUserId().equals(user.getUserId())) {
                         throw new IllegalAccessException();
                     }
 
-                    if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {
-                        Rating rating = ratingRepository.findByGoodsGoodsId(goodsId);
+                    if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {//Rating rating = ratingRepository.findByRatingGoodsId(goodsId);
                         //시작가보다 낮을 경우
 //                        if (auction.getLowPrice() > rating.getAvgRatingPrice()) {   //평균가 이상함
 //                            throw new IllegalAccessException();
@@ -88,7 +85,6 @@ public class BidService {
 
         ResponseDto response = new ResponseDto("입찰이 완료되었습니다.", HttpStatus.OK.value(), "OK");
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-//        }
     }
 
     public ResponseEntity<Page<BidListResponseDto>> BidList(Long auctionId, int page, int size, String sortBy, boolean isAsc) {
