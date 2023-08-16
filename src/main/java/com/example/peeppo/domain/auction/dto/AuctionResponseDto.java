@@ -17,7 +17,6 @@ public class AuctionResponseDto {
     private LocalDateTime auctionEndTime;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
-
     private Long bidCount;
     private GoodsResponseDto goodsResponseDto;
     private TimeRemaining leftTime;
