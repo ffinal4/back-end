@@ -11,9 +11,6 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Optional;
 
-import java.util.Collection;
-import java.util.List;
-
 public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsRepositoryCustom{
     Page<Goods> findAllByIsDeletedFalse(Pageable pageable);
     Page<Goods> findAllByUserAndIsDeletedFalse(User user, Pageable pageable);
@@ -27,9 +24,9 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
             "inner join rating r on r.rating_goods_id = rg.rating_goods_id " +
             "inner join user_rating_relation urr on urr.rating_id = r.rating_id " +
             "inner join user u on u.user_id = urr.user_id " +
-            "where u.user_id = :#{#targetUser.userId}) " +
+            "where u.user_id = :#{#targetUser.userId} " +
             "group by g2.goods_id " +
-            "having count(distinct u.user_id) <= 3) " +
+            "having COUNT(r.rating_id) <= 3) " +
             "and g1.user_id <> :#{#targetUser.userId} " +
             "and g1.is_deleted = false " +
             "order by rand() limit 1", nativeQuery = true)
@@ -52,12 +49,4 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
 
     Optional<Goods> findByGoodsId(Long goodsId);
 
-   // Goods findDistinctByTitle(String title);
-
-    // Page<Goods> findGoodsByUser(@Param("userId") Long userId);
-
-
-//    List<Goods> findAllByLocationIdAndIsDeletedFalseOrderByGoodsIdDesc(Long locationId);
-
-
-}
+   }
