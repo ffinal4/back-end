@@ -123,6 +123,7 @@ public class GoodsService {
         return userRepository.findById(userId).orElse(null);
     }
 
+
     public ApiResponse<PocketResponseDto> getMyGoods(Long userId,
                                                      int page,
                                                      int size,
@@ -137,7 +138,6 @@ public class GoodsService {
         }
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
-        User user = findUserId(userId);
         Page<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalse(user, pageable);
         List<GoodsListResponseDto> myGoods = new ArrayList<>();
         for (Goods goods : goodsList) {

@@ -45,7 +45,6 @@ public class GoodsController {
         return goodsService.getGoods(goodsId);
     }
 
-    // 주머니 조회
     @GetMapping("pocket")
     public ApiResponse<PocketResponseDto> getMyGoods(@RequestParam("userId") Long userId,
                                                               @RequestParam("page") int page,
@@ -53,12 +52,15 @@ public class GoodsController {
                                                               @RequestParam("sortBy") String sortBy,
                                                               @RequestParam("isAsc") boolean isAsc,
                                                               @AuthenticationPrincipal UserDetailsImpl userDetails){
+
         return goodsService.getMyGoods(userId,
                 page - 1,
                 size,
                 sortBy,
                 isAsc,
                 userDetails);
+        return goodsService.getMyGoods( page - 1, size, sortBy, isAsc, userDetails.getUser());
+
     }
 
 
