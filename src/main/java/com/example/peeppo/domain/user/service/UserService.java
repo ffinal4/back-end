@@ -69,13 +69,14 @@ public class UserService {
     }
 
     public ResponseDto logout(HttpServletRequest req, HttpServletResponse res, LogoutRequestDto logoutRequestDto) {
+        String accessToken = jwtUtil.substringToken(logoutRequestDto.getAccessToken());
         // 1. Access Token 검증
-        if (!jwtUtil.validateToken(req, res, logoutRequestDto.getAccessToken())) {
+        if (!jwtUtil.validateToken(req, res, accessToken)) {
             return new ResponseDto("잘못된 요청입니다.", HttpStatus.BAD_REQUEST.value(), "BAD");
         }
 
         // 2. Access Token 에서 User email 을 가져옵니다.
-        Authentication authentication = jwtUtil.getAuthentication(logoutRequestDto.getAccessToken());
+        Authentication authentication = jwtUtil.getAuthentication(accessToken);
 
         // 3. Redis 에서 해당 User email 로 저장된 Refresh Token 이 있는지 여부를 확인 후 있을 경우 삭제합니다.
         if (redisTemplate.opsForValue().get(authentication.getName()) != null) {
@@ -84,9 +85,9 @@ public class UserService {
         }
 
         // 4. 해당 Access Token 유효시간 가지고 와서 BlackList 로 저장하기
-        Long expiration = jwtUtil.getExpiration(logoutRequestDto.getAccessToken());
+        Long expiration = jwtUtil.getExpiration(accessToken);
         redisTemplate.opsForValue()
-                .set(logoutRequestDto.getAccessToken(), "logout", expiration, TimeUnit.MILLISECONDS);
+                .set(accessToken, "logout", expiration, TimeUnit.MILLISECONDS);
 
         return new ResponseDto("로그아웃 되었습니다.", HttpStatus.OK.value(), "OK");
     }
