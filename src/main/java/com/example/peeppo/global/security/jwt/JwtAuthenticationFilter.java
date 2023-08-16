@@ -50,6 +50,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         String username = ((UserDetailsImpl) authResult.getPrincipal()).getUsername();
         UserRoleEnum role = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getRole();
         Long userId = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getUserId();
+        String userLocation = ((UserDetailsImpl) authResult.getPrincipal()).getUser().getLocation();
 
         String accessToken = jwtUtil.createAccessToken(username, role);
         response.addHeader(JwtUtil.ACCESS_TOKEN, accessToken);
@@ -63,12 +64,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 .set(refreshToken, username, 5, TimeUnit.MINUTES);
 
         response.setStatus(200);
-        new ObjectMapper().writeValue(response.getOutputStream(), ("로그인 성공"));
+        new ObjectMapper().writeValue(response.getOutputStream(), (userLocation));
+
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException {
-        response.setStatus(400);
+        response.setStatus(200);
         new ObjectMapper().writeValue(response.getOutputStream(), ("아이디와 비밀번호를 한번 더 확인해 주세요"));
     }
 }

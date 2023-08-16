@@ -28,6 +28,23 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
             "inner join user_rating_relation urr on urr.rating_id = r.rating_id " +
             "inner join user u on u.user_id = urr.user_id " +
             "where u.user_id = :#{#targetUser.userId}) " +
+            "group by g2.goods_id " +
+            "having count(distinct u.user_id) <= 3) " +
+            "and g1.user_id <> :#{#targetUser.userId} " +
+            "and g1.is_deleted = false " +
+            "order by rand() limit 1", nativeQuery = true)
+    Goods findRandomGoodsWithLowRatingCount(@Param("targetUser") User user);
+
+    @Query(value = "select g1.* " +
+            "from goods g1 " +
+            "where g1.goods_id not in " +
+            "(select g2.goods_id " +
+            "from goods g2 " +
+            "inner join rating_goods rg on rg.goods_id = g2.goods_id " +
+            "inner join rating r on r.rating_goods_id = rg.rating_goods_id " +
+            "inner join user_rating_relation urr on urr.rating_id = r.rating_id " +
+            "inner join user u on u.user_id = urr.user_id " +
+            "where u.user_id = :#{#targetUser.userId}) " +
             "and g1.user_id <> :#{#targetUser.userId} " +
             "and g1.is_deleted = false " +
             "order by rand() limit 1", nativeQuery = true)
