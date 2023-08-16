@@ -92,7 +92,7 @@ public class UserService {
     }
 
     //회원정보 페이지
-    public ResponseEntity<MyPageResponseDto> mypage(Long userId) {
+    public ResponseEntity<MyPageResponseDto> myPage(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 

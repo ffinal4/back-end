@@ -46,7 +46,7 @@ public class GoodsController {
     }
 
     // 내 게시물 조회
-    @GetMapping("/{userId}/pocket")
+    @GetMapping("pocket")
     public ApiResponse<List<GoodsListResponseDto>> getMyGoods(@PathVariable Long userId,
                                                               @RequestParam("page") int page,
                                                               @RequestParam("size") int size,

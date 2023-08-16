@@ -8,15 +8,17 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MyPageResponseDto {
 
-    String nickname;
-    String email;
-    String password;
-    String location;
+    private String nickname;
+    private String email;
+    private String password;
+    private String location;
+    private Long userPoint;
 
     public MyPageResponseDto(User user) {
         this.nickname = user.getNickname();
         this.email = user.getEmail();
         this.password = user.getPassword();
         this.location = user.getLocation();
+        this.userPoint = user.getUserPoint();
     }
 }

@@ -41,8 +41,8 @@ public class UserController {
 
     //회원정보 페이지
     @GetMapping("/users/{userId}")
-    public ResponseEntity<MyPageResponseDto> mypage(@PathVariable Long userId) {
-        return userService.mypage(userId);
+    public ResponseEntity<MyPageResponseDto> myPage(@PathVariable Long userId) {
+        return userService.myPage(userId);
     }
 
     @PatchMapping("/users/{userId}")
