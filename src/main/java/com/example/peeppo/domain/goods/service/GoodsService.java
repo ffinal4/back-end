@@ -138,6 +138,7 @@ public class GoodsService {
         }
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
+        User user = findUserId(userId);
         Page<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalse(user, pageable);
         List<GoodsListResponseDto> myGoods = new ArrayList<>();
         for (Goods goods : goodsList) {
@@ -253,5 +254,6 @@ public class GoodsService {
         }
         return goodsRecentDtos;
     }
+
 
 }

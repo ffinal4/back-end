@@ -59,7 +59,6 @@ public class GoodsController {
                 sortBy,
                 isAsc,
                 userDetails);
-        return goodsService.getMyGoods( page - 1, size, sortBy, isAsc, userDetails.getUser());
 
     }
 
