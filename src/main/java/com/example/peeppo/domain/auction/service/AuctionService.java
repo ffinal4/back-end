@@ -47,9 +47,10 @@ public class AuctionService {
     public AuctionResponseDto createAuction(Long goodsId, AuctionRequestDto auctionRequestDto, User user) {
         checkGoodsUsername(goodsId, user);
         if (user.getUserPoint() < 10) {
-            new IllegalArgumentException("경매 등록에는 10p가 필요합니다. 현재" + user.getUserPoint() + "포인트를 가지고 있습니다.");
+            throw new IllegalArgumentException("경매 등록에는 10p가 필요합니다. 현재" + user.getUserPoint() + "포인트를 가지고 있습니다.");
         }
         user.userPointSubtract(10L);
+        userRepository.save(user);
 
         Goods getGoods = findGoodsId(goodsId);
         GoodsResponseDto goodsResponseDto = new GoodsResponseDto(getGoods);
@@ -146,10 +147,11 @@ public class AuctionService {
     @Transactional
     public void deleteAuction(Long auctionId, User user) {
         if (user.getUserPoint() < 10) {
-            new IllegalArgumentException("경매 취소에는 10p가 필요합니다. 현재" + user.getUserPoint() + "포인트를 가지고 있습니다.");
+            throw new IllegalArgumentException("경매 취소에는 10p가 필요합니다. 현재" + user.getUserPoint() + "포인트를 가지고 있습니다.");
         }
 
         user.userPointSubtract(10L);
+        userRepository.save(user);
 
         Auction auction = findAuctionId(auctionId);
         checkUsername(auctionId, user);
@@ -167,6 +169,8 @@ public class AuctionService {
         auction.getGoods().changeStatus(SOLDOUT);
 
         user.userPointAdd(10L);
+        userRepository.save(user);
+
         auction.changeDeleteStatus(true);
     }
 
@@ -195,11 +199,11 @@ public class AuctionService {
         PageResponse response = new PageResponse<>(auctionResponseDtoList, pageable, myAuctionPage.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
   
-    public void checkGoodsUsername(Long id, User user){
-        Goods goods = findGoodsId(id);
-        if(!(goods.getUser().getUserId().equals(user.getUserId()))){
-            throw new IllegalArgumentException("경매 취소는 작성자만 삭제가 가능합니다");
-        }
+//    public void checkGoodsUsername(Long id, User user){
+//        Goods goods = findGoodsId(id);
+//        if(!(goods.getUser().getUserId().equals(user.getUserId()))){
+//            throw new IllegalArgumentException("경매 취소는 작성자만 삭제가 가능합니다");
+//        }
     }
 
 }
