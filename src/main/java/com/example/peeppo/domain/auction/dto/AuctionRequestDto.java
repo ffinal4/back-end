@@ -12,6 +12,5 @@ public class AuctionRequestDto {
     @NotBlank
     String endTime;
 
-    @NotBlank
     Long lowPrice;
 }
