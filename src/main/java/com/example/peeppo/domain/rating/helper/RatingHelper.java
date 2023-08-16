@@ -47,11 +47,11 @@ public class RatingHelper {
         currentPointAndCurrentCount.add(currentCount);
 
 
-        user.countUpdate(currentCount, currentPoint);
+        user.countUpdate(currentPoint, currentCount);
         return currentPointAndCurrentCount;
     }
 
-    public long calculate(Long expectedPrice, Long sellerPrice) {
+    public long calculate(long expectedPrice, long sellerPrice) {
         long score = 2L;
 
         long lowerBound;

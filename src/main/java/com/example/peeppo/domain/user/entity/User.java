@@ -64,7 +64,7 @@ public class User {
         this.password = encodedPassword;
     }
 
-    public void countUpdate(Long currentCount, Long userPoint){
+    public void countUpdate(Long userPoint, Long currentCount){
         this.currentRatingCount = currentCount;
 
         if(this.maxRatingCount < currentCount){
@@ -72,6 +72,13 @@ public class User {
         }
 
         this.userPoint += userPoint;
+    }
+
+    public void userPointAdd(Long userPoint) {
+        this.userPoint += userPoint;
+    }
+    public void userPointSubtract(Long userPoint) {
+        this.userPoint -= userPoint;
     }
 
 }

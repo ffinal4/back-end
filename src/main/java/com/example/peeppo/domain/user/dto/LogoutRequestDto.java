@@ -10,9 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LogoutRequestDto {
 
-    @NotNull(message = "잘못된 요청입니다.")
     private String accessToken;
 
-    @NotNull(message = "잘못된 요청입니다.")
     private String refreshToken;
 }

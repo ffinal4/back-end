@@ -69,13 +69,14 @@ public class UserService {
     }
 
     public ResponseDto logout(HttpServletRequest req, HttpServletResponse res, LogoutRequestDto logoutRequestDto) {
+        String accessToken = jwtUtil.substringToken(logoutRequestDto.getAccessToken());
         // 1. Access Token 검증
-        if (!jwtUtil.validateToken(req, res, logoutRequestDto.getAccessToken())) {
+        if (!jwtUtil.validateToken(req, res, accessToken)) {
             return new ResponseDto("잘못된 요청입니다.", HttpStatus.BAD_REQUEST.value(), "BAD");
         }
 
         // 2. Access Token 에서 User email 을 가져옵니다.
-        Authentication authentication = jwtUtil.getAuthentication(logoutRequestDto.getAccessToken());
+        Authentication authentication = jwtUtil.getAuthentication(accessToken);
 
         // 3. Redis 에서 해당 User email 로 저장된 Refresh Token 이 있는지 여부를 확인 후 있을 경우 삭제합니다.
         if (redisTemplate.opsForValue().get(authentication.getName()) != null) {
@@ -84,27 +85,23 @@ public class UserService {
         }
 
         // 4. 해당 Access Token 유효시간 가지고 와서 BlackList 로 저장하기
-        Long expiration = jwtUtil.getExpiration(logoutRequestDto.getAccessToken());
+        Long expiration = jwtUtil.getExpiration(accessToken);
         redisTemplate.opsForValue()
-                .set(logoutRequestDto.getAccessToken(), "logout", expiration, TimeUnit.MILLISECONDS);
+                .set(accessToken, "logout", expiration, TimeUnit.MILLISECONDS);
 
         return new ResponseDto("로그아웃 되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
     //회원정보 페이지
-    public ResponseEntity<MyPageResponseDto> mypage(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+    public ResponseEntity<MyPageResponseDto> myPage(User user) {
 
         MyPageResponseDto myPageResponseDto = new MyPageResponseDto(user);
 
         return ResponseEntity.status(HttpStatus.OK.value()).body(myPageResponseDto);
     }
 
-    public ResponseDto updatemypage(Long userId, MyPageRequestDto myPageRequestDto, MultipartFile multipartFile) throws IOException {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 유저입니다."));
-
+    public ResponseDto updatemypage(MyPageRequestDto myPageRequestDto, MultipartFile multipartFile, User user) throws IOException {
         String encodedPassword = passwordEncoder.encode(myPageRequestDto.getPassword());
         String updateUserImg = uploadService.upload(multipartFile);
         user.upload(myPageRequestDto, updateUserImg, encodedPassword);
@@ -114,16 +111,8 @@ public class UserService {
         return new ResponseDto("개인정보가 수정되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
-    public ResponseEntity<ResponseDto> deletemypage(Long userId, User user1) throws IllegalAccessException {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 유저입니다."));
-
-        if(user.getUserId().equals(user1.getUserId())) {
-            userRepository.deleteById(userId);
-        }
-        else {
-            throw new IllegalAccessException();
-        }
+    public ResponseEntity<ResponseDto> deletemypage(Long userId) {
+        userRepository.deleteById(userId);
 
         ResponseDto response = new ResponseDto("탈퇴 완료", HttpStatus.OK.value(), "OK");
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
