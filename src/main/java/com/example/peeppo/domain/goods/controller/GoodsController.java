@@ -45,15 +45,22 @@ public class GoodsController {
         return goodsService.getGoods(goodsId);
     }
 
-    // 내 게시물 조회
-
-    @GetMapping("/pocket")
-    public ApiResponse<List<GoodsListResponseDto>> getMyGoods(@RequestParam("page") int page,
+    @GetMapping("pocket")
+    public ApiResponse<PocketResponseDto> getMyGoods(@RequestParam("userId") Long userId,
+                                                              @RequestParam("page") int page,
                                                               @RequestParam("size") int size,
                                                               @RequestParam("sortBy") String sortBy,
                                                               @RequestParam("isAsc") boolean isAsc,
                                                               @AuthenticationPrincipal UserDetailsImpl userDetails){
+
+        return goodsService.getMyGoods(userId,
+                page - 1,
+                size,
+                sortBy,
+                isAsc,
+                userDetails);
         return goodsService.getMyGoods( page - 1, size, sortBy, isAsc, userDetails.getUser());
+
     }
 
 
