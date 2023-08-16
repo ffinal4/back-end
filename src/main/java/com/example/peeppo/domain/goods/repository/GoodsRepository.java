@@ -35,7 +35,9 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
 
     Optional<Goods> findByGoodsId(Long goodsId);
 
-   // Goods findDistinctByTitle(String title);
+    List<Goods> findTop8ByCreatedAt();
+
+    // Goods findDistinctByTitle(String title);
 
     // Page<Goods> findGoodsByUser(@Param("userId") Long userId);
 
