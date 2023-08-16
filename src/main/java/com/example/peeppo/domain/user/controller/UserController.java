@@ -30,7 +30,7 @@ public class UserController {
 
     //닉네임 중복확인
     @PostMapping("/users/nickname")
-    public ResponseEntity<CheckResponseDto> checkValidateNickname(@RequestBody ValidateRequestDto validateRequestDto) {
+    public ResponseEntity<CheckResponseDto> checkValidateNickname(@RequestBody @Valid ValidateRequestDto validateRequestDto) {
         return userService.checkValidateNickname(validateRequestDto);
     }
 
@@ -42,21 +42,20 @@ public class UserController {
     }
 
     //회원정보 페이지
-    @GetMapping("/users/{userId}")
-    public ResponseEntity<MyPageResponseDto> mypage(@PathVariable Long userId) {
-        return userService.mypage(userId);
+    @GetMapping("/users/mypage")
+    public ResponseEntity<MyPageResponseDto> mypage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return userService.mypage(userDetails.getUser());
     }
 
-    @PatchMapping("/users/{userId}")
-    public ResponseDto updatemypage(@PathVariable Long userId,
-                                    @RequestPart(value = "data") @Valid MyPageRequestDto myPageRequestDto,
-                                    @RequestPart(value = "image") MultipartFile multipartFile) throws IOException {
-        return userService.updatemypage(userId, myPageRequestDto, multipartFile);
+    @PatchMapping("/users/mypage")
+    public ResponseDto updatemypage(@RequestPart(value = "data") @Valid MyPageRequestDto myPageRequestDto,
+                                    @RequestPart(value = "image") MultipartFile multipartFile,
+                                    @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
+        return userService.updatemypage(myPageRequestDto, multipartFile, userDetails.getUser());
     }
 
-    @DeleteMapping("/users/{userId}")
-    public ResponseEntity<ResponseDto> deletemypage(@PathVariable Long userId,
-                                                    @AuthenticationPrincipal UserDetailsImpl userDetails) throws IllegalAccessException {
-        return userService.deletemypage(userId, userDetails.getUser());
+    @DeleteMapping("/users")
+    public ResponseEntity<ResponseDto> deletemypage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return userService.deletemypage(userDetails.getUser().getUserId());
     }
 }

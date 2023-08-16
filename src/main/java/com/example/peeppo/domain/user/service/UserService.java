@@ -92,19 +92,13 @@ public class UserService {
     }
 
     //회원정보 페이지
-    public ResponseEntity<MyPageResponseDto> mypage(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 유저입니다."));
-
+    public ResponseEntity<MyPageResponseDto> mypage(User user) {
         MyPageResponseDto myPageResponseDto = new MyPageResponseDto(user);
 
         return ResponseEntity.status(HttpStatus.OK.value()).body(myPageResponseDto);
     }
 
-    public ResponseDto updatemypage(Long userId, MyPageRequestDto myPageRequestDto, MultipartFile multipartFile) throws IOException {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 유저입니다."));
-
+    public ResponseDto updatemypage(MyPageRequestDto myPageRequestDto, MultipartFile multipartFile, User user) throws IOException {
         String encodedPassword = passwordEncoder.encode(myPageRequestDto.getPassword());
         String updateUserImg = uploadService.upload(multipartFile);
         user.upload(myPageRequestDto, updateUserImg, encodedPassword);
@@ -114,16 +108,8 @@ public class UserService {
         return new ResponseDto("개인정보가 수정되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
-    public ResponseEntity<ResponseDto> deletemypage(Long userId, User user1) throws IllegalAccessException {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 유저입니다."));
-
-        if(user.getUserId().equals(user1.getUserId())) {
-            userRepository.deleteById(userId);
-        }
-        else {
-            throw new IllegalAccessException();
-        }
+    public ResponseEntity<ResponseDto> deletemypage(Long userId) {
+        userRepository.deleteById(userId);
 
         ResponseDto response = new ResponseDto("탈퇴 완료", HttpStatus.OK.value(), "OK");
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
