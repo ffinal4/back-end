@@ -24,6 +24,7 @@ import java.util.List;
 public class HomeService {
     private final GoodsRepository goodsRepository;
     private final BidRepository bidRepository;
+    private final AuctionRepository auctionRepository;
     private final AuctionService auctionService;
     private final AuctionRepository auctionRepository;
 

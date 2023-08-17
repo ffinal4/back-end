@@ -260,6 +260,18 @@ public class GoodsService {
     }
 
     public List<GoodsResponseDto> getMyGoodsWithoutPagenation(User user) {
+        return getGoodsResponseDtos(user);
+    }
+
+    public List<GoodsResponseDto> getPocket(String nickname, User user1) throws IllegalAccessException {
+        User user = userRepository.findUserByNickname(nickname);
+        if(user.equals(user1)){
+            throw new IllegalAccessException();
+        }
+        return getGoodsResponseDtos(user);
+    }
+
+    private List<GoodsResponseDto> getGoodsResponseDtos(User user) {
         List<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalseAndGoodsStatus(user, GoodsStatus.ONSALE);
         List<GoodsResponseDto> goodsResponseDtos = new ArrayList<>();
         for(Goods goods : goodsList){

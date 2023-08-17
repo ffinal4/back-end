@@ -3,6 +3,8 @@ package com.example.peeppo.domain.auction.entity;
 import com.example.peeppo.domain.auction.dto.AuctionRequestDto;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.goods.entity.Goods;
+import com.example.peeppo.domain.rating.entity.Rating;
+import com.example.peeppo.domain.rating.entity.RatingGoods;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.utils.Timestamped;
 import jakarta.persistence.*;
@@ -27,7 +29,7 @@ public class Auction extends Timestamped {
 
     @Min(1000)
     @Column
-    private Long lowPrice;
+    private double lowPrice;
 
     @Enumerated(EnumType.STRING)
     private AuctionStatus auctionStatus;
@@ -57,14 +59,14 @@ public class Auction extends Timestamped {
         this.goods = getGoods;
         this.isDeleted = false;
         this.auctionEndTime = auctionEndTime;
-        this.lowPrice = auctionRequestDto.getLowPrice();
+        this.lowPrice = getGoods.getSellerPrice();
     }
 
-    public Auction(Goods getGoods, LocalDateTime auctionEndTime, AuctionRequestDto auctionRequestDto, User user) {
+    public Auction(Goods getGoods, LocalDateTime auctionEndTime, User user, RatingGoods ratingGoods) {
         this.goods = getGoods;
         this.isDeleted = false;
         this.auctionEndTime = auctionEndTime;
-        this.lowPrice = auctionRequestDto.getLowPrice();
+        this.lowPrice = ratingGoods.getAvgRatingPrice();
         this.user = user;
     }
 

@@ -15,6 +15,7 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
     List<Bid> findBidByAuctionAuctionId(Long auctionId);
 
 
+
    // @Query(value = "select from auction a inner join a.SELECT b.auction_id, COUNT(b.bid_id) AS bidCount FROM bid b GROUP BY b.auction_id ORDER BY bidCount DESC LIMIT 3", nativeQuery = true)
 //   @Query(value = "SELECT b.*, COUNT(b.bid_id) AS bidCount " +
 //           "FROM bid b " +

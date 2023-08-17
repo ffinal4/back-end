@@ -18,4 +18,5 @@ public interface RatingGoodsRepository extends JpaRepository<RatingGoods, Long>{
     @Query(value = "select r from RatingGoods r where r.goods.goodsId = :goodsId")
     Optional<RatingGoods> findByGoodsForUpdate(@Param("goodsId") Long goodsId);
 
+    RatingGoods findByGoodsGoodsId(Long goodsId);
 }
