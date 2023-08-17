@@ -2,14 +2,12 @@ package com.example.peeppo.domain.home.service;
 
 
 import com.example.peeppo.domain.auction.dto.AuctionListResponseDto;
-import com.example.peeppo.domain.auction.dto.AuctionResponseDto;
 import com.example.peeppo.domain.auction.dto.TimeRemaining;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.auction.service.AuctionService;
 import com.example.peeppo.domain.bid.repository.BidRepository;
 import com.example.peeppo.domain.goods.dto.GoodsListResponseDto;
-import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.home.dto.HomeResponseDto;
@@ -26,7 +24,6 @@ public class HomeService {
     private final BidRepository bidRepository;
     private final AuctionRepository auctionRepository;
     private final AuctionService auctionService;
-    private final AuctionRepository auctionRepository;
 
     public HomeResponseDto peeppoHome() {
         List<Goods> goodsList = goodsRepository.findTop8ByCreatedAt();
