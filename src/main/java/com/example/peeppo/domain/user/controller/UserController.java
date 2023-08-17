@@ -42,9 +42,10 @@ public class UserController {
     }
 
     //회원정보 페이지
+
     @GetMapping("/users/mypage")
-    public ResponseEntity<MyPageResponseDto> mypage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return userService.mypage(userDetails.getUser());
+    public ResponseEntity<MyPageResponseDto> myPage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return userService.myPage(userDetails.getUser());
     }
 
     @PatchMapping("/users/mypage")
