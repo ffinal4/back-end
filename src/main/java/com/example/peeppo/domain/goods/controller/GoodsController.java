@@ -43,9 +43,10 @@ public class GoodsController {
 
     // 게시물 상세조회
     @GetMapping("/{goodsId}")
-    public ApiResponse<GoodsResponseDto> getGoods(@PathVariable Long goodsId) {
+    public ApiResponse<GoodsResponseDto> getGoods(@PathVariable Long goodsId,
+                                                  @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        return goodsService.getGoods(goodsId);
+        return goodsService.getGoods(goodsId, userDetails.getUser());
     }
 
     @GetMapping("/pocket")

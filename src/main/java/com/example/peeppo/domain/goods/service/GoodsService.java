@@ -2,6 +2,7 @@ package com.example.peeppo.domain.goods.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.example.peeppo.domain.dibs.repository.DibsRepository;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.entity.Goods;
@@ -47,6 +48,8 @@ public class GoodsService {
     private final UserRepository userRepository;
 
     private final RatingHelper ratingHelper;
+
+    private final DibsRepository dibsRepository;
     private static final String RECENT_GOODS = "goods";
     private static final int MAX_RECENT_GOODS = 4;
     //private List<Long> goodsRecent = new ArrayList<>();
@@ -102,9 +105,13 @@ public class GoodsService {
 //    }
 
 
-    public ApiResponse<GoodsResponseDto> getGoods(Long goodsId) {
+    public ApiResponse<GoodsResponseDto> getGoods(Long goodsId, User user) {
 
         Goods goods = findGoods(goodsId);
+        boolean checkSameUser = true;
+        if(goods.getUser().getUserId() != user.getUserId()){
+            checkSameUser = false;
+        }
         WantedGoods wantedGoods = findWantedGoods(goodsId);
         List<Image> images = imageRepository.findByGoodsGoodsId(goodsId);
         List<String> imageUrls = images.stream()
@@ -115,7 +122,7 @@ public class GoodsService {
         }
         goodsRecent.add(Long.toString(goods.getGoodsId())); // 조회시에 리스트에 추가 !
 
-        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods), null);
+        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods, checkSameUser), null);
     }
 
     public User findUserId(Long userId) {
