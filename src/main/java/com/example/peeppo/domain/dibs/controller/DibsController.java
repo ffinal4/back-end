@@ -20,7 +20,7 @@ public class DibsController {
 
     private final DibsService dibsService;
 
-    @PostMapping("/scrap")
+    @PostMapping("/dibs")
     public ResponseEntity<CheckResponseDto> dibsGoods(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                       @Valid @RequestBody DibsRequestDto dibsRequestDto) {
         return dibsService.dibsGoods(userDetails.getUser(), dibsRequestDto);

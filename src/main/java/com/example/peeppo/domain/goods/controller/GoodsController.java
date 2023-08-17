@@ -70,6 +70,11 @@ public class GoodsController {
         return ResponseUtils.ok(goodsService.getMyGoodsWithoutPagenation(userDetails.getUser()));
     }
 
+    @GetMapping("/pocket/{nickname}")
+    public ApiResponse<List<GoodsResponseDto>> getPocket(@PathVariable String nickname,
+                                                         @AuthenticationPrincipal UserDetailsImpl userDetails) throws IllegalAccessException {
+        return ResponseUtils.ok(goodsService.getPocket(nickname, userDetails.getUser()));
+    }
 
     @PutMapping("/{goodsId}")
     public ApiResponse<GoodsResponseDto> goodsUpdate(@PathVariable Long goodsId,

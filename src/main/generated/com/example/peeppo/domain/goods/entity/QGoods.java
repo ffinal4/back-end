@@ -43,8 +43,6 @@ public class QGoods extends EntityPathBase<Goods> {
 
     public final BooleanPath isDeleted = createBoolean("isDeleted");
 
-    public final BooleanPath isDibsDeleted = createBoolean("isDibsDeleted");
-
     public final StringPath location = createString("location");
 
     //inherited

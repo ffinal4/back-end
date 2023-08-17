@@ -15,9 +15,5 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
     List<Bid> findBidByAuctionAuctionId(Long auctionId);
 
 
-    @Query("SELECT b.auction, COUNT(b) AS bidCount " +
-            "FROM Bid b " +
-            "GROUP BY b.auction " +
-            "ORDER BY bidCount DESC")
-    List<Auction> findTop3Auction();
+
 }
