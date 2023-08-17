@@ -130,11 +130,9 @@ public class GoodsService {
                                                      String sortBy,
                                                      boolean isAsc,
                                                      UserDetailsImpl userDetails) {
-        boolean userCheck;
-        if (userDetails == null) {
-            userCheck = false;
-        } else {
-            userCheck = userId.equals(userDetails.getUser().getUserId());
+        // 리다이렉트로 빠지지 않았을 경우
+        if (userDetails.getUser().getUserId().equals(userId)) {
+            throw new IllegalStateException("잘못된 접근입니다. 다시 시도해주세요");
         }
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
@@ -146,7 +144,7 @@ public class GoodsService {
             myGoods.add(new GoodsListResponseDto(goods, firstImage.getImageUrl()));
         }
 
-        PocketResponseDto pocketResponseDto = new PocketResponseDto(user, userCheck, myGoods);
+        PocketResponseDto pocketResponseDto = new PocketResponseDto(user, myGoods);
 
         return new ApiResponse<>(true, pocketResponseDto, null);
     }
