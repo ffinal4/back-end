@@ -16,6 +16,7 @@ import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.responseDto.PageResponse;
+import com.example.peeppo.global.security.UserDetailsImpl;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -109,7 +110,7 @@ public class GoodsService {
         List<String> imageUrls = images.stream()
                 .map(Image::getImageUrl)
                 .collect(Collectors.toList());
-        if(goodsRecent.size() >= MAX_RECENT_GOODS) {
+        if (goodsRecent.size() >= MAX_RECENT_GOODS) {
             goodsRecent.remove(0);
         }
         goodsRecent.add(Long.toString(goods.getGoodsId())); // 조회시에 리스트에 추가 !
@@ -117,11 +118,22 @@ public class GoodsService {
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods), null);
     }
 
-    public User findUserId(Long userId){
+    public User findUserId(Long userId) {
         return userRepository.findById(userId).orElse(null);
     }
 
-    public ApiResponse<List<GoodsListResponseDto>> getMyGoods(Long userId, int page, int size, String sortBy, boolean isAsc) {
+
+    public ApiResponse<PocketResponseDto> getMyGoods(Long userId,
+                                                     int page,
+                                                     int size,
+                                                     String sortBy,
+                                                     boolean isAsc,
+                                                     UserDetailsImpl userDetails) {
+        // 리다이렉트로 빠지지 않았을 경우
+        if (userDetails.getUser().getUserId().equals(userId)) {
+            throw new IllegalStateException("잘못된 접근입니다. 다시 시도해주세요");
+        }
+
         Pageable pageable = paging(page, size, sortBy, isAsc);
         User user = findUserId(userId);
         Page<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalse(user, pageable);
@@ -131,7 +143,9 @@ public class GoodsService {
             myGoods.add(new GoodsListResponseDto(goods, firstImage.getImageUrl()));
         }
 
-        return new ApiResponse<>(true, myGoods, null);
+        PocketResponseDto pocketResponseDto = new PocketResponseDto(user, myGoods);
+
+        return new ApiResponse<>(true, pocketResponseDto, null);
     }
 
     @Transactional
@@ -162,11 +176,10 @@ public class GoodsService {
     @Transactional
     public ApiResponse<DeleteResponseDto> deleteGoods(Long goodsId, User user) throws IllegalAccessException {
         Goods goods = findGoods(goodsId);
-        if(user.getUserId() == goods.getUser().getUserId()) {
+        if (user.getUserId() == goods.getUser().getUserId()) {
             goods.setDeleted(true);
             goodsRepository.save(goods);
-        }
-        else {
+        } else {
             throw new IllegalAccessException();
         }
         return new ApiResponse<>(true, new DeleteResponseDto("삭제되었습니다"), null);
@@ -231,12 +244,21 @@ public class GoodsService {
         goodsCookie.setMaxAge(24 * 60 * 60); // 하루동안 저장
         response.addCookie(goodsCookie); // 전송
 
-        for(String id : goodsRecent){
-            Goods goods =  goodsRepository.findById(Long.parseLong(id)).orElse(null);
+        for (String id : goodsRecent) {
+            Goods goods = goodsRepository.findById(Long.parseLong(id)).orElse(null);
             GoodsRecentDto goodsRecentDto = new GoodsRecentDto(goods);
             goodsRecentDtos.add(goodsRecentDto);
         }
         return goodsRecentDtos;
     }
 
+    public List<GoodsResponseDto> getMyGoodsWithoutPagenation(User user) {
+        List<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalseAndGoodsStatus(user, GoodsStatus.ONSALE);
+        List<GoodsResponseDto> goodsResponseDtos = new ArrayList<>();
+        for(Goods goods : goodsList){
+            GoodsResponseDto goodsResponseDto = new GoodsResponseDto(goods);
+            goodsResponseDtos.add(goodsResponseDto);
+        }
+        return goodsResponseDtos;
+    }
 }

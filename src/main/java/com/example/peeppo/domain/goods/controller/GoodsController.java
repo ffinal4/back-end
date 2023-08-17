@@ -4,6 +4,7 @@ import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.service.GoodsService;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
+import com.example.peeppo.global.utils.ResponseUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+
+import static com.example.peeppo.global.stringCode.SuccessCodeEnum.AUCTION_END_SUCCESS;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,7 +25,7 @@ public class GoodsController {
     @PostMapping
     public ApiResponse<GoodsResponseDto> goodsCreate(@RequestPart(value = "data") GoodsRequestDto goodsRequestDto,
                                                      @RequestPart(value = "images") List<MultipartFile> images,
-                                                     @RequestPart(value = "wanted")WantedRequestDto wantedRequestDto,
+                                                     @RequestPart(value = "wanted") WantedRequestDto wantedRequestDto,
                                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         return goodsService.goodsCreate(goodsRequestDto, images, wantedRequestDto, userDetails.getUser());
@@ -45,14 +48,25 @@ public class GoodsController {
         return goodsService.getGoods(goodsId);
     }
 
-    // 내 게시물 조회
-    @GetMapping("/{userId}/pocket")
-    public ApiResponse<List<GoodsListResponseDto>> getMyGoods(@PathVariable Long userId,
-                                                              @RequestParam("page") int page,
-                                                              @RequestParam("size") int size,
-                                                              @RequestParam("sortBy") String sortBy,
-                                                              @RequestParam("isAsc") boolean isAsc){
-        return goodsService.getMyGoods(userId, page - 1, size, sortBy, isAsc);
+    @GetMapping("/pocket")
+    public ApiResponse<PocketResponseDto> getMyGoods(@RequestParam("userId") Long userId,
+                                                     @RequestParam("page") int page,
+                                                     @RequestParam("size") int size,
+                                                     @RequestParam("sortBy") String sortBy,
+                                                     @RequestParam("isAsc") boolean isAsc,
+                                                     @AuthenticationPrincipal UserDetailsImpl userDetails){
+
+        return goodsService.getMyGoods(userId,
+                page - 1,
+                size,
+                sortBy,
+                isAsc,
+                userDetails);
+    }
+
+    @GetMapping("/mypocket")
+    public ApiResponse<List<GoodsResponseDto>> getMyGoodsWithoutPagenation(@AuthenticationPrincipal UserDetailsImpl userDetails){
+        return ResponseUtils.ok(goodsService.getMyGoodsWithoutPagenation(userDetails.getUser()));
     }
 
 
@@ -72,7 +86,7 @@ public class GoodsController {
     }
 
     @GetMapping("/recent")
-    public List<GoodsRecentDto> recentGoods(HttpServletResponse response){
+    public List<GoodsRecentDto> recentGoods(HttpServletResponse response) {
         return goodsService.recentGoods(response);
     }
 }
