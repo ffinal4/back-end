@@ -3,6 +3,7 @@ package com.example.peeppo.domain.dibs.service;
 import com.example.peeppo.domain.dibs.dto.DibsRequestDto;
 import com.example.peeppo.domain.dibs.entity.Dibs;
 import com.example.peeppo.domain.dibs.repository.DibsRepository;
+import com.example.peeppo.domain.goods.dto.GoodsListResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.user.dto.CheckResponseDto;
@@ -13,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.OK;
@@ -52,5 +55,15 @@ public class DibsService {
     public Goods findGoods(Long goodsId) {
         return goodsRepository.findById(goodsId).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 goodsId 입니다."));
+    }
+
+    public List<GoodsListResponseDto> getDibsGoods(User user) {
+        findUser(user.getUserId());
+        List<Dibs> dibsList = dibsRepository.findByUserUserId(user.getUserId());
+        List<GoodsListResponseDto> goodsListResponseDtos = new ArrayList<>();
+        for(Dibs dibs1 : dibsList){
+            goodsListResponseDtos.add(new GoodsListResponseDto(dibs1.getGoods()));
+        }
+        return goodsListResponseDtos;
     }
 }
