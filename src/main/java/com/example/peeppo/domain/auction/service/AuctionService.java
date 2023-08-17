@@ -151,9 +151,13 @@ public class AuctionService {
     }
 
     // 경매 상세 조회
-    public AuctionResponseDto findAuctionById(Long auctionId) {
+    public AuctionResponseDto findAuctionById(Long auctionId, User user) {
         Auction auction = findAuctionId(auctionId);
-        return new AuctionResponseDto(auction, auction.getGoods(), countDownTime(auction), findBidCount(auctionId));
+        boolean checkSameUser = true;
+        if(auction.getUser().getUserId() != user.getUserId()){
+            checkSameUser = false;
+        }
+        return new AuctionResponseDto(auction, auction.getGoods(), countDownTime(auction), findBidCount(auctionId), checkSameUser);
     }
 
     // 경매 찾아서 Auction 리턴
@@ -239,4 +243,5 @@ public class AuctionService {
             throw new IllegalArgumentException("경매 생성은 물품 작성자만 가능합니다");
         }
     }
+
 }

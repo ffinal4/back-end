@@ -22,11 +22,11 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class HomeService {
-
     private final GoodsRepository goodsRepository;
     private final BidRepository bidRepository;
     private final AuctionRepository auctionRepository;
     private final AuctionService auctionService;
+    private final AuctionRepository auctionRepository;
 
     public HomeResponseDto peeppoHome() {
         List<Goods> goodsList = goodsRepository.findTop8ByCreatedAt();
@@ -43,7 +43,6 @@ public class HomeService {
             AuctionListResponseDto auctionResponseDto = new AuctionListResponseDto(auction, timeRemaining, auctionService.findBidCount(auction.getAuctionId()));
             auctionResponseDtos.add(auctionResponseDto);
         }
-
         return new HomeResponseDto(goodsListResponseDtos, auctionResponseDtos);
     }
 }

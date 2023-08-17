@@ -11,13 +11,7 @@ import java.util.List;
 public interface AuctionRepository extends JpaRepository<Auction, Long> {
     Page<Auction> findByUserUserId(Long userId, Pageable pageable);
 
-//    "SELECT g from Goods g ORDER BY g.createdAt desc limit 3"
 
-//    @Query("SELECT b.auction, COUNT(b) AS bidCount " +
-//            "FROM Bid b " +
-//            "GROUP BY b.auction " +
-//            "ORDER BY bidCount DESC " +
-//            "LIMIT 3")
-    @Query("SELECT b.auction, COUNT(b) AS bidCount from Bid b GROUP BY b.auction ORDER BY bidCount DESC limit 3")
+    @Query(value = "select a.* from auction a inner join (SELECT b.auction_id, COUNT(b.bid_id) AS bidCount FROM bid b GROUP BY b.auction_id ORDER BY bidCount DESC LIMIT 3) as top3auction on a.auction_id= top3auction.auction_id", nativeQuery = true)
     List<Auction> findTop3Auction();
 }
