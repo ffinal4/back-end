@@ -22,7 +22,7 @@ public class GoodsController {
     @PostMapping
     public ApiResponse<GoodsResponseDto> goodsCreate(@RequestPart(value = "data") GoodsRequestDto goodsRequestDto,
                                                      @RequestPart(value = "images") List<MultipartFile> images,
-                                                     @RequestPart(value = "wanted")WantedRequestDto wantedRequestDto,
+                                                     @RequestPart(value = "wanted") WantedRequestDto wantedRequestDto,
                                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         return goodsService.goodsCreate(goodsRequestDto, images, wantedRequestDto, userDetails.getUser());
@@ -46,13 +46,14 @@ public class GoodsController {
     }
 
     // 주머니 조회
-    @GetMapping("pocket")
+    // http://localhost:8080/api/goods/pocket?userId=1&page=1&size=5&sortBy=createdAt&isAsc=false
+    @GetMapping("/pocket")
     public ApiResponse<PocketResponseDto> getMyGoods(@RequestParam("userId") Long userId,
-                                                              @RequestParam("page") int page,
-                                                              @RequestParam("size") int size,
-                                                              @RequestParam("sortBy") String sortBy,
-                                                              @RequestParam("isAsc") boolean isAsc,
-                                                              @AuthenticationPrincipal UserDetailsImpl userDetails){
+                                                     @RequestParam("page") int page,
+                                                     @RequestParam("size") int size,
+                                                     @RequestParam("sortBy") String sortBy,
+                                                     @RequestParam("isAsc") boolean isAsc,
+                                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return goodsService.getMyGoods(userId,
                 page - 1,
                 size,
@@ -78,7 +79,7 @@ public class GoodsController {
     }
 
     @GetMapping("/recent")
-    public List<GoodsRecentDto> recentGoods(HttpServletResponse response){
+    public List<GoodsRecentDto> recentGoods(HttpServletResponse response) {
         return goodsService.recentGoods(response);
     }
 }
