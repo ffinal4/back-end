@@ -38,7 +38,7 @@ public class RatingService {
             randomGoods = goodsRepository.findRandomGoods(user);
         }
         if(randomGoods == null){
-            new NullPointerException("평가가능한 상품이 존재하지 않습니다.");
+            throw new NullPointerException("평가가능한 상품이 존재하지 않습니다.");
         }
 
         RatingResponseDto ratingResponseDto = new RatingResponseDto(randomGoods);
