@@ -48,8 +48,9 @@ public class AuctionController {
     }
 
     @GetMapping("/{auctionId}")
-    public ApiResponse<AuctionResponseDto> getAuction(@PathVariable("auctionId") Long auctionId) {
-        return ResponseUtils.ok(auctionService.findAuctionById(auctionId));
+    public ApiResponse<AuctionResponseDto> getAuction(@PathVariable("auctionId") Long auctionId,
+                                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseUtils.ok(auctionService.findAuctionById(auctionId, userDetails.getUser()));
     }
 
     // 경매 정상 종료 -> 우선 입찰 물품 전체 보여주기 -> 입찰 물품 선택

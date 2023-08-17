@@ -59,6 +59,8 @@ public class GoodsResponseDto {
         this.createdAt = goods.getCreatedAt();
         this.images = goods.getImage().stream().map(Image::getImageUrl).toList();
         this.modifiedAt = goods.getModifiedAt();
+        this.wantedGoods = goods.getWantedGoods();
+        this.nickname = goods.getUser().getNickname();
     }
 
     public GoodsResponseDto(Goods goods, List<String> images, WantedGoods wantedGoods, User user) {

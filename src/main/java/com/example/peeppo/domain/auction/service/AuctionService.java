@@ -139,9 +139,13 @@ public class AuctionService {
     }
 
     // 경매 상세 조회
-    public AuctionResponseDto findAuctionById(Long auctionId) {
+    public AuctionResponseDto findAuctionById(Long auctionId, User user) {
         Auction auction = findAuctionId(auctionId);
-        return new AuctionResponseDto(auction, auction.getGoods(), countDownTime(auction), findBidCount(auctionId));
+        boolean checkSameUser = true;
+        if(auction.getUser().getUserId() != user.getUserId()){
+            checkSameUser = false;
+        }
+        return new AuctionResponseDto(auction, auction.getGoods(), countDownTime(auction), findBidCount(auctionId), checkSameUser);
     }
 
     // 경매 찾아서 Auction 리턴
