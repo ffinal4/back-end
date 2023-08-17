@@ -52,7 +52,7 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
     Optional<Goods> findByGoodsId(Long goodsId);
 
 
-    @Query("SELECT g from Goods g ORDER BY g.createdAt desc ")
+    @Query(value = "SELECT g.* from goods g ORDER BY g.created_at desc LIMIT 8", nativeQuery = true)
     List<Goods> findTop8ByCreatedAt();
     List<Goods> findAllByUserAndIsDeletedFalseAndGoodsStatus(User user, GoodsStatus onsale);
 
