@@ -25,6 +25,8 @@ public class QUser extends EntityPathBase<User> {
 
     public final StringPath location = createString("location");
 
+    public final NumberPath<Long> maxRatingCount = createNumber("maxRatingCount", Long.class);
+
     public final StringPath nickname = createString("nickname");
 
     public final StringPath password = createString("password");

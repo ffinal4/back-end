@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.goods.repository;
 
 import com.example.peeppo.domain.goods.entity.Goods;
+import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,9 +26,9 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
             "inner join rating r on r.rating_goods_id = rg.rating_goods_id " +
             "inner join user_rating_relation urr on urr.rating_id = r.rating_id " +
             "inner join user u on u.user_id = urr.user_id " +
-            "where u.user_id = :#{#targetUser.userId}) " +
+            "where u.user_id = :#{#targetUser.userId} " +
             "group by g2.goods_id " +
-            "having count(distinct u.user_id) <= 3) " +
+            "having COUNT(r.rating_id) <= 3) " +
             "and g1.user_id <> :#{#targetUser.userId} " +
             "and g1.is_deleted = false " +
             "order by rand() limit 1", nativeQuery = true)
