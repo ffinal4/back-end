@@ -136,6 +136,7 @@ public class GoodsService {
         }
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
+        User user = findUserId(userId);
         Page<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalse(user, pageable);
         List<GoodsListResponseDto> myGoods = new ArrayList<>();
         for (Goods goods : goodsList) {
@@ -252,4 +253,13 @@ public class GoodsService {
         return goodsRecentDtos;
     }
 
+    public List<GoodsResponseDto> getMyGoodsWithoutPagenation(User user) {
+        List<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalseAndGoodsStatus(user, GoodsStatus.ONSALE);
+        List<GoodsResponseDto> goodsResponseDtos = new ArrayList<>();
+        for(Goods goods : goodsList){
+            GoodsResponseDto goodsResponseDto = new GoodsResponseDto(goods);
+            goodsResponseDtos.add(goodsResponseDto);
+        }
+        return goodsResponseDtos;
+    }
 }

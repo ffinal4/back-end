@@ -77,4 +77,5 @@ public class GoodsResponseDto {
         this.wantedGoods = wantedGoods;
         this.nickname = user.getNickname();
     }
+
 }
