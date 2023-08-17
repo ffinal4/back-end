@@ -21,7 +21,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class HomeService {
-
     private final GoodsRepository goodsRepository;
     private final BidRepository bidRepository;
     private final AuctionService auctionService;
@@ -41,7 +40,6 @@ public class HomeService {
             AuctionListResponseDto auctionResponseDto = new AuctionListResponseDto(auction, timeRemaining, auctionService.findBidCount(auction.getAuctionId()));
             auctionResponseDtos.add(auctionResponseDto);
         }
-
         return new HomeResponseDto(goodsListResponseDtos, auctionResponseDtos);
     }
 }
