@@ -4,10 +4,10 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.example.peeppo.domain.dibs.entity.Dibs;
 import com.example.peeppo.domain.dibs.repository.DibsRepository;
 import com.example.peeppo.domain.dibs.service.DibsService;
-import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.entity.WantedGoods;
+import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.goods.repository.WantedGoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
@@ -255,8 +255,11 @@ public class GoodsService {
 
     public ApiResponse<UrPocketResponseDto> getPocket(String nickname, UserDetailsImpl userDetails, int page, int size, String sortBy, boolean isAsc){
         User user = userRepository.findUserByNickname(nickname);
-        if (user.equals(user1)) {
-            throw new IllegalAccessException();
+        if(userDetails != null){ // 로그인 된 경우다 !!
+            if(user.getUserId() == userDetails.getUser().getUserId()){
+                throw new IllegalArgumentException("같은 사용자입니다 ");
+            }
+        }
         if(userDetails != null){ // 로그인 된 경우다 !!
             if(user.getUserId() == userDetails.getUser().getUserId()){
                throw new IllegalArgumentException("같은 사용자입니다 ");
@@ -282,7 +285,7 @@ public class GoodsService {
 //        return getGoodsResponseDtos(user);
     }
 
-    private List<GoodsResponseDto> getGoodsResponseDtos(User user) {
+    private List<GoodsResponseDto> getGoodsResponseDtos(User user){
         List<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalseAndGoodsStatus(user, GoodsStatus.ONSALE);
         List<GoodsResponseDto> goodsResponseDtos = new ArrayList<>();
         for (Goods goods : goodsList) {
