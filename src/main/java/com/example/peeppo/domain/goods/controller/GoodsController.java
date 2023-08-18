@@ -14,8 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-import static com.example.peeppo.global.stringCode.SuccessCodeEnum.AUCTION_END_SUCCESS;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/goods")
@@ -50,19 +48,13 @@ public class GoodsController {
     }
 
     @GetMapping("/pocket")
-    public ApiResponse<PocketResponseDto> getMyGoods(@RequestParam("userId") Long userId,
-                                                     @RequestParam("page") int page,
+    public ApiResponse<PocketResponseDto> getMyGoods(@RequestParam("page") int page,
                                                      @RequestParam("size") int size,
                                                      @RequestParam("sortBy") String sortBy,
                                                      @RequestParam("isAsc") boolean isAsc,
                                                      @AuthenticationPrincipal UserDetailsImpl userDetails){
 
-        return goodsService.getMyGoods(userId,
-                page - 1,
-                size,
-                sortBy,
-                isAsc,
-                userDetails);
+        return goodsService.getMyGoods(page - 1, size, sortBy, isAsc, userDetails.getUser().getUserId());
     }
 
     @GetMapping("/mypocket")
@@ -88,7 +80,7 @@ public class GoodsController {
     @DeleteMapping("/{goodsId}")
     public ApiResponse<DeleteResponseDto> deleteGoods(@PathVariable Long goodsId,
                                                       @AuthenticationPrincipal UserDetailsImpl userDetails) throws IllegalAccessException {
-        return goodsService.deleteGoods(goodsId, userDetails.getUser());
+        return goodsService.deleteGoods(goodsId, userDetails.getUser().getUserId());
     }
 
     @GetMapping("/recent")
