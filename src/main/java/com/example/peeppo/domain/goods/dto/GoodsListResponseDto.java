@@ -27,6 +27,7 @@ public class GoodsListResponseDto {
         this.location = goods.getLocation();
         this.image = image;
         this.nickname = goods.getUser().getNickname();
+        this.goodsStatus = goods.getGoodsStatus();
     }
     public GoodsListResponseDto(Goods goods, String image, Boolean checkDibs) {
         this.goodsId = goods.getGoodsId();
