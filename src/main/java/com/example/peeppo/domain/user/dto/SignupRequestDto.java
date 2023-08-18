@@ -15,12 +15,12 @@ public class SignupRequestDto {
 
     @NotBlank
     @Size(min = 2, max = 15, message = "2자 이상 15자 이내로 입력해주세요.")
-    @Pattern(regexp = "^[a-zA-Z0-9가-힣]+$", message = "소문자 영어와 숫자만 사용 가능합니다.")
+    @Pattern(regexp = "^[a-zA-Z0-9가-힣]+$", message = "영어와 숫자, 한글만 사용 가능합니다.")
     String nickname;
 
     @Email(message = "이메일 형식이 아닙니다.")
     @NotBlank
-    @Size(min = 10, max = 30, message = "2자 이상 15자 이내로 입력해주세요.")
+    @Size(min = 10, max = 30, message = "10자 이상 30자 이내로 입력해주세요.")
     @Pattern(regexp = "^[a-zA-Z0-9+-\\_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$")
     String email;
 

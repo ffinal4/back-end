@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.goods.controller;
 
 import com.example.peeppo.domain.goods.dto.*;
+
 import com.example.peeppo.domain.goods.service.GoodsService;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
@@ -13,8 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-
-import static com.example.peeppo.global.stringCode.SuccessCodeEnum.AUCTION_END_SUCCESS;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,33 +35,29 @@ public class GoodsController {
     public Page<GoodsListResponseDto> allGoods(@RequestParam("page") int page,
                                                @RequestParam("size") int size,
                                                @RequestParam("sortBy") String sortBy,
-                                               @RequestParam("isAsc") boolean isAsc) {
-
-        return goodsService.allGoods(page - 1, size, sortBy, isAsc);
+                                               @RequestParam("isAsc") boolean isAsc,
+                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
+            return goodsService.allGoods(page -1, size, sortBy, isAsc, userDetails);
     }
 
     // 게시물 상세조회
     @GetMapping("/{goodsId}")
     public ApiResponse<GoodsResponseDto> getGoods(@PathVariable Long goodsId,
                                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
-
-        return goodsService.getGoods(goodsId, userDetails.getUser());
+        if(userDetails != null){
+           return goodsService.getGoods(goodsId, userDetails.getUser());
+        }
+        return goodsService.getGoodsEveryone(goodsId);
     }
 
     @GetMapping("/pocket")
-    public ApiResponse<PocketResponseDto> getMyGoods(@RequestParam("userId") Long userId,
-                                                     @RequestParam("page") int page,
+    public ApiResponse<PocketResponseDto> getMyGoods(@RequestParam("page") int page,
                                                      @RequestParam("size") int size,
                                                      @RequestParam("sortBy") String sortBy,
                                                      @RequestParam("isAsc") boolean isAsc,
                                                      @AuthenticationPrincipal UserDetailsImpl userDetails){
 
-        return goodsService.getMyGoods(userId,
-                page - 1,
-                size,
-                sortBy,
-                isAsc,
-                userDetails);
+        return goodsService.getMyGoods(page - 1, size, sortBy, isAsc, userDetails.getUser().getUserId());
     }
 
     @GetMapping("/mypocket")
@@ -71,9 +66,13 @@ public class GoodsController {
     }
 
     @GetMapping("/pocket/{nickname}")
-    public ApiResponse<List<GoodsResponseDto>> getPocket(@PathVariable String nickname,
-                                                         @AuthenticationPrincipal UserDetailsImpl userDetails) throws IllegalAccessException {
-        return ResponseUtils.ok(goodsService.getPocket(nickname, userDetails.getUser()));
+    public ApiResponse<UrPocketResponseDto> getPocket(@PathVariable String nickname,
+                                                         @RequestParam("page") int page,
+                                                         @RequestParam("size") int size,
+                                                         @RequestParam("sortBy") String sortBy,
+                                                         @RequestParam("isAsc") boolean isAsc,
+                                                         @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return goodsService.getPocket(nickname, userDetails, page - 1, size, sortBy, isAsc);
     }
 
     @PutMapping("/{goodsId}")
@@ -88,11 +87,18 @@ public class GoodsController {
     @DeleteMapping("/{goodsId}")
     public ApiResponse<DeleteResponseDto> deleteGoods(@PathVariable Long goodsId,
                                                       @AuthenticationPrincipal UserDetailsImpl userDetails) throws IllegalAccessException {
-        return goodsService.deleteGoods(goodsId, userDetails.getUser());
+        return goodsService.deleteGoods(goodsId, userDetails.getUser().getUserId());
     }
 
     @GetMapping("/recent")
     public List<GoodsRecentDto> recentGoods(HttpServletResponse response) {
         return goodsService.recentGoods(response);
     }
+
+
+    @GetMapping("/search")
+    public ApiResponse<List<GoodsListResponseDto>> searchGoods(@RequestParam("keyword") String keyword){
+        return goodsService.searchGoods(keyword);
+    }
 }
+

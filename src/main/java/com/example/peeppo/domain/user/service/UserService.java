@@ -1,23 +1,28 @@
 package com.example.peeppo.domain.user.service;
 
+import com.example.peeppo.domain.auction.dto.AuctionResponseDto;
 import com.example.peeppo.domain.image.service.UploadService;
 import com.example.peeppo.domain.user.dto.*;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.entity.UserRoleEnum;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.security.jwt.JwtUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
 import static org.springframework.http.HttpStatus.OK;
@@ -32,13 +37,12 @@ public class UserService {
     private final RedisTemplate redisTemplate;
     private final UploadService uploadService;
 
-    public ResponseEntity<ResponseDto> signup(SignupRequestDto signupRequestDto) {
+    public ResponseDto signup(SignupRequestDto signupRequestDto) {
         String email = signupRequestDto.getEmail();
         boolean validateDuplicateEmail = userRepository.findByEmail(email).isEmpty();
 
         if (!validateDuplicateEmail) {
-            ResponseDto response = new ResponseDto("중복된 이메일입니다.", HttpStatus.BAD_REQUEST.value(), "BAD");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(response);
+            return new ResponseDto("중복된 이메일입니다.", HttpStatus.BAD_REQUEST.value(), "BAD");
         }
 
         String encodedPassword = passwordEncoder.encode(signupRequestDto.getPassword());
@@ -47,21 +51,17 @@ public class UserService {
 
         userRepository.save(user);
 
-        ResponseDto response = new ResponseDto("회원가입 완료", HttpStatus.OK.value(), "OK");
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return new ResponseDto("회원가입 완료", HttpStatus.OK.value(), "OK");
     }
 
     //닉네임 중복체크
-    public ResponseEntity<CheckResponseDto> checkValidateNickname(ValidateRequestDto validateRequestDto) {
+    public CheckResponseDto checkValidateNickname(ValidateRequestDto validateRequestDto) {
         String nickname = validateRequestDto.getNickname();
         boolean validateDuplicateNickname = isDuplicatedNickname(nickname);
-
         if (!validateDuplicateNickname) {
             throw new IllegalStateException("중복된 이름입니다.");
         }
-
-        CheckResponseDto response = new CheckResponseDto("중복되지 않은 이름입니다.", validateDuplicateNickname, OK.value(), "OK");
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return new CheckResponseDto("중복되지 않은 이름입니다.", validateDuplicateNickname, OK.value(), "OK");
     }
 
     private boolean isDuplicatedNickname(String nickname) {
@@ -93,16 +93,18 @@ public class UserService {
     }
 
     //회원정보 페이지
+    public MyPageResponseDto myPage(User user) {
 
-    public ResponseEntity<MyPageResponseDto> myPage(User user) {
-
-        MyPageResponseDto myPageResponseDto = new MyPageResponseDto(user);
-
-        return ResponseEntity.status(HttpStatus.OK.value()).body(myPageResponseDto);
+        return new MyPageResponseDto(user);
     }
 
-    public ResponseDto updatemypage(MyPageRequestDto myPageRequestDto, MultipartFile multipartFile, User user) throws IOException {
+    public ResponseDto updateMyPage(MyPageRequestDto myPageRequestDto, MultipartFile multipartFile, User user) throws IOException {
+
         String encodedPassword = passwordEncoder.encode(myPageRequestDto.getPassword());
+        if(!passwordEncoder.matches(myPageRequestDto.getOriginPassword(), user.getPassword())){
+            return new ResponseDto("비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST.value(), "BAD_REQUEST");
+        }
+
         String updateUserImg = uploadService.upload(multipartFile);
         user.upload(myPageRequestDto, updateUserImg, encodedPassword);
 
@@ -111,10 +113,9 @@ public class UserService {
         return new ResponseDto("개인정보가 수정되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
-    public ResponseEntity<ResponseDto> deletemypage(Long userId) {
+    public ResponseDto deleteMyPage(Long userId) {
         userRepository.deleteById(userId);
 
-        ResponseDto response = new ResponseDto("탈퇴 완료", HttpStatus.OK.value(), "OK");
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return new ResponseDto("탈퇴 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
 }

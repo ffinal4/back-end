@@ -44,6 +44,8 @@ public class User {
     @Column
     private Long maxRatingCount = 0L;
     private Long currentRatingCount = 0L;
+    // 한 게임에서 얻은 총 포인트
+    private Long totalPoint = 0L;
 
 
     @Column
@@ -72,7 +74,14 @@ public class User {
         }
 
         this.userPoint += userPoint;
+        this.totalPoint += userPoint;
     }
+
+    public void totalPointInit(){
+        this.totalPoint = 0L;
+    }
+
+
 
     public void userPointAdd(Long userPoint) {
         this.userPoint += userPoint;

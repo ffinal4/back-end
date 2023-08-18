@@ -14,6 +14,9 @@ import com.example.peeppo.domain.bid.repository.QueryRepository;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.image.repository.ImageRepository;
+import com.example.peeppo.domain.rating.entity.Rating;
+import com.example.peeppo.domain.rating.entity.RatingGoods;
+import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
 import com.example.peeppo.domain.rating.repository.ratingRepository.RatingRepository;
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
@@ -42,9 +45,10 @@ public class BidService {
     private final ImageRepository imageRepository;
     private final QueryRepository queryRepository;
     private final ChoiceBidRepository choiceBidRepository;
+    private final RatingGoodsRepository ratingGoodsRepository;
     private final RatingRepository ratingRepository;
 
-    public ResponseEntity<ResponseDto> bidding(User user, Long auctionId, BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
+    public ResponseDto bidding(User user, Long auctionId, BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
 
         Auction auction = getAuction(auctionId);
         List<Bid> List = new ArrayList<>();
@@ -61,11 +65,11 @@ public class BidService {
                     }
 
                     if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {
-                        //Rating rating = ratingRepository.findByRatingGoodsId(goodsId);
+                        RatingGoods ratingGoods = ratingGoodsRepository.findByGoodsGoodsId(goodsId);
                         //시작가보다 낮을 경우
-//                        if (auction.getLowPrice() > rating.getAvgRatingPrice()) {   //평균가 이상함
-//                            throw new IllegalAccessException();
-//                        }
+                        if (auction.getLowPrice() > ratingGoods.getAvgRatingPrice()) {   //평균가 이상함
+                            throw new IllegalAccessException();
+                        }
                         List.add(new Bid(user, auction, goods, goodsImg));
                         goods.changeStatus(GoodsStatus.BIDDING);
                     } else {
@@ -78,11 +82,10 @@ public class BidService {
 
         bidRepository.saveAll(List);
 
-        ResponseDto response = new ResponseDto("입찰이 완료되었습니다.", HttpStatus.OK.value(), "OK");
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return new ResponseDto("입찰이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
-    public ResponseEntity<Page<BidListResponseDto>> BidList(Long auctionId, int page, int size, String sortBy, boolean isAsc) {
+    public Page<BidListResponseDto> BidList(Long auctionId, int page, int size, String sortBy, boolean isAsc) {
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Bid> bidPage = bidRepository.findAllByAuctionAuctionId(auctionId, pageable);
 
@@ -95,12 +98,11 @@ public class BidService {
                 .map(Bid -> new BidListResponseDto(Bid, goodsImg))
                 .toList();
 
-        PageResponse response = new PageResponse<>(bidList, pageable, bidPage.getTotalElements());
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return new PageResponse<>(bidList, pageable, bidPage.getTotalElements());
     }
 
     //경매자가 선택
-    public ResponseEntity<ResponseDto> choiceBids(User user, Long auctionId, ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
+    public ResponseDto choiceBids(User user, Long auctionId, ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
         Auction auction = getAuction(auctionId);
         List<Choice> bidsList = new ArrayList<>();
 
@@ -110,12 +112,11 @@ public class BidService {
             throw new IllegalAccessException();
         }
 
-        ResponseDto response = new ResponseDto("선택이 완료되었습니다.", HttpStatus.OK.value(), "OK");
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return new ResponseDto("선택이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
     //경매자가 선택 바꾸는 기능
-    public ResponseEntity<ResponseDto> choiceUpdateBids(User user, Long auctionId, ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
+    public ResponseDto choiceUpdateBids(User user, Long auctionId, ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
         Auction auction = getAuction(auctionId);
         List<Choice> bidsList = new ArrayList<>();
         List<Choice> findAllChoice = queryRepository.findChoice(auctionId);
@@ -130,8 +131,7 @@ public class BidService {
             throw new IllegalAccessException();
         }
 
-        ResponseDto response = new ResponseDto("재선택 되었습니다.", HttpStatus.OK.value(), "OK");
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return new ResponseDto("재선택 되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
     private void getBiddingList(ChoiceRequestDto choiceRequestDto, Auction auction, List<Choice> bidsList) throws IllegalAccessException {
