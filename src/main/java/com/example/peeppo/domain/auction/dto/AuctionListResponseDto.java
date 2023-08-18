@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.auction.dto;
 
 import com.example.peeppo.domain.auction.entity.Auction;
+import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.image.entity.Image;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,6 +26,7 @@ public class AuctionListResponseDto {
     private String content;
     private String image;
     private TimeRemaining timeRemaining;
+    private AuctionStatus auctionStatus;
 
 
 
@@ -42,6 +44,7 @@ public class AuctionListResponseDto {
         this.content = auction.getGoods().getContent();
         this.image = auction.getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
         this.timeRemaining = timeRemaining;
+        this.auctionStatus = auction.getAuctionStatus();
     }
 
 
