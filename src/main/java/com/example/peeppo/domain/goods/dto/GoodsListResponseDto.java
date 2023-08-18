@@ -37,6 +37,7 @@ public class GoodsListResponseDto {
         this.location = goods.getLocation();
         this.image = image;
         this.nickname = goods.getUser().getNickname();
+        this.goodsStatus = goods.getGoodsStatus();
     }
 
     public GoodsListResponseDto(Goods goods) {
@@ -57,6 +58,7 @@ public class GoodsListResponseDto {
         this.location = goods.getLocation();
         this.image = goods.getImage().stream().map(Image::getImageUrl).toList().get(0);
         this.nickname = goods.getUser().getNickname();
+        this.goodsStatus = goods.getGoodsStatus();
 
     }
 }
