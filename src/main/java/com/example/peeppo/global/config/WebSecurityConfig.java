@@ -157,7 +157,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                                         .requestMatchers(HttpMethod.GET,
                                                 "/api/auction/{auctionId}",
                                                 "/api/auction/{auctionId}/bid",
-                                                "/api/goods,/api/goods/{goodsId}",
+                                                "/api/goods","/api/goods/{goodsId}",
                                                 "/api/goods/pocket/{nickname}",
                                                 "/api/home",
                                                 "/api/goods/recent",
