@@ -9,6 +9,10 @@ import com.example.peeppo.domain.bid.repository.BidRepository;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
+import com.example.peeppo.domain.rating.entity.Rating;
+import com.example.peeppo.domain.rating.entity.RatingGoods;
+import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
+import com.example.peeppo.domain.rating.repository.ratingRepository.RatingRepository;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.PageResponse;
@@ -46,6 +50,7 @@ public class AuctionService {
     private final AuctionRepository auctionRepository;
     private final BidRepository bidRepository;
     private final UserRepository userRepository;
+    private final RatingGoodsRepository ratingGoodsRepository;
 
     @Transactional
     public AuctionResponseDto createAuction(Long goodsId, AuctionRequestDto auctionRequestDto, User user) {
@@ -63,10 +68,17 @@ public class AuctionService {
         if(!(getGoods.isDeleted())){
             new IllegalArgumentException("해당 물건은 삭제된 물건입니다.");
         }
+
+        RatingGoods ratingGoods = ratingGoodsRepository.findByGoodsGoodsId(goodsId);
+
+        if(ratingGoods.getRatingCount() < 3){
+            new IllegalArgumentException("해당 물건은 3회 이상의 평가가 끝나지 않은 상태입니다.");
+        }
+
         GoodsResponseDto goodsResponseDto = new GoodsResponseDto(getGoods);
         LocalDateTime auctionEndTime = calAuctionEndTime(auctionRequestDto.getEndTime()); // 마감기한 계산
         log.info("{}", auctionEndTime);
-        Auction auction = new Auction(getGoods, auctionEndTime, auctionRequestDto, user); // 경매와 마감기한 생성
+        Auction auction = new Auction(getGoods, auctionEndTime, user, ratingGoods); // 경매와 마감기한 생성
         auction.getGoods().changeStatus(GoodsStatus.ONAUCTION);
         auctionRepository.save(auction);
         return new AuctionResponseDto(auction, goodsResponseDto, user, countDownTime(auction));
@@ -139,9 +151,13 @@ public class AuctionService {
     }
 
     // 경매 상세 조회
-    public AuctionResponseDto findAuctionById(Long auctionId) {
+    public AuctionResponseDto findAuctionById(Long auctionId, User user) {
         Auction auction = findAuctionId(auctionId);
-        return new AuctionResponseDto(auction, auction.getGoods(), countDownTime(auction), findBidCount(auctionId));
+        boolean checkSameUser = true;
+        if(auction.getUser().getUserId() != user.getUserId()){
+            checkSameUser = false;
+        }
+        return new AuctionResponseDto(auction, auction.getGoods(), countDownTime(auction), findBidCount(auctionId), checkSameUser);
     }
 
     // 경매 찾아서 Auction 리턴
@@ -227,4 +243,5 @@ public class AuctionService {
             throw new IllegalArgumentException("경매 생성은 물품 작성자만 가능합니다");
         }
     }
+
 }

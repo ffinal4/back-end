@@ -50,20 +50,18 @@ public class BidService {
         List<Bid> List = new ArrayList<>();
 
         //경매 진행 여부
-        if (auction.getGoods().getGoodsStatus().equals(GoodsStatus.ONAUCTION)) {
-            if (!auction.getUser().getUserId().equals(user.getUserId())) {
+        if (auction.getGoods().getGoodsStatus().equals(GoodsStatus.ONAUCTION) &&
+                !auction.getUser().getUserId().equals(user.getUserId())) {
                 for (Long goodsId : bidGoodsListRequestDto.getGoodsId()) {
                     Goods goods = getGoods(goodsId);
                     String goodsImg = String.valueOf(imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goodsId));
 
-                    if (goods.isDeleted()) {
+                    if (goods.isDeleted() && !goods.getUser().getUserId().equals(user.getUserId())) {
                         throw new IllegalAccessException();        //여기도 고민
                     }
-                    if (!goods.getUser().getUserId().equals(user.getUserId())) {
-                        throw new IllegalAccessException();
-                    }
 
-                    if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {//Rating rating = ratingRepository.findByRatingGoodsId(goodsId);
+                    if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {
+                        //Rating rating = ratingRepository.findByRatingGoodsId(goodsId);
                         //시작가보다 낮을 경우
 //                        if (auction.getLowPrice() > rating.getAvgRatingPrice()) {   //평균가 이상함
 //                            throw new IllegalAccessException();
@@ -74,9 +72,6 @@ public class BidService {
                         throw new IllegalAccessException();
                     }
                 }
-            } else {
-                throw new IllegalAccessException();
-            }
         } else {
             throw new IllegalAccessException();
         }

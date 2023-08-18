@@ -1,4 +1,4 @@
-
+/*
 package com.example.peeppo.global.config;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -14,3 +14,4 @@ public class QuerydslConfig {
         return new JPAQueryFactory(em);
     }
 }
+*/

@@ -17,11 +17,10 @@ public class AuctionResponseDto {
     private LocalDateTime auctionEndTime;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
-
     private Long bidCount;
     private GoodsResponseDto goodsResponseDto;
     private TimeRemaining leftTime;
-
+    private boolean checkSameUser;
 
     public AuctionResponseDto(Auction auction, GoodsResponseDto goodsResponseDto, User user, TimeRemaining countDownTime) {
         this.auctionId = auction.getAuctionId();
@@ -42,6 +41,18 @@ public class AuctionResponseDto {
         this.modifiedAt = auction.getModifiedAt();
         this.leftTime = countDownTime;
         this.bidCount = bidCount;
+    }
+
+    public AuctionResponseDto(Auction auction, Goods goods, TimeRemaining countDownTime, Long bidCount, boolean checkSameUser) {
+        this.auctionId = auction.getAuctionId();
+        this.deleteStatus = auction.getIsDeleted();
+        this.goodsResponseDto = new GoodsResponseDto(goods);
+        this.auctionEndTime = auction.getAuctionEndTime();
+        this.createdAt = auction.getCreatedAt();
+        this.modifiedAt = auction.getModifiedAt();
+        this.leftTime = countDownTime;
+        this.bidCount = bidCount;
+        this.checkSameUser = checkSameUser;
     }
 }
 

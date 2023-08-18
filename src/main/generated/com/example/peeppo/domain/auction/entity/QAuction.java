@@ -37,7 +37,7 @@ public class QAuction extends EntityPathBase<Auction> {
 
     public final BooleanPath isDeleted = createBoolean("isDeleted");
 
-    public final NumberPath<Long> lowPrice = createNumber("lowPrice", Long.class);
+    public final NumberPath<Double> lowPrice = createNumber("lowPrice", Double.class);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;

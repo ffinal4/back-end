@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.goods.repository;
 
 import com.example.peeppo.domain.goods.entity.Goods;
+import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 
+import java.util.List;
 import java.util.Optional;
 
 public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsRepositoryCustom{
@@ -49,4 +51,8 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
 
     Optional<Goods> findByGoodsId(Long goodsId);
 
-   }
+
+    @Query(value = "SELECT g.* from goods g ORDER BY g.created_at desc LIMIT 8", nativeQuery = true)
+    List<Goods> findTop8ByCreatedAt();
+    List<Goods> findAllByUserAndIsDeletedFalseAndGoodsStatus(User user, GoodsStatus onsale);
+}

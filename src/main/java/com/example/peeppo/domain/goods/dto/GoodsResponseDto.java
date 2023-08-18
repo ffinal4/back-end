@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class GoodsResponseDto {
     private Long goodsId;
+    private Long userId;
     private String title;
     private String content;
     private Category category;
@@ -27,10 +28,12 @@ public class GoodsResponseDto {
     private WantedGoods wantedGoods;
 
     private String nickname;
+    private boolean checkSameUser;
 
 
     public GoodsResponseDto(Goods goods, List<String> images, WantedGoods wantedGoods) {
         this.goodsId = goods.getGoodsId();
+        this.userId = goods.getUser().getUserId();
         this.title = goods.getTitle();
         this.content = goods.getContent();
         this.category = goods.getCategory();
@@ -41,10 +44,12 @@ public class GoodsResponseDto {
         this.modifiedAt = goods.getModifiedAt();
         this.images = images;
         this.wantedGoods = wantedGoods;
+        this.nickname = goods.getUser().getNickname();
     }
 
     public GoodsResponseDto(Goods goods) {
         this.goodsId = goods.getGoodsId();
+        this.userId = goods.getUser().getUserId();
         this.title = goods.getTitle();
         this.content = goods.getContent();
         this.category = goods.getCategory();
@@ -53,13 +58,14 @@ public class GoodsResponseDto {
         this.tradeType = goods.getTradeType();
         this.createdAt = goods.getCreatedAt();
         this.images = goods.getImage().stream().map(Image::getImageUrl).toList();
-        this.wantedGoods = goods.getWantedGoods();
         this.modifiedAt = goods.getModifiedAt();
+        this.wantedGoods = goods.getWantedGoods();
         this.nickname = goods.getUser().getNickname();
     }
 
     public GoodsResponseDto(Goods goods, List<String> images, WantedGoods wantedGoods, User user) {
         this.goodsId = goods.getGoodsId();
+        this.userId = goods.getUser().getUserId();
         this.title = goods.getTitle();
         this.content = goods.getContent();
         this.category = goods.getCategory();
@@ -71,5 +77,22 @@ public class GoodsResponseDto {
         this.images = images;
         this.wantedGoods = wantedGoods;
         this.nickname = user.getNickname();
+    }
+
+    public GoodsResponseDto(Goods goods, List<String> imageUrls, WantedGoods wantedGoods, boolean checkSameUser) {
+        this.goodsId = goods.getGoodsId();
+        this.userId = goods.getUser().getUserId();
+        this.title = goods.getTitle();
+        this.content = goods.getContent();
+        this.category = goods.getCategory();
+        this.location = goods.getLocation();
+        this.goodsCondition = goods.getGoodsCondition();
+        this.tradeType = goods.getTradeType();
+        this.createdAt = goods.getCreatedAt();
+        this.modifiedAt = goods.getModifiedAt();
+        this.images =  imageUrls;
+        this.wantedGoods = wantedGoods;
+        this.nickname = goods.getUser().getNickname();
+        this.checkSameUser = checkSameUser;
     }
 }
