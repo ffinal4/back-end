@@ -1,9 +1,12 @@
 package com.example.peeppo.global.exception;
 
+import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.responseDto.ErrorResponse;
+import jdk.jshell.Snippet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -20,12 +23,20 @@ public class GlobalExceptionHandler {
         return apiResponse;
     }
 
+//    @ExceptionHandler(IllegalArgumentException.class)
+//    public ApiResponse<ErrorResponse> handleIllegalArgumentException(Exception ex) {
+//        log.error("IllegalArgumentException error: {}", ex.getMessage());
+//        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
+//        ApiResponse<ErrorResponse> apiResponse = new ApiResponse<>(false, null, errorResponse);
+//        return apiResponse;
+//    }
+
     @ExceptionHandler(IllegalArgumentException.class)
-    public ApiResponse<ErrorResponse> handleIllegalArgumentException(Exception ex) {
+    public ResponseEntity<ResponseDto> handleIllegalArgumentException(Exception ex) {
         log.error("IllegalArgumentException error: {}", ex.getMessage());
-        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
-        ApiResponse<ErrorResponse> apiResponse = new ApiResponse<>(false, null, errorResponse);
-        return apiResponse;
+        ResponseDto responseDto = new ResponseDto(ex.getMessage(), HttpStatus.BAD_REQUEST.value(), null);
+        ResponseEntity<ResponseDto> response = new ResponseEntity<>(responseDto, HttpStatus.BAD_REQUEST);
+        return response;
     }
 
     @ExceptionHandler(IllegalAccessException.class)
