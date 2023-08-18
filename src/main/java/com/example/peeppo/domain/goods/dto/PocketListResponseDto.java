@@ -3,14 +3,15 @@ package com.example.peeppo.domain.goods.dto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class PocketListResponseDto {
     private Long goodsId;
     private String location;
     private String title;
     private String content;
-    private String nickname;
     private String image;
     private GoodsStatus goodsStatus;
     private Long ratingPrice;
