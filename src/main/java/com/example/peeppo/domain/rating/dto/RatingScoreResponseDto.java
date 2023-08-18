@@ -14,6 +14,7 @@ public class RatingScoreResponseDto {
     private Long score;
     private Long ratingPrice;
     private Long sellerPrice;
+    private Long totalPoint;
 
 
 }
