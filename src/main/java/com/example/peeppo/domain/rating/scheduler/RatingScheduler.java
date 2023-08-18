@@ -1,5 +1,6 @@
 package com.example.peeppo.domain.rating.scheduler;
 
+
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.rating.helper.RatingHelper;

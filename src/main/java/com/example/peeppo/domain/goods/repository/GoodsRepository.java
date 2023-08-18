@@ -32,7 +32,7 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
             "and g1.user_id <> :#{#targetUser.userId} " +
             "and g1.is_deleted = false " +
             "order by rand() limit 1", nativeQuery = true)
-    Goods findRandomGoodsWithLowRatingCount(@Param("targetUser") User user);
+    Optional<Goods> findRandomGoodsWithLowRatingCount(@Param("targetUser") User user);
 
     @Query(value = "select g1.* " +
             "from goods g1 " +
@@ -47,12 +47,12 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
             "and g1.user_id <> :#{#targetUser.userId} " +
             "and g1.is_deleted = false " +
             "order by rand() limit 1", nativeQuery = true)
-    Goods findRandomGoods(@Param("targetUser") User user);
+    Optional<Goods> findRandomGoods(@Param("targetUser") User user);
 
     Optional<Goods> findByGoodsId(Long goodsId);
 
 
-    @Query("SELECT g from Goods g ORDER BY g.createdAt desc limit 8")
+    @Query(value = "SELECT g.* from goods g ORDER BY g.created_at desc LIMIT 8", nativeQuery = true)
     List<Goods> findTop8ByCreatedAt();
     List<Goods> findAllByUserAndIsDeletedFalseAndGoodsStatus(User user, GoodsStatus onsale);
 }

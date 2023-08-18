@@ -28,6 +28,7 @@ public class GoodsResponseDto {
     private WantedGoods wantedGoods;
 
     private String nickname;
+    private boolean checkSameUser;
 
 
     public GoodsResponseDto(Goods goods, List<String> images, WantedGoods wantedGoods) {
@@ -57,8 +58,8 @@ public class GoodsResponseDto {
         this.tradeType = goods.getTradeType();
         this.createdAt = goods.getCreatedAt();
         this.images = goods.getImage().stream().map(Image::getImageUrl).toList();
-        this.wantedGoods = goods.getWantedGoods();
         this.modifiedAt = goods.getModifiedAt();
+        this.wantedGoods = goods.getWantedGoods();
         this.nickname = goods.getUser().getNickname();
     }
 
@@ -78,4 +79,20 @@ public class GoodsResponseDto {
         this.nickname = user.getNickname();
     }
 
+    public GoodsResponseDto(Goods goods, List<String> imageUrls, WantedGoods wantedGoods, boolean checkSameUser) {
+        this.goodsId = goods.getGoodsId();
+        this.userId = goods.getUser().getUserId();
+        this.title = goods.getTitle();
+        this.content = goods.getContent();
+        this.category = goods.getCategory();
+        this.location = goods.getLocation();
+        this.goodsCondition = goods.getGoodsCondition();
+        this.tradeType = goods.getTradeType();
+        this.createdAt = goods.getCreatedAt();
+        this.modifiedAt = goods.getModifiedAt();
+        this.images =  imageUrls;
+        this.wantedGoods = wantedGoods;
+        this.nickname = goods.getUser().getNickname();
+        this.checkSameUser = checkSameUser;
+    }
 }

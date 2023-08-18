@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.goods.entity;
 
 import com.example.peeppo.domain.auction.entity.Auction;
+import com.example.peeppo.domain.dibs.entity.Dibs;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.dto.GoodsRequestDto;
 import com.example.peeppo.domain.goods.enums.Category;
@@ -18,7 +19,6 @@ import java.util.List;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
 @DynamicUpdate
 public class Goods extends Timestamped {
@@ -36,8 +36,6 @@ public class Goods extends Timestamped {
 
     private Long sellerPrice;
     private boolean isDeleted;
-//    @OneToOne(fetch = FetchType.LAZY)
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -55,6 +53,9 @@ public class Goods extends Timestamped {
 
     @Enumerated(EnumType.STRING)
     private GoodsStatus goodsStatus;
+
+/*    @OneToMany(mappedBy = "goods")
+    private List<Dibs> dibs;*/
 
 
 
@@ -85,6 +86,10 @@ public class Goods extends Timestamped {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.location = requestDto.getLocation();
+    }
+
+    public void delete(){
+        this.isDeleted = true;
     }
 
     public void changeStatus(GoodsStatus goodsStatus) {
