@@ -54,7 +54,7 @@ public class UserController {
     public ApiResponse<ResponseDto> updateMyPage(@RequestPart(value = "data") @Valid MyPageRequestDto myPageRequestDto,
                                                         @RequestPart(value = "image") MultipartFile multipartFile,
                                                         @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
-        return ResponseUtils.ok(userService.updateMyPage(myPageRequestDto, multipartFile, userDetails.getUser()));
+        return userService.updateMyPage(myPageRequestDto, multipartFile, userDetails.getUser());
     }
 
     @DeleteMapping("/users")
