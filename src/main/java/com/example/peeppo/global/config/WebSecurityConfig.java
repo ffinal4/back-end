@@ -18,6 +18,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +31,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
 
+import static com.example.peeppo.domain.user.entity.UserRoleEnum.Authority.USER;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
@@ -63,7 +65,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://54.180.87.141:8080")); // 이 부분에 출처를 추가합니다.
+        config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://54.180.87.141:8080", "http://54.180.87.141:80", "http://peeppo.store")); // 이 부분에 출처를 추가합니다.
         config.setAllowedMethods(Arrays.asList("HEAD", "POST", "GET", "DELETE", "PUT", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(Arrays.asList("*"));
         config.addExposedHeader("*");
@@ -93,6 +95,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         return filter;
     }
 
+/*
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return web -> {
@@ -104,35 +107,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 
         };
     }
-
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // CSRF 설정
-        http.csrf(AbstractHttpConfigurer::disable);
-        // 기본 설정인 Session 방식이 아닌 JWT 방식을 사용하기 위한 설정
-        http.sessionManagement((sessionManagement) ->
-                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        );
-
-        http
-                .cors(withDefaults())
-                .authorizeHttpRequests((authorizeHttpRequests) ->
-                authorizeHttpRequests
-                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/**").permitAll()
-                        .requestMatchers(HttpMethod.PUT, "/**").permitAll()
-                        .requestMatchers(HttpMethod.DELETE, "/**").permitAll()
-                        .anyRequest().authenticated() // 그 외 모든 요청 인증처리
-        );
-
-        http.addFilterBefore(new JwtAuthorizationFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class);
-        http.addFilterBefore(new AuthExceptionFilter(), JwtAuthorizationFilter.class);
-
-        return http.build();
-    }
-
+*/
 
 //    @Bean
 //    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -146,27 +121,86 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 //        http
 //                .cors(withDefaults())
 //                .authorizeHttpRequests((authorizeHttpRequests) ->
-//                                authorizeHttpRequests
-//                                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-//                                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-//                                        .requestMatchers(HttpMethod.GET,
-//                                                "/api/auction/**, " +
-//                                                        "/api/auction/{auctionId}/bid," +
-//                                                        "/api/goods," +
-//                                                        "api/goods/{goodsId}," +
-//                                                        "/api/goods/pocket/{nickname}," +
-//                                                        "/api/home").permitAll()
-//                                        .requestMatchers(HttpMethod.POST,
-//                                                "/api/users/signup," +
-//                                                        "/api/users/nickname").permitAll()
-////                                .requestMatchers(HttpMethod.PUT, "/**").authenticated()
-////                                .requestMatchers(HttpMethod.DELETE, "/**").authenticated()
-//                                        .anyRequest().permitAll() // 그 외 모든 요청 인증처리
+//                authorizeHttpRequests
+//                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+//                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+//                        .requestMatchers(HttpMethod.GET, "/**").permitAll()
+//                        .requestMatchers(HttpMethod.POST, "/**").permitAll()
+//                        .requestMatchers(HttpMethod.PUT, "/**").permitAll()
+//                        .requestMatchers(HttpMethod.DELETE, "/**").permitAll()
+//                        .anyRequest().authenticated() // 그 외 모든 요청 인증처리
+//        );
+//
+//        http.addFilterBefore(new JwtAuthorizationFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class);
+//        http.addFilterBefore(new AuthExceptionFilter(), JwtAuthorizationFilter.class);
+//
+//        return http.build();
+//    }
+
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        // CSRF 설정
+        http.csrf(AbstractHttpConfigurer::disable);
+        // 기본 설정인 Session 방식이 아닌 JWT 방식을 사용하기 위한 설정
+        http.sessionManagement((sessionManagement) ->
+                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        );
+
+        http
+//                .cors(withDefaults())
+                .cors(corsConfig -> corsConfig.configurationSource(corsConfigurationSource()))
+                .authorizeHttpRequests((authorizeHttpRequests) ->
+                                authorizeHttpRequests
+                                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                        .requestMatchers(HttpMethod.GET,
+                                                "/api/auction/{auctionId}",
+                                                "/api/auction/{auctionId}/bid",
+                                                "/api/goods,/api/goods/{goodsId}",
+                                                "/api/goods/pocket/{nickname}",
+                                                "/api/home",
+                                                "/api/goods/recent",
+                                                "/api/goods/search",
+                                                "/api/users/login").permitAll()
+                                        .requestMatchers(HttpMethod.POST,
+                                                "/api/users/signup",
+                                                "/api/users/nickname",
+                                                "/api/users/login").permitAll()
+                                        .anyRequest().authenticated() // 그 외 모든 요청 인증처리
+
+                );
+        http.addFilterBefore(new JwtAuthorizationFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new AuthExceptionFilter(), JwtAuthorizationFilter.class);
+
+        return http.build();
+    }
+
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        http
+//                .httpBasic(AbstractHttpConfigurer::disable)
+//                .formLogin(AbstractHttpConfigurer::disable)
+//                .cors(corsConfig -> corsConfig.configurationSource(corsConfigurationSource()))
+//                .csrf(AbstractHttpConfigurer::disable)
+//                .headers(header -> header.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable).disable())
+//                .sessionManagement(sessionManagementConfigurer -> sessionManagementConfigurer.sessionCreationPolicy(STATELESS))
+//                .addFilterBefore(jwtVerificationFilter(), JwtAuthenticationFilter.class)
+//                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+//                .authorizeHttpRequests(
+//                        request -> request
+//                                .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+//                                .requestMatchers(POST, "/api/pin/**").authenticated()
+//                                .requestMatchers(PUT, "/api/**").authenticated()
+//                                .requestMatchers(DELETE, "/api/**").authenticated()
+//                                .requestMatchers(GET, "/api/v1/oauth2/google", "/login/oauth2/code/google").permitAll()
+//                                .requestMatchers(POST, "/api/users/**").permitAll()
+//                                .requestMatchers(GET, "/api/users/**", "/api/pin/**").permitAll()
 //
 //                );
 //
 //        return http.build();
-    
+//    }
 }
 
 

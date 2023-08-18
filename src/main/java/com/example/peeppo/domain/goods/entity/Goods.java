@@ -36,6 +36,7 @@ public class Goods extends Timestamped {
 
     private Long sellerPrice;
     private boolean isDeleted;
+    private boolean ratingCheck;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -67,6 +68,7 @@ public class Goods extends Timestamped {
         this.tradeType = requestDto.getTradeType();
         this.category = requestDto.getCategory();
         this.wantedGoods = wantedGoods;
+
     }
 
     public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods, User user, GoodsStatus goodsStatus) {

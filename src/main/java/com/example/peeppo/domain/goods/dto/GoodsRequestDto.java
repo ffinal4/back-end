@@ -22,6 +22,9 @@ public class GoodsRequestDto {
     private String goodsCondition;
     @NotBlank
     private String tradeType;
+    @NotBlank
     private Long sellerPrice;
+    @NotBlank
+    private boolean ratingCheck;
 
 }
