@@ -1,9 +1,9 @@
 package com.example.peeppo.domain.goods.service;
 
-import com.amazonaws.services.kms.model.NotFoundException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.example.peeppo.domain.dibs.entity.Dibs;
 import com.example.peeppo.domain.dibs.repository.DibsRepository;
+import com.example.peeppo.domain.dibs.service.DibsService;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.entity.Goods;
@@ -13,7 +13,6 @@ import com.example.peeppo.domain.goods.repository.WantedGoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.helper.ImageHelper;
 import com.example.peeppo.domain.image.repository.ImageRepository;
-import com.example.peeppo.domain.rating.entity.RatingGoods;
 import com.example.peeppo.domain.rating.helper.RatingHelper;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
@@ -51,6 +50,7 @@ public class GoodsService {
     private final UserRepository userRepository;
 
     private final RatingHelper ratingHelper;
+    private final DibsService dibsService;
 
     private final DibsRepository dibsRepository;
     private static final String RECENT_GOODS = "goods";
@@ -253,18 +253,25 @@ public class GoodsService {
         return getGoodsResponseDtos(user);
     }
 
-    public ApiResponse<UrPocketResponseDto> getPocket(String nickname, User user1, int page, int size, String sortBy, boolean isAsc) throws IllegalAccessException {
+    public ApiResponse<UrPocketResponseDto> getPocket(String nickname, UserDetailsImpl userDetails, int page, int size, String sortBy, boolean isAsc){
         User user = userRepository.findUserByNickname(nickname);
-        if(user.equals(user1)){
-            throw new IllegalAccessException();
+        if(userDetails != null){ // 로그인 된 경우다 !!
+            if(user.getUserId() == userDetails.getUser().getUserId()){
+               throw new IllegalArgumentException("같은 사용자입니다 ");
+            }
         }
-
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalse(user, pageable);
         List<GoodsListResponseDto> myGoods = new ArrayList<>();
         for (Goods goods : goodsList) {
             Image firstImage = imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goods.getGoodsId());
-            myGoods.add(new GoodsListResponseDto(goods, firstImage.getImageUrl()));
+
+            boolean checkDibs = false;
+            if(userDetails != null) {
+                checkDibs = dibsService.checkDibsGoods(userDetails.getUser().getUserId(), goods.getGoodsId());
+            }
+
+            myGoods.add(new GoodsListResponseDto(goods, firstImage.getImageUrl(), checkDibs));
         }
 
         UrPocketResponseDto urPocketResponseDto = new UrPocketResponseDto(user, myGoods);

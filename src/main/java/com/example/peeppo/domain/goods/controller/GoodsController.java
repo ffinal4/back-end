@@ -73,8 +73,8 @@ public class GoodsController {
                                                          @RequestParam("size") int size,
                                                          @RequestParam("sortBy") String sortBy,
                                                          @RequestParam("isAsc") boolean isAsc,
-                                                         @AuthenticationPrincipal UserDetailsImpl userDetails) throws IllegalAccessException {
-        return goodsService.getPocket(nickname, userDetails.getUser(), page - 1, size, sortBy, isAsc);
+                                                         @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return goodsService.getPocket(nickname, userDetails, page - 1, size, sortBy, isAsc);
     }
 
     @PutMapping("/{goodsId}")
