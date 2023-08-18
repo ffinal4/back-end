@@ -49,8 +49,8 @@ public class DibsService {
         // 찜한 경우
         if (dibsGoods.isPresent()) {
             dibsRepository.delete(dibsGoods.get());
-            CheckResponseDto response = new CheckResponseDto("이미 찜하신 목록입니다.", dibsGoods.isPresent(), BAD_REQUEST.value(), "BAD_REQUEST");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(response);
+            CheckResponseDto response = new CheckResponseDto("이미 찜하신 목록입니다.", dibsGoods.isPresent(), OK.value(), "OK");
+            return ResponseEntity.status(HttpStatus.OK.value()).body(response);
         }
 
         dibsRepository.save(new Dibs(goods, user));
