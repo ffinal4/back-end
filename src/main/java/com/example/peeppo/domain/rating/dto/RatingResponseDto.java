@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class RatingResponseDto {
+    private Long score;
     private Long goodsId;
     private String title;
     private Category category;
@@ -17,7 +18,8 @@ public class RatingResponseDto {
     private String content;
     private String imageUrl;
 
-    public RatingResponseDto(Goods goods) {
+    public RatingResponseDto(Goods goods, Long currentRatingCount) {
+        this.score = currentRatingCount;
         this.goodsId = goods.getGoodsId();
         this.title = goods.getTitle();
         this.category = goods.getCategory();
