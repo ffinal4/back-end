@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.goods.dto;
 
 import com.example.peeppo.domain.goods.entity.Goods;
+import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.image.entity.Image;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,9 +13,9 @@ public class GoodsListResponseDto {
     private String location;
     private String title;
     private String content;
-    // 사용자 이름
     private String nickname;
     private String image;
+    private GoodsStatus goodsStatus;
 
 
     public GoodsListResponseDto(Goods goods, String image) {
@@ -33,5 +34,6 @@ public class GoodsListResponseDto {
         this.location = goods.getLocation();
         this.image = goods.getImage().stream().map(Image::getImageUrl).toList().get(0);
         this.nickname = goods.getUser().getNickname();
+        this.goodsStatus = goods.getGoodsStatus();
     }
 }
