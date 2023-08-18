@@ -18,7 +18,6 @@ import java.util.List;
 
 @Entity
 @Getter
-@Setter
 @NoArgsConstructor
 @DynamicUpdate
 public class Goods extends Timestamped {
@@ -36,8 +35,6 @@ public class Goods extends Timestamped {
 
     private Long sellerPrice;
     private boolean isDeleted;
-//    @OneToOne(fetch = FetchType.LAZY)
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -85,6 +82,10 @@ public class Goods extends Timestamped {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.location = requestDto.getLocation();
+    }
+
+    public void delete(){
+        this.isDeleted = true;
     }
 
     public void changeStatus(GoodsStatus goodsStatus) {
