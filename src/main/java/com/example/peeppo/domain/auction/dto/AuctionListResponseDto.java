@@ -19,7 +19,6 @@ public class AuctionListResponseDto {
     private LocalDateTime modifiedAt;
     private Long bidCount;
     private Long goodsId;
-
     private boolean checkDibs;
     private String location;
     private String title;

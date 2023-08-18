@@ -4,18 +4,19 @@ import com.example.peeppo.domain.auction.dto.*;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.bid.entity.Bid;
+import com.example.peeppo.domain.dibs.repository.DibsRepository;
+import com.example.peeppo.domain.dibs.service.DibsService;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.bid.repository.BidRepository;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
-import com.example.peeppo.domain.rating.entity.Rating;
 import com.example.peeppo.domain.rating.entity.RatingGoods;
 import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
-import com.example.peeppo.domain.rating.repository.ratingRepository.RatingRepository;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.PageResponse;
+import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -51,6 +52,7 @@ public class AuctionService {
     private final BidRepository bidRepository;
     private final UserRepository userRepository;
     private final RatingGoodsRepository ratingGoodsRepository;
+    private final DibsService dibsService;
 
     @Transactional
     public AuctionResponseDto createAuction(Long goodsId, AuctionRequestDto auctionRequestDto, User user) {
@@ -128,16 +130,19 @@ public class AuctionService {
     }
 
     // 경매 전체 조회
-    public Page<AuctionListResponseDto> findAllAuction(int i, int size, String sortBy, boolean isAsc) {
+    public Page<AuctionListResponseDto> findAllAuction(int i, int size, String sortBy, boolean isAsc, UserDetailsImpl userDetails) {
+
         Pageable pageable = paging(i, size, sortBy, isAsc);
         Page<Auction> auctionPage = auctionRepository.findAll(pageable);
         List<AuctionListResponseDto> auctionResponseDtoList = new ArrayList<>();
 
         for (Auction auction : auctionPage) {
-
             TimeRemaining timeRemaining = countDownTime(auction);
-
-            AuctionListResponseDto auctionListResponseDto = new AuctionListResponseDto(auction, timeRemaining, findBidCount(auction.getAuctionId()));
+            boolean checkDibs = false;
+            if(userDetails != null){
+                checkDibs = dibsService.checkDibsGoods(userDetails.getUser().getUserId(), auction.getGoods().getGoodsId());
+            }
+            AuctionListResponseDto auctionListResponseDto = new AuctionListResponseDto(auction, timeRemaining, findBidCount(auction.getAuctionId()), checkDibs);
             auctionResponseDtoList.add(auctionListResponseDto);
         }
         return new PageResponse<>(auctionResponseDtoList, pageable, auctionPage.getTotalElements());
