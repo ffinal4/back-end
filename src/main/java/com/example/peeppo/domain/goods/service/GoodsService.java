@@ -199,7 +199,7 @@ public class GoodsService {
     }
 
 
-        // 최근 본 목록에 상품 ID를 추가
+    // 최근 본 목록에 상품 ID를 추가
 //        List<Long> recentlyViewedGoodsIds = user.getRecentlyViewedGoodsIds();
 //        if (!recentlyViewedGoodsIds.contains(goodsId)) {
 //            recentlyViewedGoodsIds.add(goodsId);
@@ -255,6 +255,8 @@ public class GoodsService {
 
     public ApiResponse<UrPocketResponseDto> getPocket(String nickname, UserDetailsImpl userDetails, int page, int size, String sortBy, boolean isAsc){
         User user = userRepository.findUserByNickname(nickname);
+        if (user.equals(user1)) {
+            throw new IllegalAccessException();
         if(userDetails != null){ // 로그인 된 경우다 !!
             if(user.getUserId() == userDetails.getUser().getUserId()){
                throw new IllegalArgumentException("같은 사용자입니다 ");
@@ -283,11 +285,20 @@ public class GoodsService {
     private List<GoodsResponseDto> getGoodsResponseDtos(User user) {
         List<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalseAndGoodsStatus(user, GoodsStatus.ONSALE);
         List<GoodsResponseDto> goodsResponseDtos = new ArrayList<>();
-        for(Goods goods : goodsList){
+        for (Goods goods : goodsList) {
             GoodsResponseDto goodsResponseDto = new GoodsResponseDto(goods);
             goodsResponseDtos.add(goodsResponseDto);
         }
         return goodsResponseDtos;
+    }
+
+    public ApiResponse<List<GoodsListResponseDto>> searchGoods(String keyword) {
+        List<Goods> searchList = goodsRepository.findByTitleContaining(keyword);
+        List<GoodsListResponseDto> goodsListResponseDtos = new ArrayList<>();
+        for (Goods search : searchList) {
+            goodsListResponseDtos.add(new GoodsListResponseDto(search));
+        }
+        return new ApiResponse<>(true, goodsListResponseDtos, null);
     }
 
     // 로그인 하고 전체조회

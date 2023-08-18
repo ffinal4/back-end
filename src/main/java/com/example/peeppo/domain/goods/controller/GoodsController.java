@@ -96,4 +96,9 @@ public class GoodsController {
     public List<GoodsRecentDto> recentGoods(HttpServletResponse response) {
         return goodsService.recentGoods(response);
     }
+
+    @GetMapping("/search")
+    public ApiResponse<List<GoodsListResponseDto>> searchGoods(@RequestParam("keyword") String keyword){
+        return goodsService.searchGoods(keyword);
+    }
 }
