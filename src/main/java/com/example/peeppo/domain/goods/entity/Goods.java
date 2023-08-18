@@ -39,7 +39,6 @@ public class Goods extends Timestamped {
     private boolean isDeleted;
 //    @OneToOne(fetch = FetchType.LAZY)
 
-    private Boolean isDiped;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

@@ -45,4 +45,15 @@ public class GoodsListResponseDto {
         this.image = goods.getImage().stream().map(Image::getImageUrl).toList().get(0);
         this.nickname = goods.getUser().getNickname();
     }
+
+    public GoodsListResponseDto(Goods goods, boolean checkDibs) {
+        this.goodsId = goods.getGoodsId();
+        this.checkDibs = checkDibs;
+        this.title = goods.getTitle();
+        this.content = goods.getContent();
+        this.location = goods.getLocation();
+        this.image = goods.getImage().stream().map(Image::getImageUrl).toList().get(0);
+        this.nickname = goods.getUser().getNickname();
+
+    }
 }

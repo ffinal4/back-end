@@ -81,7 +81,7 @@ public class GoodsService {
 
     @CachePut(key = "#page", value = "allGoods")
     @Cacheable(key = "#page", value = "allGoods", condition = "#page == 0", cacheManager = "cacheManager")
-    public Page<GoodsListResponseDto> allGoods(int page, int size, String sortBy, boolean isAsc) {
+    public Page<GoodsListResponseDto> allGoodsEveryone(int page, int size, String sortBy, boolean isAsc) {
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Goods> goodsPage = goodsRepository.findAllByIsDeletedFalse(pageable);
@@ -287,7 +287,8 @@ public class GoodsService {
         return goodsResponseDtos;
     }
 
-    public Page<GoodsListResponseDto> allGoodsEveryone(int page, int size, String sortBy, boolean isAsc, User user) {
+    // 로그인 하고 전체조회
+    public Page<GoodsListResponseDto> allGoods(int page, int size, String sortBy, boolean isAsc, User user) {
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Goods> goodsPage = goodsRepository.findAllByIsDeletedFalse(pageable);
         List<GoodsListResponseDto> goodsResponseList = new ArrayList<>();

@@ -39,9 +39,9 @@ public class GoodsController {
                                                @RequestParam("isAsc") boolean isAsc,
                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
         if(userDetails!=null){
-            return goodsService.allGoodsEveryone(page -1, size, sortBy, isAsc,userDetails.getUser());
+            return goodsService.allGoods(page -1, size, sortBy, isAsc,userDetails.getUser());
         }
-        return goodsService.allGoods(page - 1, size, sortBy, isAsc);
+        return goodsService.allGoodsEveryone(page - 1, size, sortBy, isAsc);
     }
 
     // 게시물 상세조회
