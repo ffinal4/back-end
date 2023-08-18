@@ -1,5 +1,7 @@
 package com.example.peeppo.domain.rating.entity;
 
+import com.example.peeppo.domain.goods.entity.Goods;
+import com.example.peeppo.domain.image.entity.Image;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;

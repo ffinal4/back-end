@@ -4,6 +4,7 @@ import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.service.GoodsService;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
+import com.example.peeppo.global.utils.ResponseUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+
+import static com.example.peeppo.global.stringCode.SuccessCodeEnum.AUCTION_END_SUCCESS;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,12 +43,13 @@ public class GoodsController {
 
     // 게시물 상세조회
     @GetMapping("/{goodsId}")
-    public ApiResponse<GoodsResponseDto> getGoods(@PathVariable Long goodsId) {
+    public ApiResponse<GoodsResponseDto> getGoods(@PathVariable Long goodsId,
+                                                  @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        return goodsService.getGoods(goodsId);
+        return goodsService.getGoods(goodsId, userDetails.getUser());
     }
 
-    @GetMapping("pocket")
+    @GetMapping("/pocket")
     public ApiResponse<PocketResponseDto> getMyGoods(@RequestParam("userId") Long userId,
                                                      @RequestParam("page") int page,
                                                      @RequestParam("size") int size,
@@ -61,6 +65,16 @@ public class GoodsController {
                 userDetails);
     }
 
+    @GetMapping("/mypocket")
+    public ApiResponse<List<GoodsResponseDto>> getMyGoodsWithoutPagenation(@AuthenticationPrincipal UserDetailsImpl userDetails){
+        return ResponseUtils.ok(goodsService.getMyGoodsWithoutPagenation(userDetails.getUser()));
+    }
+
+    @GetMapping("/pocket/{nickname}")
+    public ApiResponse<List<GoodsResponseDto>> getPocket(@PathVariable String nickname,
+                                                         @AuthenticationPrincipal UserDetailsImpl userDetails) throws IllegalAccessException {
+        return ResponseUtils.ok(goodsService.getPocket(nickname, userDetails.getUser()));
+    }
 
     @PutMapping("/{goodsId}")
     public ApiResponse<GoodsResponseDto> goodsUpdate(@PathVariable Long goodsId,
