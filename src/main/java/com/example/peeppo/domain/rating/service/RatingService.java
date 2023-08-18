@@ -33,13 +33,9 @@ public class RatingService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NullPointerException("존재하지 않는 유저입니다."));
 
-        Goods randomGoods = goodsRepository.findRandomGoodsWithLowRatingCount(user);
-        if (randomGoods == null) {
-            randomGoods = goodsRepository.findRandomGoods(user);
-        }
-        if(randomGoods == null){
-            throw new NullPointerException("평가가능한 상품이 존재하지 않습니다.");
-        }
+        Goods randomGoods = goodsRepository.findRandomGoodsWithLowRatingCount(user)
+                .orElse(goodsRepository.findRandomGoods(user)
+                        .orElseThrow(() -> new NullPointerException("평가 가능한 상품이 존재하지 않습니다.")));
 
         RatingResponseDto ratingResponseDto = new RatingResponseDto(randomGoods);
 
