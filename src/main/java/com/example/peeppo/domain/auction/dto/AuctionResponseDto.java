@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.auction.dto;
 
 import com.example.peeppo.domain.auction.entity.Auction;
+import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.user.entity.User;
@@ -21,6 +22,7 @@ public class AuctionResponseDto {
     private GoodsResponseDto goodsResponseDto;
     private TimeRemaining leftTime;
     private boolean checkSameUser;
+    private AuctionStatus auctionStatus;
 
     public AuctionResponseDto(Auction auction, GoodsResponseDto goodsResponseDto, User user, TimeRemaining countDownTime) {
         this.auctionId = auction.getAuctionId();
@@ -30,6 +32,7 @@ public class AuctionResponseDto {
         this.createdAt = auction.getCreatedAt();
         this.modifiedAt = auction.getModifiedAt();
         this.leftTime = countDownTime;
+        this.auctionStatus = auction.getAuctionStatus();
     }
 
     public AuctionResponseDto(Auction auction, Goods goods, TimeRemaining countDownTime, Long bidCount) {
@@ -41,6 +44,7 @@ public class AuctionResponseDto {
         this.modifiedAt = auction.getModifiedAt();
         this.leftTime = countDownTime;
         this.bidCount = bidCount;
+        this.auctionStatus = auction.getAuctionStatus();
     }
 
     public AuctionResponseDto(Auction auction, Goods goods, TimeRemaining countDownTime, Long bidCount, boolean checkSameUser) {
@@ -53,6 +57,7 @@ public class AuctionResponseDto {
         this.leftTime = countDownTime;
         this.bidCount = bidCount;
         this.checkSameUser = checkSameUser;
+        this.auctionStatus = auction.getAuctionStatus();
     }
 }
 

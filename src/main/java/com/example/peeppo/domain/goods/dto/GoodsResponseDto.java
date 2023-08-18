@@ -3,6 +3,7 @@ package com.example.peeppo.domain.goods.dto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.entity.WantedGoods;
 import com.example.peeppo.domain.goods.enums.Category;
+import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.user.entity.User;
 import lombok.Getter;
@@ -27,10 +28,10 @@ public class GoodsResponseDto {
     private LocalDateTime modifiedAt;
     private List<String> images;
     private WantedGoods wantedGoods;
+    private GoodsStatus goodsStatus;
 
     private String nickname;
     private boolean checkSameUser;
-
 
 
     public GoodsResponseDto(Goods goods, List<String> images, WantedGoods wantedGoods) {
@@ -47,6 +48,7 @@ public class GoodsResponseDto {
         this.images = images;
         this.wantedGoods = wantedGoods;
         this.nickname = goods.getUser().getNickname();
+        this.goodsStatus = goods.getGoodsStatus();
     }
 
     public GoodsResponseDto(Goods goods) {
@@ -63,6 +65,7 @@ public class GoodsResponseDto {
         this.modifiedAt = goods.getModifiedAt();
         this.wantedGoods = goods.getWantedGoods();
         this.nickname = goods.getUser().getNickname();
+        this.goodsStatus = goods.getGoodsStatus();
     }
 
     public GoodsResponseDto(Goods goods, List<String> images, WantedGoods wantedGoods, User user) {
@@ -79,6 +82,7 @@ public class GoodsResponseDto {
         this.images = images;
         this.wantedGoods = wantedGoods;
         this.nickname = user.getNickname();
+        this.goodsStatus = goods.getGoodsStatus();
     }
 
     public GoodsResponseDto(Goods goods, List<String> imageUrls, WantedGoods wantedGoods, boolean checkSameUser, boolean checkDibs) {
@@ -96,6 +100,5 @@ public class GoodsResponseDto {
         this.wantedGoods = wantedGoods;
         this.nickname = goods.getUser().getNickname();
         this.checkSameUser = checkSameUser;
-        this.checkDibs = checkDibs;
     }
 }
