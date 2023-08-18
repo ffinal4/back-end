@@ -71,9 +71,13 @@ public class GoodsController {
     }
 
     @GetMapping("/pocket/{nickname}")
-    public ApiResponse<List<GoodsResponseDto>> getPocket(@PathVariable String nickname,
+    public ApiResponse<UrPocketResponseDto> getPocket(@PathVariable String nickname,
+                                                         @RequestParam("page") int page,
+                                                         @RequestParam("size") int size,
+                                                         @RequestParam("sortBy") String sortBy,
+                                                         @RequestParam("isAsc") boolean isAsc,
                                                          @AuthenticationPrincipal UserDetailsImpl userDetails) throws IllegalAccessException {
-        return ResponseUtils.ok(goodsService.getPocket(nickname, userDetails.getUser()));
+        return goodsService.getPocket(nickname, userDetails.getUser(), page - 1, size, sortBy, isAsc);
     }
 
     @PutMapping("/{goodsId}")

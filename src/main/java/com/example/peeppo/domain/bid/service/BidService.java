@@ -44,7 +44,7 @@ public class BidService {
     private final ChoiceBidRepository choiceBidRepository;
     private final RatingRepository ratingRepository;
 
-    public ResponseEntity<ResponseDto> bidding(User user, Long auctionId, BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
+    public ResponseDto bidding(User user, Long auctionId, BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
 
         Auction auction = getAuction(auctionId);
         List<Bid> List = new ArrayList<>();
@@ -78,11 +78,10 @@ public class BidService {
 
         bidRepository.saveAll(List);
 
-        ResponseDto response = new ResponseDto("입찰이 완료되었습니다.", HttpStatus.OK.value(), "OK");
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return new ResponseDto("입찰이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
-    public ResponseEntity<Page<BidListResponseDto>> BidList(Long auctionId, int page, int size, String sortBy, boolean isAsc) {
+    public Page<BidListResponseDto> BidList(Long auctionId, int page, int size, String sortBy, boolean isAsc) {
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Bid> bidPage = bidRepository.findAllByAuctionAuctionId(auctionId, pageable);
 
@@ -95,12 +94,11 @@ public class BidService {
                 .map(Bid -> new BidListResponseDto(Bid, goodsImg))
                 .toList();
 
-        PageResponse response = new PageResponse<>(bidList, pageable, bidPage.getTotalElements());
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return new PageResponse<>(bidList, pageable, bidPage.getTotalElements());
     }
 
     //경매자가 선택
-    public ResponseEntity<ResponseDto> choiceBids(User user, Long auctionId, ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
+    public ResponseDto choiceBids(User user, Long auctionId, ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
         Auction auction = getAuction(auctionId);
         List<Choice> bidsList = new ArrayList<>();
 
@@ -110,12 +108,11 @@ public class BidService {
             throw new IllegalAccessException();
         }
 
-        ResponseDto response = new ResponseDto("선택이 완료되었습니다.", HttpStatus.OK.value(), "OK");
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return new ResponseDto("선택이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
     //경매자가 선택 바꾸는 기능
-    public ResponseEntity<ResponseDto> choiceUpdateBids(User user, Long auctionId, ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
+    public ResponseDto choiceUpdateBids(User user, Long auctionId, ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
         Auction auction = getAuction(auctionId);
         List<Choice> bidsList = new ArrayList<>();
         List<Choice> findAllChoice = queryRepository.findChoice(auctionId);
@@ -130,8 +127,7 @@ public class BidService {
             throw new IllegalAccessException();
         }
 
-        ResponseDto response = new ResponseDto("재선택 되었습니다.", HttpStatus.OK.value(), "OK");
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return new ResponseDto("재선택 되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
     private void getBiddingList(ChoiceRequestDto choiceRequestDto, Auction auction, List<Choice> bidsList) throws IllegalAccessException {

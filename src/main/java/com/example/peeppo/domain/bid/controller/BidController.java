@@ -5,7 +5,9 @@ import com.example.peeppo.domain.bid.dto.BidListResponseDto;
 import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
 import com.example.peeppo.domain.bid.service.BidService;
 import com.example.peeppo.domain.user.dto.ResponseDto;
+import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
+import com.example.peeppo.global.utils.ResponseUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,38 +26,38 @@ public class BidController {
 
     // 입찰하기
     @PostMapping("/auction/{auctionId}/bid")
-    public ResponseEntity<ResponseDto> bidding(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                               @PathVariable Long auctionId,
-                                               @Valid @RequestBody BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
+    public ApiResponse<ResponseDto> bidding(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                            @PathVariable Long auctionId,
+                                            @Valid @RequestBody BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
 
-        return bidService.bidding(userDetails.getUser(), auctionId, bidGoodsListRequestDto);
+        return ResponseUtils.ok(bidService.bidding(userDetails.getUser(), auctionId, bidGoodsListRequestDto));
     }
 
     //전체조회
     @GetMapping("/auction/{auctionId}/bid")
-    public ResponseEntity<Page<BidListResponseDto>> bidList(@PathVariable Long auctionId,
+    public ApiResponse<Page<BidListResponseDto>> bidList(@PathVariable Long auctionId,
                                                             @RequestParam("page") int page,
                                                             @RequestParam("size") int size,
                                                             @RequestParam("sortBy") String sortBy,
                                                             @RequestParam("isAsc") boolean isAsc) {
 
-        return bidService.BidList(auctionId, page - 1, size, sortBy, isAsc);
+        return ResponseUtils.ok(bidService.BidList(auctionId, page - 1, size, sortBy, isAsc));
     }
 
     @PostMapping("/auction/{auctionId}/choice/bids")
-    public ResponseEntity<ResponseDto> choiceBids(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public ApiResponse<ResponseDto> choiceBids(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                   @PathVariable Long auctionId,
                                                   @Valid @RequestBody ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
 
-        return bidService.choiceBids(userDetails.getUser(), auctionId, choiceRequestDto);
+        return ResponseUtils.ok(bidService.choiceBids(userDetails.getUser(), auctionId, choiceRequestDto));
     }
 
     @PutMapping("/auction/{auctionId}/choice/bids")
-    public ResponseEntity<ResponseDto> choiceUpdateBids(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public ApiResponse<ResponseDto> choiceUpdateBids(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                         @PathVariable Long auctionId,
                                                         @Valid @RequestBody ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
 
-        return bidService.choiceUpdateBids(userDetails.getUser(), auctionId, choiceRequestDto);
+        return ResponseUtils.ok(bidService.choiceUpdateBids(userDetails.getUser(), auctionId, choiceRequestDto));
     }
 
     //나중에 전체 조회로 하는게 맞겠지?

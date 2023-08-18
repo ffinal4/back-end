@@ -1,8 +1,11 @@
 package com.example.peeppo.domain.user.controller;
 
+import com.example.peeppo.domain.auction.dto.AuctionResponseDto;
 import com.example.peeppo.domain.user.dto.*;
 import com.example.peeppo.domain.user.service.UserService;
+import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
+import com.example.peeppo.global.utils.ResponseUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -24,39 +27,38 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/users/signup")
-    public ResponseEntity<ResponseDto> signup(@RequestBody @Valid SignupRequestDto signupRequestDto) {
-        return userService.signup(signupRequestDto);
+    public ApiResponse<ResponseDto> signup(@RequestBody @Valid SignupRequestDto signupRequestDto) {
+        return ResponseUtils.ok(userService.signup(signupRequestDto));
     }
 
     //닉네임 중복확인
     @PostMapping("/users/nickname")
-    public ResponseEntity<CheckResponseDto> checkValidateNickname(@RequestBody @Valid ValidateRequestDto validateRequestDto) {
-        return userService.checkValidateNickname(validateRequestDto);
+    public ApiResponse<CheckResponseDto> checkValidateNickname(@RequestBody @Valid ValidateRequestDto validateRequestDto) {
+        return ResponseUtils.ok(userService.checkValidateNickname(validateRequestDto));
     }
 
     @PostMapping("/users/logout")
-    public ResponseDto logout(@RequestBody @Valid LogoutRequestDto logoutRequestDto,
-                              HttpServletRequest req,
-                              HttpServletResponse res) {
-        return userService.logout(req, res, logoutRequestDto);
+    public ApiResponse<ResponseDto> logout(@RequestBody @Valid LogoutRequestDto logoutRequestDto,
+                                           HttpServletRequest req,
+                                           HttpServletResponse res) {
+        return ResponseUtils.ok(userService.logout(req, res, logoutRequestDto));
     }
 
     //회원정보 페이지
-
     @GetMapping("/users/mypage")
-    public ResponseEntity<MyPageResponseDto> myPage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return userService.myPage(userDetails.getUser());
+    public ApiResponse<MyPageResponseDto> myPage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseUtils.ok(userService.myPage(userDetails.getUser()));
     }
 
     @PatchMapping("/users/mypage")
-    public ResponseDto updatemypage(@RequestPart(value = "data") @Valid MyPageRequestDto myPageRequestDto,
-                                    @RequestPart(value = "image") MultipartFile multipartFile,
-                                    @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
-        return userService.updatemypage(myPageRequestDto, multipartFile, userDetails.getUser());
+    public ApiResponse<ResponseDto> updateMyPage(@RequestPart(value = "data") @Valid MyPageRequestDto myPageRequestDto,
+                                                        @RequestPart(value = "image") MultipartFile multipartFile,
+                                                        @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
+        return ResponseUtils.ok(userService.updateMyPage(myPageRequestDto, multipartFile, userDetails.getUser()));
     }
 
     @DeleteMapping("/users")
-    public ResponseEntity<ResponseDto> deletemypage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return userService.deletemypage(userDetails.getUser().getUserId());
+    public ApiResponse<ResponseDto> deleteMyPage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseUtils.ok(userService.deleteMyPage(userDetails.getUser().getUserId()));
     }
 }
