@@ -14,14 +14,12 @@ public class PocketResponseDto {
     private String nickName;
     private String getUserImg;
     private String location;
-    private List<GoodsListResponseDto> goodsListResponseDto;
-    private GoodsStatus goodsStatus;
+    private List<PocketListResponseDto> goodsListResponseDto;
 
-    public PocketResponseDto(User user, List<GoodsListResponseDto> goodsListResponseDto) {
+    public PocketResponseDto(User user, List<PocketListResponseDto> pocketListResponseDtos) {
         this.userId = user.getUserId();
         this.nickName = user.getNickname();
         this.getUserImg = user.getUserImg();
-        this.location = user.getLocation();
-        this.goodsListResponseDto = goodsListResponseDto;
+        this.goodsListResponseDto = pocketListResponseDtos;
     }
 }
