@@ -1,5 +1,6 @@
 package com.example.peeppo.domain.goods.repository;
 
+import com.example.peeppo.domain.goods.dto.GoodsListResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.user.entity.User;
@@ -55,4 +56,7 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
     @Query(value = "SELECT g.* from goods g ORDER BY g.created_at desc LIMIT 8", nativeQuery = true)
     List<Goods> findTop8ByCreatedAt();
     List<Goods> findAllByUserAndIsDeletedFalseAndGoodsStatus(User user, GoodsStatus onsale);
+
+    List<Goods> findByTitleContaining(String keyword);
+
 }
