@@ -39,6 +39,7 @@ public class Goods extends Timestamped {
     private boolean isDeleted;
 //    @OneToOne(fetch = FetchType.LAZY)
 
+    private Boolean isDiped;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -57,8 +58,8 @@ public class Goods extends Timestamped {
     @Enumerated(EnumType.STRING)
     private GoodsStatus goodsStatus;
 
-/*    @OneToMany(mappedBy = "goods")
-    private List<Dibs> dibs;*/
+    @OneToMany(mappedBy = "goods")
+    private List<Dibs> dibs;
 
 
 

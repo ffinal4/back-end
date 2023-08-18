@@ -2,6 +2,7 @@ package com.example.peeppo.domain.goods.service;
 
 import com.amazonaws.services.kms.model.NotFoundException;
 import com.amazonaws.services.s3.AmazonS3;
+import com.example.peeppo.domain.dibs.entity.Dibs;
 import com.example.peeppo.domain.dibs.repository.DibsRepository;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.dto.*;
@@ -34,6 +35,7 @@ import org.springframework.web.util.UriUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -106,7 +108,6 @@ public class GoodsService {
 
 
     public ApiResponse<GoodsResponseDto> getGoods(Long goodsId, User user) {
-
         Goods goods = findGoods(goodsId);
         boolean checkSameUser = true;
         if(goods.getUser().getUserId() != user.getUserId()){
@@ -120,9 +121,14 @@ public class GoodsService {
         if (goodsRecent.size() >= MAX_RECENT_GOODS) {
             goodsRecent.remove(0);
         }
-        goodsRecent.add(Long.toString(goods.getGoodsId())); // 조회시에 리스트에 추가 !
-
-        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods, checkSameUser), null);
+       // goodsRecent.add(Long.toString(goods.getGoodsId())); // 조회시에 리스트에 추가 !
+        boolean checkDibs = false;
+        Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goodsId);
+        if(dibsGoods.isPresent()){
+            checkDibs = true;
+            System.out.println("true 입니다사ㅏㅏㅏㅏ");
+        }
+        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods, checkSameUser, checkDibs), null);
     }
 
     public User findUserId(Long userId) {
@@ -279,5 +285,42 @@ public class GoodsService {
             goodsResponseDtos.add(goodsResponseDto);
         }
         return goodsResponseDtos;
+    }
+
+    public Page<GoodsListResponseDto> allGoodsEveryone(int page, int size, String sortBy, boolean isAsc, User user) {
+        Pageable pageable = paging(page, size, sortBy, isAsc);
+        Page<Goods> goodsPage = goodsRepository.findAllByIsDeletedFalse(pageable);
+        List<GoodsListResponseDto> goodsResponseList = new ArrayList<>();
+
+        for (Goods goods : goodsPage.getContent()) {
+            List<Image> images = imageRepository.findByGoodsGoodsId(goods.getGoodsId());
+            List<String> imageUrls = new ArrayList<>();
+            for (Image image : images) {
+                imageUrls.add(image.getImageUrl());
+            }
+            boolean checkDibs = false;
+            Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goods.getGoodsId());
+            if(dibsGoods.isPresent()){
+                checkDibs = true;
+            }
+            goodsResponseList.add(new GoodsListResponseDto(goods, imageUrls.get(0), checkDibs));
+        }
+
+        return new PageResponse<>(goodsResponseList, pageable, goodsPage.getTotalElements());
+    }
+
+    // 로그인 없이 조회
+    public ApiResponse<GoodsResponseDto> getGoodsEveryone(Long goodsId) {
+        Goods goods = findGoods(goodsId);
+        WantedGoods wantedGoods = findWantedGoods(goodsId);
+        List<Image> images = imageRepository.findByGoodsGoodsId(goodsId);
+        List<String> imageUrls = images.stream()
+                .map(Image::getImageUrl)
+                .collect(Collectors.toList());
+        if (goodsRecent.size() >= MAX_RECENT_GOODS) {
+            goodsRecent.remove(0);
+        }
+        goodsRecent.add(Long.toString(goods.getGoodsId())); // 조회시에 리스트에 추가 !
+        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods), null);
     }
 }

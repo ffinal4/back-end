@@ -15,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class GoodsResponseDto {
     private Long goodsId;
+    private boolean checkDibs;
     private Long userId;
     private String title;
     private String content;
@@ -29,6 +30,7 @@ public class GoodsResponseDto {
 
     private String nickname;
     private boolean checkSameUser;
+
 
 
     public GoodsResponseDto(Goods goods, List<String> images, WantedGoods wantedGoods) {
@@ -79,7 +81,7 @@ public class GoodsResponseDto {
         this.nickname = user.getNickname();
     }
 
-    public GoodsResponseDto(Goods goods, List<String> imageUrls, WantedGoods wantedGoods, boolean checkSameUser) {
+    public GoodsResponseDto(Goods goods, List<String> imageUrls, WantedGoods wantedGoods, boolean checkSameUser, boolean checkDibs) {
         this.goodsId = goods.getGoodsId();
         this.userId = goods.getUser().getUserId();
         this.title = goods.getTitle();
@@ -94,5 +96,6 @@ public class GoodsResponseDto {
         this.wantedGoods = wantedGoods;
         this.nickname = goods.getUser().getNickname();
         this.checkSameUser = checkSameUser;
+        this.checkDibs = checkDibs;
     }
 }

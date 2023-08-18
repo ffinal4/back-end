@@ -36,8 +36,11 @@ public class GoodsController {
     public Page<GoodsListResponseDto> allGoods(@RequestParam("page") int page,
                                                @RequestParam("size") int size,
                                                @RequestParam("sortBy") String sortBy,
-                                               @RequestParam("isAsc") boolean isAsc) {
-
+                                               @RequestParam("isAsc") boolean isAsc,
+                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if(userDetails!=null){
+            return goodsService.allGoodsEveryone(page -1, size, sortBy, isAsc,userDetails.getUser());
+        }
         return goodsService.allGoods(page - 1, size, sortBy, isAsc);
     }
 
@@ -45,8 +48,10 @@ public class GoodsController {
     @GetMapping("/{goodsId}")
     public ApiResponse<GoodsResponseDto> getGoods(@PathVariable Long goodsId,
                                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
-
-        return goodsService.getGoods(goodsId, userDetails.getUser());
+        if(userDetails != null){
+           return goodsService.getGoods(goodsId, userDetails.getUser());
+        }
+        return goodsService.getGoodsEveryone(goodsId);
     }
 
     @GetMapping("/pocket")
