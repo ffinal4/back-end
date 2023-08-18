@@ -36,7 +36,8 @@ public class Goods extends Timestamped {
 
     private Long sellerPrice;
     private boolean isDeleted;
-    private boolean ratingCheck;
+
+    private Boolean ratingCheck;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -78,7 +79,15 @@ public class Goods extends Timestamped {
         this.goodsCondition = requestDto.getGoodsCondition();
         this.tradeType = requestDto.getTradeType();
         this.category = requestDto.getCategory();
-        this.sellerPrice = requestDto.getSellerPrice();
+        this.ratingCheck = requestDto.getRatingCheck();
+        if(ratingCheck == false){
+            sellerPrice = 0L;
+        } else if(ratingCheck == true && requestDto.getSellerPrice() != null) {
+            this.sellerPrice = requestDto.getSellerPrice();
+        }
+        else{
+            new IllegalArgumentException("올바르지 않은 값입니다.");
+        }
         this.wantedGoods = wantedGoods;
         this.goodsStatus = goodsStatus;
         this.user = user;

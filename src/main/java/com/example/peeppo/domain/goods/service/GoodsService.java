@@ -77,7 +77,7 @@ public class GoodsService {
 
 //        ratingHelper.createRating(sellerPriceRequestDto.getSellerPrice(), goods, image);
 
-        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUuids, wantedGoods, user), null);
+        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUuids, wantedGoods), null);
     }
 
     @CachePut(key = "#page", value = "allGoods")
@@ -128,8 +128,6 @@ public class GoodsService {
 
         return new PageResponse<>(goodsResponseList, pageable, goodsPage.getTotalElements());
     }
-    // 로그인 하고 전체조회
-
 
 //    public ApiResponse<List<GoodsResponseDto>> locationAllGoods(Long locationId) {
 //        List<Goods> goodsList = goodsRepository.findAllByLocationIdAndIsDeletedFalseOrderByGoodsIdDesc(locationId);
@@ -155,7 +153,7 @@ public class GoodsService {
         }
        // goodsRecent.add(Long.toString(goods.getGoodsId())); // 조회시에 리스트에 추가 !
         boolean checkDibs = false;
-        Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goods.getGoodsId());
+        Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goodsId);
         if(dibsGoods.isPresent()){
             checkDibs = true;
             System.out.println("true 입니다사ㅏㅏㅏㅏ");
