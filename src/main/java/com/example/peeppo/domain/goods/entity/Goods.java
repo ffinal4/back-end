@@ -54,8 +54,8 @@ public class Goods extends Timestamped {
     @Enumerated(EnumType.STRING)
     private GoodsStatus goodsStatus;
 
-/*    @OneToMany(mappedBy = "goods")
-    private List<Dibs> dibs;*/
+    @OneToMany(mappedBy = "goods")
+    private List<Dibs> dibs;
 
 
 
