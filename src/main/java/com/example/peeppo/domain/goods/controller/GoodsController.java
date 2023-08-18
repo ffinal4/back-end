@@ -34,17 +34,22 @@ public class GoodsController {
     public Page<GoodsListResponseDto> allGoods(@RequestParam("page") int page,
                                                @RequestParam("size") int size,
                                                @RequestParam("sortBy") String sortBy,
-                                               @RequestParam("isAsc") boolean isAsc) {
-
-        return goodsService.allGoods(page - 1, size, sortBy, isAsc);
+                                               @RequestParam("isAsc") boolean isAsc,
+                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if(userDetails!=null){
+            return goodsService.allGoods(page -1, size, sortBy, isAsc,userDetails.getUser());
+        }
+        return goodsService.allGoodsEveryone(page - 1, size, sortBy, isAsc);
     }
 
     // 게시물 상세조회
     @GetMapping("/{goodsId}")
     public ApiResponse<GoodsResponseDto> getGoods(@PathVariable Long goodsId,
                                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
-
-        return goodsService.getGoods(goodsId, userDetails.getUser());
+        if(userDetails != null){
+           return goodsService.getGoods(goodsId, userDetails.getUser());
+        }
+        return goodsService.getGoodsEveryone(goodsId);
     }
 
     @GetMapping("/pocket")
@@ -63,9 +68,13 @@ public class GoodsController {
     }
 
     @GetMapping("/pocket/{nickname}")
-    public ApiResponse<List<GoodsResponseDto>> getPocket(@PathVariable String nickname,
-                                                         @AuthenticationPrincipal UserDetailsImpl userDetails) throws IllegalAccessException {
-        return ResponseUtils.ok(goodsService.getPocket(nickname, userDetails.getUser()));
+    public ApiResponse<UrPocketResponseDto> getPocket(@PathVariable String nickname,
+                                                         @RequestParam("page") int page,
+                                                         @RequestParam("size") int size,
+                                                         @RequestParam("sortBy") String sortBy,
+                                                         @RequestParam("isAsc") boolean isAsc,
+                                                         @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return goodsService.getPocket(nickname, userDetails, page - 1, size, sortBy, isAsc);
     }
 
     @PutMapping("/{goodsId}")
