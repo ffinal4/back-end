@@ -82,6 +82,35 @@ public class GoodsService {
 
     @CachePut(key = "#page", value = "allGoods")
     @Cacheable(key = "#page", value = "allGoods", condition = "#page == 0", cacheManager = "cacheManager")
+    public Page<GoodsListResponseDto> allGoods(int page, int size, String sortBy, boolean isAsc, UserDetailsImpl userDetails) {
+        if(userDetails == null){ // 비로그인시
+           return allGoodsEveryone(page, size, sortBy, isAsc);
+        }
+        User user = userDetails.getUser();
+
+        Pageable pageable = paging(page, size, sortBy, isAsc);
+        Page<Goods> goodsPage = goodsRepository.findAllByIsDeletedFalse(pageable);
+        List<GoodsListResponseDto> goodsResponseList = new ArrayList<>();
+
+        for (Goods goods : goodsPage.getContent()) {
+            boolean checkSameUser = goods.getUser().getUserId() == userDetails.getUser().getUserId();
+
+            List<Image> images = imageRepository.findByGoodsGoodsId(goods.getGoodsId());
+            List<String> imageUrls = new ArrayList<>();
+            for (Image image : images) {
+                imageUrls.add(image.getImageUrl());
+            }
+            boolean checkDibs = false;
+            Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goods.getGoodsId());
+            if(dibsGoods.isPresent()){
+                checkDibs = true;
+            }
+            goodsResponseList.add(new GoodsListResponseDto(goods, imageUrls.get(0), checkDibs, checkSameUser));
+        }
+
+        return new PageResponse<>(goodsResponseList, pageable, goodsPage.getTotalElements());
+    }
+
     public Page<GoodsListResponseDto> allGoodsEveryone(int page, int size, String sortBy, boolean isAsc) {
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
@@ -99,6 +128,8 @@ public class GoodsService {
 
         return new PageResponse<>(goodsResponseList, pageable, goodsPage.getTotalElements());
     }
+    // 로그인 하고 전체조회
+
 
 //    public ApiResponse<List<GoodsResponseDto>> locationAllGoods(Long locationId) {
 //        List<Goods> goodsList = goodsRepository.findAllByLocationIdAndIsDeletedFalseOrderByGoodsIdDesc(locationId);
@@ -129,7 +160,6 @@ public class GoodsService {
             checkDibs = true;
             System.out.println("true 입니다사ㅏㅏㅏㅏ");
         }
-
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods, checkSameUser, checkDibs), null);
     }
 
@@ -305,28 +335,6 @@ public class GoodsService {
         return new ApiResponse<>(true, goodsListResponseDtos, null);
     }
 
-    // 로그인 하고 전체조회
-    public Page<GoodsListResponseDto> allGoods(int page, int size, String sortBy, boolean isAsc, User user) {
-        Pageable pageable = paging(page, size, sortBy, isAsc);
-        Page<Goods> goodsPage = goodsRepository.findAllByIsDeletedFalse(pageable);
-        List<GoodsListResponseDto> goodsResponseList = new ArrayList<>();
-
-        for (Goods goods : goodsPage.getContent()) {
-            List<Image> images = imageRepository.findByGoodsGoodsId(goods.getGoodsId());
-            List<String> imageUrls = new ArrayList<>();
-            for (Image image : images) {
-                imageUrls.add(image.getImageUrl());
-            }
-            boolean checkDibs = false;
-            Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goods.getGoodsId());
-            if(dibsGoods.isPresent()){
-                checkDibs = true;
-            }
-            goodsResponseList.add(new GoodsListResponseDto(goods, imageUrls.get(0), checkDibs));
-        }
-
-        return new PageResponse<>(goodsResponseList, pageable, goodsPage.getTotalElements());
-    }
 
     // 로그인 없이 조회
     public ApiResponse<GoodsResponseDto> getGoodsEveryone(Long goodsId) {

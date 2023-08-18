@@ -42,10 +42,7 @@ public class DibsService {
     }
 
 
-    public ResponseEntity<CheckResponseDto> dibsGoods(UserDetailsImpl userDetails, DibsRequestDto dibsRequestDto) {
-        if(userDetails == null){
-            throw new IllegalArgumentException("로그인 해주세요");
-        }
+    public CheckResponseDto dibsGoods(UserDetailsImpl userDetails, DibsRequestDto dibsRequestDto) {
         User user = userDetails.getUser();
         findUser(user.getUserId());
         Goods goods = findGoods(dibsRequestDto.getGoodsId());
@@ -55,14 +52,12 @@ public class DibsService {
         // 찜한 경우
         if (dibsGoods.isPresent()) {
             dibsRepository.delete(dibsGoods.get());
-            CheckResponseDto response = new CheckResponseDto("이미 찜하신 목록입니다.", dibsGoods.isPresent(), OK.value(), "OK");
-            return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+            return new CheckResponseDto("이미 찜하신 목록입니다.", dibsGoods.isPresent(), OK.value(), "OK");
         }
 
         dibsRepository.save(new Dibs(goods, user));
 
-        CheckResponseDto response = new CheckResponseDto("찜하셨습니다.", dibsGoods.isPresent(), OK.value(), "OK");
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return new CheckResponseDto("찜하셨습니다.", dibsGoods.isPresent(), OK.value(), "OK");
     }
 
     public User findUser(Long userId) {

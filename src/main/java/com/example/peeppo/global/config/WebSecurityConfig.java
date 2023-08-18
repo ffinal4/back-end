@@ -64,7 +64,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://54.180.87.141:8080")); // 이 부분에 출처를 추가합니다.
-        config.setAllowedMethods(Arrays.asList("HEAD","POST","GET","DELETE","PUT","OPTIONS","PATCH"));
+        config.setAllowedMethods(Arrays.asList("HEAD", "POST", "GET", "DELETE", "PUT", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(Arrays.asList("*"));
         config.addExposedHeader("*");
         config.setAllowCredentials(true);
@@ -93,17 +93,17 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         return filter;
     }
 
-//    @Bean
-//    public WebSecurityCustomizer webSecurityCustomizer() {
-//        return web -> {
-//            web.ignoring()
-//                    .requestMatchers("/api/users/**")
-//                    .requestMatchers(HttpMethod.GET,"/**")
-//                    .requestMatchers(HttpMethod.GET, "/api/goods/**")
-//                    .requestMatchers("/api/auction/**");
-//
-//        };
-//    }
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> {
+            web.ignoring()
+                    .requestMatchers("/api/users/**")
+                    .requestMatchers(HttpMethod.GET, "/**")
+                    .requestMatchers(HttpMethod.GET, "/api/goods/**")
+                    .requestMatchers("/api/auction/**");
+
+        };
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -146,33 +146,57 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 //        http
 //                .cors(withDefaults())
 //                .authorizeHttpRequests((authorizeHttpRequests) ->
-//                        authorizeHttpRequests
-//                                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-//                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-////                                .requestMatchers(HttpMethod.GET, "/**").permitAll()
-//                                .requestMatchers(HttpMethod.GET,
-//                                        "/api/goods/pocket, " +
-//                                                "/api/goods/mypocket," +
-//                                                "/api/users/mypage, " +
-//                                                "/api/users/wishlist, " +
-//                                                "/api/users/trade/list, " +
-//                                                "/api/ratings").authenticated()
-////                                .requestMatchers(HttpMethod.POST, "/**").permitAll()
-//                                .requestMatchers(HttpMethod.POST,
-//                                        "api/users/logout, " +
-//                                                "/api/goods, " +
-//                                                "/api/auction/{auctionId}/bid, " +
-//                                                "/api/auction/{auctionId}/choice/bids, " +
-//                                                "api/dibs, " +
-//                                                "/api/ratings, ").authenticated()
-//                                .requestMatchers(HttpMethod.PUT, "/**").authenticated()
-//                                .requestMatchers(HttpMethod.DELETE, "/**").authenticated()
-//                                .anyRequest().permitAll() // 그 외 모든 요청 인증처리
+//                                authorizeHttpRequests
+//                                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+//                                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+//                                        .requestMatchers(HttpMethod.GET,
+//                                                "/api/auction/**, " +
+//                                                        "/api/auction/{auctionId}/bid," +
+//                                                        "/api/goods," +
+//                                                        "api/goods/{goodsId}," +
+//                                                        "/api/goods/pocket/{nickname}," +
+//                                                        "/api/home").permitAll()
+//                                        .requestMatchers(HttpMethod.POST,
+//                                                "/api/users/signup," +
+//                                                        "/api/users/nickname").permitAll()
+////                                .requestMatchers(HttpMethod.PUT, "/**").authenticated()
+////                                .requestMatchers(HttpMethod.DELETE, "/**").authenticated()
+//                                        .anyRequest().permitAll() // 그 외 모든 요청 인증처리
+//
 //                );
+//
+//        return http.build();
+    
+}
 
-        // 인증 및 인가가 필요
-        //  get: /api/goods/pocket, /api/goods/mypocket, /api/users/mypage, /api/users/wishlist, /api/users/trade/list
-        //  post: api/users/logout, /api/goods
+
+    // 인증 및 인가가 필요 없음
+    // get: /api/auction/**;, /api/auction/{auctionId}/bid, /api/goods, api/goods/{goodsId}, /api/goods/pocket/{nickname}, /api/home
+    // post: /api/users/signup, /api/users/nickname
+
+///api/auction
+//
+///api/auction/{auctionId}
+//
+//			/api/auction/**
+//
+// /api/auction/{auctionId}/bid
+//
+// /api/goods
+//
+// /api/goods/{goodsId}
+//
+// /api/goods/pocket/{nickname}
+//
+// /api/goods/recent
+//
+// /api/goods/search
+//
+// /api/home
+
+
+
+
 
 //      get .. /api/ratings(랜덤 레이팅 받는거)
 //      post.. /api/auction/{goodsId}(옥션 생성),  /api/auction/{auctionId}/bid(입찰하기),
@@ -189,4 +213,3 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 //
 //        return http.build();
 //    }
-}
