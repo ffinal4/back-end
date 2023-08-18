@@ -102,7 +102,7 @@ public class UserService {
 
         String encodedPassword = passwordEncoder.encode(myPageRequestDto.getPassword());
         if(!passwordEncoder.matches(myPageRequestDto.getOriginPassword(), user.getPassword())){
-            throw new IOException("현재 비밀번호가 일치하지 않습니다.");
+            return new ResponseDto("비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST.value(), "BAD_REQUEST");
         }
 
         String updateUserImg = uploadService.upload(multipartFile);
