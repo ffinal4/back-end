@@ -253,12 +253,24 @@ public class GoodsService {
         return getGoodsResponseDtos(user);
     }
 
-    public List<GoodsResponseDto> getPocket(String nickname, User user1) throws IllegalAccessException {
+    public ApiResponse<UrPocketResponseDto> getPocket(String nickname, User user1, int page, int size, String sortBy, boolean isAsc) throws IllegalAccessException {
         User user = userRepository.findUserByNickname(nickname);
         if(user.equals(user1)){
             throw new IllegalAccessException();
         }
-        return getGoodsResponseDtos(user);
+
+        Pageable pageable = paging(page, size, sortBy, isAsc);
+        Page<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalse(user, pageable);
+        List<GoodsListResponseDto> myGoods = new ArrayList<>();
+        for (Goods goods : goodsList) {
+            Image firstImage = imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goods.getGoodsId());
+            myGoods.add(new GoodsListResponseDto(goods, firstImage.getImageUrl()));
+        }
+
+        UrPocketResponseDto urPocketResponseDto = new UrPocketResponseDto(user, myGoods);
+
+        return new ApiResponse<>(true, urPocketResponseDto, null);
+//        return getGoodsResponseDtos(user);
     }
 
     private List<GoodsResponseDto> getGoodsResponseDtos(User user) {
