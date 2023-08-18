@@ -33,8 +33,6 @@ public class QGoods extends EntityPathBase<Goods> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
-    public final ListPath<com.example.peeppo.domain.dibs.entity.Dibs, com.example.peeppo.domain.dibs.entity.QDibs> dibs = this.<com.example.peeppo.domain.dibs.entity.Dibs, com.example.peeppo.domain.dibs.entity.QDibs>createList("dibs", com.example.peeppo.domain.dibs.entity.Dibs.class, com.example.peeppo.domain.dibs.entity.QDibs.class, PathInits.DIRECT2);
-
     public final StringPath goodsCondition = createString("goodsCondition");
 
     public final NumberPath<Long> goodsId = createNumber("goodsId", Long.class);
