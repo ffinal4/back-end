@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -74,6 +75,14 @@ public class RatingHelper {
 
         return score;
     }
+    public double getAvgPriceByGoodsId(Long goodsId) {
+        RatingGoods ratingGoods = ratingGoodsRepository.findByGoodsGoodsId(goodsId);
+
+        if(ratingGoods != null){
+            return ratingGoods.getAvgRatingPrice();
+        }
+            return 0D; // 기본 값 또는 실패 시 반환할 값
+    }
 
     @Transactional
     public void resetGoodsAvgPrice(Goods goods) {
@@ -90,4 +99,5 @@ public class RatingHelper {
         }
 
     }
+
 }

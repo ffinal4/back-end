@@ -13,6 +13,7 @@ import com.example.peeppo.domain.goods.repository.WantedGoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.helper.ImageHelper;
 import com.example.peeppo.domain.image.repository.ImageRepository;
+import com.example.peeppo.domain.rating.entity.RatingGoods;
 import com.example.peeppo.domain.rating.helper.RatingHelper;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
@@ -150,10 +151,11 @@ public class GoodsService {
             return  new ApiResponse<>(true, new PocketResponseDto(), null);
         }
 
-        List<GoodsListResponseDto> myGoods = new ArrayList<>();
+        List<PocketListResponseDto> myGoods = new ArrayList<>();
         for (Goods goods : goodsList) {
+            long ratingPrice = (long) ratingHelper.getAvgPriceByGoodsId(goods.getGoodsId());
             Image firstImage = imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goods.getGoodsId());
-            myGoods.add(new GoodsListResponseDto(goods, firstImage.getImageUrl()));
+            myGoods.add(new PocketListResponseDto(goods, firstImage.getImageUrl(), ratingPrice));
         }
 
         return new ApiResponse<>(true, new PocketResponseDto(user, myGoods), null);
