@@ -25,7 +25,7 @@ public class DibsController {
     @PostMapping("/dibs")
     public ResponseEntity<CheckResponseDto> dibsGoods(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                       @Valid @RequestBody DibsRequestDto dibsRequestDto) {
-        return dibsService.dibsGoods(userDetails.getUser(), dibsRequestDto);
+        return dibsService.dibsGoods(userDetails, dibsRequestDto);
     }
 
     @GetMapping("/users/wishlist")

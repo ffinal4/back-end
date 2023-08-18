@@ -124,11 +124,12 @@ public class GoodsService {
         }
        // goodsRecent.add(Long.toString(goods.getGoodsId())); // 조회시에 리스트에 추가 !
         boolean checkDibs = false;
-        Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goodsId);
+        Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goods.getGoodsId());
         if(dibsGoods.isPresent()){
             checkDibs = true;
             System.out.println("true 입니다사ㅏㅏㅏㅏ");
         }
+
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods, checkSameUser, checkDibs), null);
     }
 

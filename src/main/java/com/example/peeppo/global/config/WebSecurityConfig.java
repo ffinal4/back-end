@@ -109,8 +109,6 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         // CSRF 설정
         http.csrf(AbstractHttpConfigurer::disable);
-
-
         // 기본 설정인 Session 방식이 아닌 JWT 방식을 사용하기 위한 설정
         http.sessionManagement((sessionManagement) ->
                 sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -134,4 +132,61 @@ public class WebSecurityConfig implements WebMvcConfigurer {
 
         return http.build();
     }
+
+
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+//        // CSRF 설정
+//        http.csrf(AbstractHttpConfigurer::disable);
+//        // 기본 설정인 Session 방식이 아닌 JWT 방식을 사용하기 위한 설정
+//        http.sessionManagement((sessionManagement) ->
+//                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//        );
+//
+//        http
+//                .cors(withDefaults())
+//                .authorizeHttpRequests((authorizeHttpRequests) ->
+//                        authorizeHttpRequests
+//                                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+//                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+////                                .requestMatchers(HttpMethod.GET, "/**").permitAll()
+//                                .requestMatchers(HttpMethod.GET,
+//                                        "/api/goods/pocket, " +
+//                                                "/api/goods/mypocket," +
+//                                                "/api/users/mypage, " +
+//                                                "/api/users/wishlist, " +
+//                                                "/api/users/trade/list, " +
+//                                                "/api/ratings").authenticated()
+////                                .requestMatchers(HttpMethod.POST, "/**").permitAll()
+//                                .requestMatchers(HttpMethod.POST,
+//                                        "api/users/logout, " +
+//                                                "/api/goods, " +
+//                                                "/api/auction/{auctionId}/bid, " +
+//                                                "/api/auction/{auctionId}/choice/bids, " +
+//                                                "api/dibs, " +
+//                                                "/api/ratings, ").authenticated()
+//                                .requestMatchers(HttpMethod.PUT, "/**").authenticated()
+//                                .requestMatchers(HttpMethod.DELETE, "/**").authenticated()
+//                                .anyRequest().permitAll() // 그 외 모든 요청 인증처리
+//                );
+
+        // 인증 및 인가가 필요
+        //  get: /api/goods/pocket, /api/goods/mypocket, /api/users/mypage, /api/users/wishlist, /api/users/trade/list
+        //  post: api/users/logout, /api/goods
+
+//      get .. /api/ratings(랜덤 레이팅 받는거)
+//      post.. /api/auction/{goodsId}(옥션 생성),  /api/auction/{auctionId}/bid(입찰하기),
+//             /api/auction/{auctionId}/choice/bids(경매자가 선호 물품 선택),
+//             api/dibs/ ???(찜도 추가해야될까요?) ,  /api/ratings(레이팅)
+//      put..  /api/auction/{auctionId}/choice/bids(선호 물품 수정),  /api/goods/{goodsId}(게시글 수정)
+//             /api/users/mypage(내 정보 수정)
+//      delete.. /api/auction/{auctionId}/pick/{bidId},  /api/auction/{auctionId},
+//              /api/goods/{goodsId},
+//
+//
+//       http.addFilterBefore(new JwtAuthorizationFilter(jwtUtil, userDetailsService), UsernamePasswordAuthenticationFilter.class);
+//        http.addFilterBefore(new AuthExceptionFilter(), JwtAuthorizationFilter.class);
+//
+//        return http.build();
+//    }
 }

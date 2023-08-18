@@ -100,5 +100,6 @@ public class GoodsResponseDto {
         this.wantedGoods = wantedGoods;
         this.nickname = goods.getUser().getNickname();
         this.checkSameUser = checkSameUser;
+        this.checkDibs = checkDibs;
     }
 }
