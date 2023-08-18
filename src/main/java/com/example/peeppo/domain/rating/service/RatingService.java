@@ -33,11 +33,15 @@ public class RatingService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NullPointerException("존재하지 않는 유저입니다."));
 
+        if (user.getCurrentRatingCount() == 0L){
+            user.totalPointInit();
+        }
+        
         Goods randomGoods = goodsRepository.findRandomGoodsWithLowRatingCount(user)
                 .orElse(goodsRepository.findRandomGoods(user)
                         .orElseThrow(() -> new NullPointerException("평가 가능한 상품이 존재하지 않습니다.")));
 
-        RatingResponseDto ratingResponseDto = new RatingResponseDto(randomGoods);
+        RatingResponseDto ratingResponseDto = new RatingResponseDto(randomGoods, user.getCurrentRatingCount());
 
         return new ApiResponse<>(true, ratingResponseDto, null);
     }
@@ -69,7 +73,8 @@ public class RatingService {
                 currentPoint,
                 currentCount,
                 ratingRequestDto.getRatingPrice(),
-                goods.getSellerPrice());
+                goods.getSellerPrice(),
+                user.getTotalPoint());
         return new ApiResponse<>(true, responseDto, null);
     }
 }
