@@ -130,29 +130,27 @@ public class GoodsService {
     }
 
 
-    public ApiResponse<PocketResponseDto> getMyGoods(Long userId,
-                                                     int page,
+    public ApiResponse<PocketResponseDto> getMyGoods(int page,
                                                      int size,
                                                      String sortBy,
                                                      boolean isAsc,
-                                                     UserDetailsImpl userDetails) {
-        // 리다이렉트로 빠지지 않았을 경우
-        if (userDetails.getUser().getUserId().equals(userId)) {
-            throw new IllegalStateException("잘못된 접근입니다. 다시 시도해주세요");
-        }
+                                                     Long userId) {
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
         User user = findUserId(userId);
         Page<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalse(user, pageable);
+
+        if(goodsList.isEmpty()){
+            return  new ApiResponse<>(true, new PocketResponseDto(), null);
+        }
+
         List<GoodsListResponseDto> myGoods = new ArrayList<>();
         for (Goods goods : goodsList) {
             Image firstImage = imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goods.getGoodsId());
             myGoods.add(new GoodsListResponseDto(goods, firstImage.getImageUrl()));
         }
 
-        PocketResponseDto pocketResponseDto = new PocketResponseDto(user, myGoods);
-
-        return new ApiResponse<>(true, pocketResponseDto, null);
+        return new ApiResponse<>(true, new PocketResponseDto(user, myGoods), null);
     }
 
     @Transactional
@@ -181,10 +179,10 @@ public class GoodsService {
     }
 
     @Transactional
-    public ApiResponse<DeleteResponseDto> deleteGoods(Long goodsId, User user) throws IllegalAccessException {
+    public ApiResponse<DeleteResponseDto> deleteGoods(Long goodsId, Long userId) throws IllegalAccessException {
         Goods goods = findGoods(goodsId);
-        if (user.getUserId() == goods.getUser().getUserId()) {
-            goods.setDeleted(true);
+        if (userId == goods.getUser().getUserId()) {
+            goods.delete();
             goodsRepository.save(goods);
         } else {
             throw new IllegalAccessException();
@@ -192,19 +190,6 @@ public class GoodsService {
         return new ApiResponse<>(true, new DeleteResponseDto("삭제되었습니다"), null);
     }
 
-    public Goods getGoodsById(Long goodsId, Long userId) {
-        // 상품 조회
-        Goods goods = goodsRepository.findById(goodsId).orElse(null);
-        if (goods == null) {
-            throw new NotFoundException("존재하지 않는 상품입니다.");
-        }
-
-        // 사용자 조회
-        User user = userRepository.findById(userId).orElse(null);
-        if (user == null) {
-            // 사용자가 존재하지 않을 경우 예외 처리
-            throw new NotFoundException("User not found");
-        }
 
         // 최근 본 목록에 상품 ID를 추가
 //        List<Long> recentlyViewedGoodsIds = user.getRecentlyViewedGoodsIds();
@@ -213,9 +198,6 @@ public class GoodsService {
 //            user.setRecentlyViewedGoodsIds(recentlyViewedGoodsIds);
 //            userRepository.save(user);
 //        }
-
-        return goods;
-    }
 
     public Goods findGoods(Long goodsId) {
         Goods goods = goodsRepository.findById(goodsId).orElseThrow(() ->
