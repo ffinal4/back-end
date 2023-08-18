@@ -103,16 +103,16 @@ public class UserService {
     public ResponseDto updateMyPage(MyPageRequestDto myPageRequestDto, MultipartFile multipartFile, User user) throws IOException {
 
         String encodedPassword = passwordEncoder.encode(myPageRequestDto.getPassword());
-        if(!passwordEncoder.matches(myPageRequestDto.getOriginPassword(), user.getPassword())){
-            throw new IOException("현재 비밀번호가 일치하지 않습니다.");
+        if (!passwordEncoder.matches(myPageRequestDto.getOriginPassword(), user.getPassword())) {
+            return new ResponseDto("비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST.value(), "BAD_REQUEST");
+        } else {
+            String updateUserImg = uploadService.upload(multipartFile);
+            user.upload(myPageRequestDto, updateUserImg, encodedPassword);
+
+            userRepository.save(user);
+
+            return new ResponseDto("개인정보가 수정되었습니다.", HttpStatus.OK.value(), "OK");
         }
-
-        String updateUserImg = uploadService.upload(multipartFile);
-        user.upload(myPageRequestDto, updateUserImg, encodedPassword);
-
-        userRepository.save(user);
-
-        return new ResponseDto("개인정보가 수정되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
     public ResponseDto deleteMyPage(Long userId) {
