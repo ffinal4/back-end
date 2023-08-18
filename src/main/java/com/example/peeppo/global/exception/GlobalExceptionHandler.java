@@ -35,6 +35,13 @@ public class GlobalExceptionHandler {
         ApiResponse<ErrorResponse> apiResponse = new ApiResponse<>(false, null, errorResponse);
         return apiResponse;
     }
+    @ExceptionHandler(IllegalStateException.class)
+    public ApiResponse<ErrorResponse> handleIllegalStateException(Exception ex) {
+        log.error("IllegalAccessException error: {}", ex.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        ApiResponse<ErrorResponse> apiResponse = new ApiResponse<>(false, null, errorResponse);
+        return apiResponse;
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ApiResponse<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
