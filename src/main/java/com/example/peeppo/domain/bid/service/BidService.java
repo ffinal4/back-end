@@ -14,6 +14,9 @@ import com.example.peeppo.domain.bid.repository.QueryRepository;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.image.repository.ImageRepository;
+import com.example.peeppo.domain.rating.entity.Rating;
+import com.example.peeppo.domain.rating.entity.RatingGoods;
+import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
 import com.example.peeppo.domain.rating.repository.ratingRepository.RatingRepository;
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
@@ -42,6 +45,7 @@ public class BidService {
     private final ImageRepository imageRepository;
     private final QueryRepository queryRepository;
     private final ChoiceBidRepository choiceBidRepository;
+    private final RatingGoodsRepository ratingGoodsRepository;
     private final RatingRepository ratingRepository;
 
     public ResponseDto bidding(User user, Long auctionId, BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
@@ -61,11 +65,11 @@ public class BidService {
                     }
 
                     if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {
-                        //Rating rating = ratingRepository.findByRatingGoodsId(goodsId);
+                        RatingGoods ratingGoods = ratingGoodsRepository.findByGoodsGoodsId(goodsId);
                         //시작가보다 낮을 경우
-//                        if (auction.getLowPrice() > rating.getAvgRatingPrice()) {   //평균가 이상함
-//                            throw new IllegalAccessException();
-//                        }
+                        if (auction.getLowPrice() > ratingGoods.getAvgRatingPrice()) {   //평균가 이상함
+                            throw new IllegalAccessException();
+                        }
                         List.add(new Bid(user, auction, goods, goodsImg));
                         goods.changeStatus(GoodsStatus.BIDDING);
                     } else {
