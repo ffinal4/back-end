@@ -50,18 +50,6 @@ public class Auction extends Timestamped {
     @ColumnDefault("false")
     private Boolean isDeleted;
 
-
-    public Auction(Goods goods){
-        this.goods = goods;
-    }
-
-    public Auction(Goods getGoods, LocalDateTime auctionEndTime,  AuctionRequestDto auctionRequestDto) {
-        this.goods = getGoods;
-        this.isDeleted = false;
-        this.auctionEndTime = auctionEndTime;
-        this.lowPrice = getGoods.getSellerPrice();
-    }
-
     public Auction(Goods getGoods, LocalDateTime auctionEndTime, User user, RatingGoods ratingGoods) {
         this.goods = getGoods;
         this.isDeleted = false;

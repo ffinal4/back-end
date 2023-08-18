@@ -58,11 +58,9 @@ public class UserService {
     public CheckResponseDto checkValidateNickname(ValidateRequestDto validateRequestDto) {
         String nickname = validateRequestDto.getNickname();
         boolean validateDuplicateNickname = isDuplicatedNickname(nickname);
-
         if (!validateDuplicateNickname) {
             throw new IllegalStateException("중복된 이름입니다.");
         }
-
         return new CheckResponseDto("중복되지 않은 이름입니다.", validateDuplicateNickname, OK.value(), "OK");
     }
 

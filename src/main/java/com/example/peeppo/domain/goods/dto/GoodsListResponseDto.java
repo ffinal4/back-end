@@ -19,6 +19,8 @@ public class GoodsListResponseDto {
     private String image;
     private GoodsStatus goodsStatus;
 
+    private boolean checkSameUser;
+
 
     public GoodsListResponseDto(Goods goods, String image) {
         this.goodsId = goods.getGoodsId();
@@ -59,6 +61,17 @@ public class GoodsListResponseDto {
         this.image = goods.getImage().stream().map(Image::getImageUrl).toList().get(0);
         this.nickname = goods.getUser().getNickname();
         this.goodsStatus = goods.getGoodsStatus();
+    }
 
+    public GoodsListResponseDto(Goods goods, String image, Boolean checkDibs, boolean checkSameUser) {
+        this.goodsId = goods.getGoodsId();
+        this.checkDibs = checkDibs;
+        this.title = goods.getTitle();
+        this.content = goods.getContent();
+        this.location = goods.getLocation();
+        this.image = image;
+        this.nickname = goods.getUser().getNickname();
+        this.goodsStatus = goods.getGoodsStatus();
+        this.checkSameUser = checkSameUser;
     }
 }
