@@ -61,22 +61,26 @@ public class BidService {
                     String goodsImg = String.valueOf(imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goodsId));
 
                     if (goods.isDeleted() && !goods.getUser().getUserId().equals(user.getUserId())) {
-                        throw new IllegalAccessException();        //여기도 고민
+                        System.out.println(" ");
+                        throw new IllegalAccessException();
+                        //여기도 고민
                     }
-
                     if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {
                         RatingGoods ratingGoods = ratingGoodsRepository.findByGoodsGoodsId(goodsId);
                         //시작가보다 낮을 경우
                         if (auction.getLowPrice() > ratingGoods.getAvgRatingPrice()) {   //평균가 이상함
+                            System.out.println("2 ");
                             throw new IllegalAccessException();
                         }
                         List.add(new Bid(user, auction, goods, goodsImg));
                         goods.changeStatus(GoodsStatus.BIDDING);
                     } else {
+                        System.out.println("3 ");
                         throw new IllegalAccessException();
                     }
                 }
         } else {
+            System.out.println("4 ");
             throw new IllegalAccessException();
         }
 

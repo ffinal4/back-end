@@ -104,6 +104,10 @@ public class AuctionService {
                 System.out.println("3시간");
                 daysLater = now.plusHours(3);
                 break;
+            case "1일":
+                System.out.println("1일");
+                daysLater = now.plusDays(1);
+                break;
         }
         return daysLater;
     }
