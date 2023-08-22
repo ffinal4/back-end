@@ -15,6 +15,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -59,7 +60,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://54.180.87.141:8080", "http://54.180.87.141:80", "http://peeppo.store")); // 이 부분에 출처를 추가합니다.
+        config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://54.180.87.141:8080", "http://54.180.87.141:80", "http://peeppo.store", "https://apic.app", "chrome-extension://ggnhohnkfcpcanfekomdkjffnfcjnjam")); // 이 부분에 출처를 추가합니다.
         config.setAllowedMethods(Arrays.asList("HEAD", "POST", "GET", "DELETE", "PUT", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(Arrays.asList("*"));
         config.addExposedHeader("*");
@@ -89,19 +90,18 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         return filter;
     }
 
+
 /*
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return web -> {
             web.ignoring()
-                    .requestMatchers("/api/users/**")
-                    .requestMatchers(HttpMethod.GET, "/**")
-                    .requestMatchers(HttpMethod.GET, "/api/goods/**")
-                    .requestMatchers("/api/auction/**");
+                    .requestMatchers("/stomp/chat");
 
         };
     }
 */
+
 
 //    @Bean
 //    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -157,11 +157,15 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                                                 "/api/home",
                                                 "/api/goods/recent",
                                                 "/api/goods/search",
-                                                "/api/users/login").permitAll()
+                                                "/api/users/login",
+                                                "/chat/**",
+                                                "/chatroom/**",
+                                                "/stomp/chat").permitAll()
                                         .requestMatchers(HttpMethod.POST,
                                                 "/api/users/signup",
                                                 "/api/users/nickname",
-                                                "/api/users/login").permitAll()
+                                                "/api/users/login",
+                                                "/chat/room/**").permitAll()
                                         .anyRequest().authenticated() // 그 외 모든 요청 인증처리
 
                 );

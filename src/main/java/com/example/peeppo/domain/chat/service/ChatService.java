@@ -5,6 +5,9 @@ import com.example.peeppo.domain.chat.entity.ChatMessage;
 import com.example.peeppo.domain.chat.entity.ChatRoom;
 import com.example.peeppo.domain.chat.repository.ChatMessageRepository;
 import com.example.peeppo.domain.chat.repository.ChatRoomRepository;
+import com.example.peeppo.domain.goods.entity.Goods;
+import com.example.peeppo.domain.goods.repository.GoodsRepository;
+import com.example.peeppo.domain.goods.service.GoodsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -28,6 +31,7 @@ public class ChatService {
     private final ChannelTopic channelTopic;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final GoodsService goodsService;
     private Map<String, ChatRoom> chatRooms;
 
     // Redis CacheKeys
@@ -49,17 +53,19 @@ public class ChatService {
     } //순서대로 저장메서드
 
 //     채팅방 생성 : 서버간 채팅방 공유를 위해 redis hash에 저장한다. -> 이것으로 채팅방은 지워지지 않음
-    public ChatRoomResponseDto createRoom(String title){
+    public ChatRoomResponseDto createRoom(Long id){
         String randomId = UUID.randomUUID().toString();
+        Goods goods = goodsService.findGoods(id);
         ChatRoom chatRoom = ChatRoom.builder()
                 .roomId(randomId)
-                .title(title)
+                .goods(goods)
                 .build();
         hashOpsChatRoom.put(CHAT_ROOMS, randomId, chatRoom);
         System.out.println(hashOpsChatRoom.get(CHAT_ROOMS, randomId));
         chatRoomRepository.save(chatRoom);
         return new ChatRoomResponseDto(chatRoom);
     }
+    //채팅방 아이디는 랜덤 !
 
     /**
      * destination정보에서 roomId 추출
@@ -105,7 +111,7 @@ public class ChatService {
 
 
 
-    //전체 채팅방 조회
+    //전체 채팅방 조회 => 사용자 마다 !
     public List<ChatRoom> findAllRoom(){
         // 채팅방 생성 순서를 최근순으로 반환
         //List chatRoomList = new ArrayList<>(chatRooms.values());

@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.goods.entity;
 
 import com.example.peeppo.domain.auction.entity.Auction;
+import com.example.peeppo.domain.chat.entity.ChatRoom;
 import com.example.peeppo.domain.dibs.entity.Dibs;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.dto.GoodsRequestDto;
@@ -58,6 +59,9 @@ public class Goods extends Timestamped {
 
     @OneToMany(mappedBy = "goods")
     private List<Dibs> dibs;
+
+    @OneToMany(mappedBy = "goods")
+    private List<ChatRoom> chatRooms;
 
 
 

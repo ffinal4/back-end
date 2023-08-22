@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
@@ -17,12 +18,18 @@ public class QChatRoom extends EntityPathBase<ChatRoom> {
 
     private static final long serialVersionUID = 678685172L;
 
+    private static final PathInits INITS = PathInits.DIRECT2;
+
     public static final QChatRoom chatRoom = new QChatRoom("chatRoom");
 
     public final com.example.peeppo.global.utils.QTimestamped _super = new com.example.peeppo.global.utils.QTimestamped(this);
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
+
+    public final com.example.peeppo.domain.goods.entity.QGoods goods;
+
+    public final StringPath goodsTitle = createString("goodsTitle");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
@@ -31,20 +38,27 @@ public class QChatRoom extends EntityPathBase<ChatRoom> {
 
     public final StringPath roomId = createString("roomId");
 
-    public final StringPath title = createString("title");
-
     public final StringPath user = createString("user");
 
     public QChatRoom(String variable) {
-        super(ChatRoom.class, forVariable(variable));
+        this(ChatRoom.class, forVariable(variable), INITS);
     }
 
     public QChatRoom(Path<? extends ChatRoom> path) {
-        super(path.getType(), path.getMetadata());
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
     public QChatRoom(PathMetadata metadata) {
-        super(ChatRoom.class, metadata);
+        this(metadata, PathInits.getFor(metadata, INITS));
+    }
+
+    public QChatRoom(PathMetadata metadata, PathInits inits) {
+        this(ChatRoom.class, metadata, inits);
+    }
+
+    public QChatRoom(Class<? extends ChatRoom> type, PathMetadata metadata, PathInits inits) {
+        super(type, metadata, inits);
+        this.goods = inits.isInitialized("goods") ? new com.example.peeppo.domain.goods.entity.QGoods(forProperty("goods"), inits.get("goods")) : null;
     }
 
 }

@@ -18,9 +18,9 @@ public class ChatRoomController {
     private final ChatService chatService;
 
     //채팅방
-    @PostMapping("/room")
-    public ChatRoomResponseDto createRoom(@RequestBody ChatRoomRequestDto chatRoomDto){
-        return chatService.createRoom(chatRoomDto.getTitle());
+    @PostMapping("/room/{goodsId}")
+    public ChatRoomResponseDto createRoom(@PathVariable("goodsId") Long goodsId){
+        return chatService.createRoom(goodsId);
     }
 
     //채팅방 전체 조회
