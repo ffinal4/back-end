@@ -1,5 +1,5 @@
 
-package com.example.peeppo.global.config.redis;
+package com.example.peeppo.global.redis.config;
 
 
 import com.example.peeppo.domain.chat.entity.ChatMessage;

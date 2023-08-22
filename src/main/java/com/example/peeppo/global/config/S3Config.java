@@ -1,4 +1,3 @@
-/*
 package com.example.peeppo.global.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
@@ -40,4 +39,3 @@ public class S3Config {
         return bucket;
     }
 }
-*/

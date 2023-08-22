@@ -2,6 +2,7 @@ package com.example.peeppo.global.config;
 
 import com.example.peeppo.global.security.jwt.AuthExceptionFilter;
 import com.example.peeppo.global.security.jwt.JwtAuthenticationFilter;
+import com.example.peeppo.global.security.jwt.JwtAuthorizationFilter;
 import com.example.peeppo.global.security.jwt.JwtUtil;
 import com.example.peeppo.global.security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
