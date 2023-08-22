@@ -1,7 +1,7 @@
-/*
 package com.example.peeppo.global.security;
 
-
+import com.example.peeppo.domain.user.entity.User;
+import com.example.peeppo.domain.user.entity.UserRoleEnum;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,7 +29,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getUsername();
+        return user.getEmail();
     }
 
     @Override
@@ -64,5 +64,3 @@ public class UserDetailsImpl implements UserDetails {
         return true;
     }
 }
-*/
-

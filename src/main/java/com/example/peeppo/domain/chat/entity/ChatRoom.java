@@ -26,7 +26,7 @@ public class ChatRoom extends Timestamped implements Serializable {
     private Long id;
     private String roomId; //채팅방 아이디
     private String title; // 패팅방 이름
-    private String user; // 판매자 아이디 (= 유저리스트)
+    private String user; // 판매자 닉네임 (= 유저리스트)
 
    // @Transient //Serialize하는 과정을 제외하고 싶은 경우 선언하는 키워드
    // private Set<WebSocketSession> sessions = new HashSet<>(); // 중복저장을 막는다

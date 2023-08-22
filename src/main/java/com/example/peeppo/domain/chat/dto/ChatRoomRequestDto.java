@@ -8,5 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Getter
 public class ChatRoomRequestDto {
-   private String title;
+   private String title; // 물품이름으로 될것 !
 }
