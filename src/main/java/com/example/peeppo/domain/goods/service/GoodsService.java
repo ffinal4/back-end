@@ -61,6 +61,9 @@ public class GoodsService {
                                                      List<MultipartFile> images,
                                                      WantedRequestDto wantedRequestDto,
                                                      User user) {
+        if(goodsRequestDto.getSellerPrice() == null && goodsRequestDto.getRatingCheck() == true){
+            throw new IllegalArgumentException("레이팅을 원하시면 가격을 입력해주세요.");
+        }
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
         Goods goods = new Goods(goodsRequestDto, wantedGoods, user, GoodsStatus.ONSALE);
         goodsRepository.save(goods);
