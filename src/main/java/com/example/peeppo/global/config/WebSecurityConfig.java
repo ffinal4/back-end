@@ -155,6 +155,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
                                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                         .requestMatchers(HttpMethod.GET,
+                                                "/",
                                                 "/api/auction/{auctionId}",
                                                 "/api/auction/{auctionId}/bid",
                                                 "/api/goods","/api/goods/{goodsId}",
