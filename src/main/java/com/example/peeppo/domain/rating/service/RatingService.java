@@ -5,6 +5,7 @@ import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.rating.dto.RatingRequestDto;
 import com.example.peeppo.domain.rating.dto.RatingResponseDto;
 import com.example.peeppo.domain.rating.dto.RatingScoreResponseDto;
+import com.example.peeppo.domain.rating.dto.TopRatingUserResponseDto;
 import com.example.peeppo.domain.rating.helper.RatingHelper;
 import com.example.peeppo.domain.rating.repository.ratingRepository.RatingRepository;
 import com.example.peeppo.domain.user.entity.User;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -27,6 +29,17 @@ public class RatingService {
     private final UserRepository userRepository;
     private final RatingHelper ratingHelper;
 
+
+    public ApiResponse<List<TopRatingUserResponseDto>> ratingTopFiveUsers() {
+        List<User> ratingTopFiveUsers = userRepository.findTopFiveUsersByMaxRatingCount();
+
+        List<TopRatingUserResponseDto> responseDtoList = ratingTopFiveUsers.stream()
+                .map(user -> new TopRatingUserResponseDto(user.getNickname(), user.getMaxRatingCount()))
+                .collect(Collectors.toList());
+
+        return new ApiResponse<>(true, responseDtoList, null);
+    }
+
     @Transactional
     public ApiResponse<RatingResponseDto> randomRatingGoods(Long userId) {
 
@@ -36,7 +49,7 @@ public class RatingService {
         if (user.getCurrentRatingCount() == 0L){
             user.totalPointInit();
         }
-        
+
         Goods randomGoods = goodsRepository.findRandomGoodsWithLowRatingCount(user)
                 .orElse(goodsRepository.findRandomGoods(user)
                         .orElseThrow(() -> new NullPointerException("평가 가능한 상품이 존재하지 않습니다.")));
@@ -55,7 +68,6 @@ public class RatingService {
         Goods goods = goodsRepository.findByGoodsId(ratingRequestDto.getGoodsId())
                 .orElseThrow(() -> new NullPointerException("해당 상품이 존재하지 않습니다."));
 
-        // user -> UserRatingRelation -> rating -> ratingGoods -> goods
         if (ratingRepository.existRatingByUserAndGoods(user, goods)) {
             throw new IllegalStateException("이미 해당 상품에 대한 평가가 존재합니다.");
         }
@@ -77,4 +89,5 @@ public class RatingService {
                 user.getTotalPoint());
         return new ApiResponse<>(true, responseDto, null);
     }
+
 }
