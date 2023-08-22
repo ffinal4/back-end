@@ -36,7 +36,7 @@ public class Goods extends Timestamped {
     private Category category;
 
     private Long sellerPrice;
-    private boolean isDeleted;
+    private Boolean isDeleted;
 
     private Boolean ratingCheck;
     @ManyToOne

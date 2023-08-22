@@ -67,7 +67,7 @@ public class AuctionService {
         if(!(getGoods.getGoodsStatus()==ONSALE)){
             new IllegalArgumentException("해당 물건으로는 경매를 등록할 수 없습니다");
         }
-        if(!(getGoods.isDeleted())){
+        if(!(getGoods.getIsDeleted())){
             new IllegalArgumentException("해당 물건은 삭제된 물건입니다.");
         }
 

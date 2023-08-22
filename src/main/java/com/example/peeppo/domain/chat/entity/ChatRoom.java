@@ -1,17 +1,12 @@
 package com.example.peeppo.domain.chat.entity;
 
-import com.example.peeppo.domain.chat.service.ChatService;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.global.utils.Timestamped;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.web.socket.WebSocketSession;
 
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.HashSet;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -34,6 +29,7 @@ public class ChatRoom extends Timestamped implements Serializable {
    // private Set<WebSocketSession> sessions = new HashSet<>(); // 중복저장을 막는다
 
     @ManyToOne
+    @JoinColumn(name = "goods_id", nullable = false)
     private Goods goods;
 
     @Builder
