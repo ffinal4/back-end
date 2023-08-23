@@ -58,7 +58,7 @@ public class BidService {
                 !auction.getUser().getUserId().equals(user.getUserId())) {
                 for (Long goodsId : bidGoodsListRequestDto.getGoodsId()) {
                     Goods goods = getGoods(goodsId);
-                    String goodsImg = String.valueOf(imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goodsId));
+                    String goodsImg = String.valueOf(imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsId));
 
                     if (goods.isDeleted() && !goods.getUser().getUserId().equals(user.getUserId())) {
                         System.out.println(" ");
@@ -96,7 +96,7 @@ public class BidService {
         Auction auction = getAuction(auctionId);
         Long goodsId = auction.getGoods().getGoodsId();
 
-        String goodsImg = String.valueOf(imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goodsId));
+        String goodsImg = String.valueOf(imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsId));
 
         List<BidListResponseDto> bidList = bidPage.getContent().stream()
                 .map(Bid -> new BidListResponseDto(Bid, goodsImg))
