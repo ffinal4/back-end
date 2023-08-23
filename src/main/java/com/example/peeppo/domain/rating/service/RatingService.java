@@ -34,7 +34,7 @@ public class RatingService {
     public ApiResponse<List<RatingUserResponseDto>> ratingTopFiveUsers() {
         List<RatingUserResponseDto> responseDtoList = userRepository.findTopFiveUsersByMaxRatingCount()
                 .stream()
-                .map(user -> new RatingUserResponseDto(user.getNickname(), user.getMaxRatingCount()))
+                .map(user -> new RatingUserResponseDto(user.getUserImg(), user.getNickname(), user.getMaxRatingCount()))
                 .collect(Collectors.toList());
 
         return new ApiResponse<>(true, responseDtoList, null);

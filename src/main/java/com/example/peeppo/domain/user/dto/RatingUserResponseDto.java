@@ -6,6 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class RatingUserResponseDto {
+
+    private String userImage;
     private String nickName;
     private Long maxRatingCount;
 }
