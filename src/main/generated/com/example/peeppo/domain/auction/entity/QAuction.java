@@ -30,6 +30,8 @@ public class QAuction extends EntityPathBase<Auction> {
 
     public final EnumPath<com.example.peeppo.domain.auction.enums.AuctionStatus> auctionStatus = createEnum("auctionStatus", com.example.peeppo.domain.auction.enums.AuctionStatus.class);
 
+    public final NumberPath<Double> avgPrice = createNumber("avgPrice", Double.class);
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
