@@ -59,9 +59,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         response.addHeader(JwtUtil.REFRESH_TOKEN, refreshToken);
 
         redisTemplate.opsForValue()
-                .set(username, refreshToken, 5, TimeUnit.MINUTES); //나중에 3일로 바꾸기
+                .set(username, refreshToken, 3, TimeUnit.DAYS); //나중에 3일로 바꾸기
         redisTemplate.opsForValue()
-                .set(refreshToken, username, 5, TimeUnit.MINUTES);
+                .set(refreshToken, username, 3, TimeUnit.DAYS);
 
         response.setStatus(200);
         new ObjectMapper().writeValue(response.getOutputStream(), (userLocation));
