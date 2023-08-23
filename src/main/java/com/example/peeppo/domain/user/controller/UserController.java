@@ -18,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")

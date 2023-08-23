@@ -1,9 +1,5 @@
 package com.example.peeppo.global.exception;
 
-import com.example.peeppo.domain.user.dto.ResponseDto;
-import com.example.peeppo.global.responseDto.ApiResponse;
-import com.example.peeppo.global.responseDto.ErrorResponse;
-import jdk.jshell.Snippet;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
