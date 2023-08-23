@@ -46,7 +46,7 @@ public class HomeService {
 
         List<RatingUserResponseDto> ratingUserListResponseDto = userRepository.findTopThreeUsersByMaxRatingCount()
                 .stream()
-                .map(ratingUser -> new RatingUserResponseDto(ratingUser.getNickname(), ratingUser.getMaxRatingCount()))
+                .map(ratingUser -> new RatingUserResponseDto(ratingUser.getUserImg(), ratingUser.getNickname(), ratingUser.getMaxRatingCount()))
                 .collect(Collectors.toList());
 
         List<Auction> auctionList = auctionRepository.findTop3Auction();

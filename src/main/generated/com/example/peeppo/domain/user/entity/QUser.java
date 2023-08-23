@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
@@ -18,6 +19,8 @@ public class QUser extends EntityPathBase<User> {
     private static final long serialVersionUID = 446756319L;
 
     public static final QUser user = new QUser("user");
+
+    public final ListPath<com.example.peeppo.domain.chat.entity.ChatRoom, com.example.peeppo.domain.chat.entity.QChatRoom> chatRoom = this.<com.example.peeppo.domain.chat.entity.ChatRoom, com.example.peeppo.domain.chat.entity.QChatRoom>createList("chatRoom", com.example.peeppo.domain.chat.entity.ChatRoom.class, com.example.peeppo.domain.chat.entity.QChatRoom.class, PathInits.DIRECT2);
 
     public final NumberPath<Long> currentRatingCount = createNumber("currentRatingCount", Long.class);
 

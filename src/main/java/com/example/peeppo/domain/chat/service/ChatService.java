@@ -5,6 +5,11 @@ import com.example.peeppo.domain.chat.entity.ChatMessage;
 import com.example.peeppo.domain.chat.entity.ChatRoom;
 import com.example.peeppo.domain.chat.repository.ChatMessageRepository;
 import com.example.peeppo.domain.chat.repository.ChatRoomRepository;
+import com.example.peeppo.domain.goods.entity.Goods;
+import com.example.peeppo.domain.goods.service.GoodsService;
+import com.example.peeppo.domain.user.entity.User;
+import com.example.peeppo.domain.user.repository.UserRepository;
+import com.example.peeppo.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -15,6 +20,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -28,6 +34,8 @@ public class ChatService {
     private final ChannelTopic channelTopic;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
+    private final GoodsService goodsService;
+    private final UserRepository userRepository;
     private Map<String, ChatRoom> chatRooms;
 
     // Redis CacheKeys
@@ -36,7 +44,7 @@ public class ChatService {
     public static final String ENTER_INFO = "ENTER_INFO"; // 채팅룸에 입장한 클라이언트의 sessionId와 채팅룸 id를 맵핑한 정보 저장
 
     @Resource(name = "chatRoomRedisTemplate")
-    private HashOperations<String, String, ChatRoom> hashOpsChatRoom;
+    private HashOperations<String, String, ChatRoomResponseDto> hashOpsChatRoom;
     @Resource(name = "redisTemplate")
     private HashOperations<String, String, String> hashOpsEnterInfo;
     @Resource(name = "redisTemplate")
@@ -48,18 +56,24 @@ public class ChatService {
         chatRooms = new LinkedHashMap<>();
     } //순서대로 저장메서드
 
+
 //     채팅방 생성 : 서버간 채팅방 공유를 위해 redis hash에 저장한다. -> 이것으로 채팅방은 지워지지 않음
-    public ChatRoomResponseDto createRoom(String title){
+    @Transactional
+    public ChatRoomResponseDto createRoom(Long id, User user){
         String randomId = UUID.randomUUID().toString();
+        Goods goods = goodsService.findGoods(id);
+        User enterUser = userRepository.findById(user.getUserId()).orElseThrow(()->new IllegalArgumentException("해당하는 사용자는 없습니다"));
         ChatRoom chatRoom = ChatRoom.builder()
                 .roomId(randomId)
-                .title(title)
+                .goods(goods)
+                .user(enterUser)
                 .build();
-        hashOpsChatRoom.put(CHAT_ROOMS, randomId, chatRoom);
+        hashOpsChatRoom.put(CHAT_ROOMS, randomId, new ChatRoomResponseDto(chatRoom, enterUser));
         System.out.println(hashOpsChatRoom.get(CHAT_ROOMS, randomId));
         chatRoomRepository.save(chatRoom);
-        return new ChatRoomResponseDto(chatRoom);
+        return new ChatRoomResponseDto(chatRoom, enterUser);
     }
+    //채팅방 아이디는 랜덤 !
 
     /**
      * destination정보에서 roomId 추출
@@ -105,11 +119,12 @@ public class ChatService {
 
 
 
-    //전체 채팅방 조회
-    public List<ChatRoom> findAllRoom(){
+    //전체 채팅방 조회 => 사용자 마다 !
+    public List<ChatRoom> findAllRoom(User user){
         // 채팅방 생성 순서를 최근순으로 반환
         //List chatRoomList = new ArrayList<>(chatRooms.values());
        // Collections.reverse(chatRoomList);
+        chatRoomRepository.findByUserUserId(user.getUserId());
         return chatRoomRepository.findAll();
     }
 
@@ -124,11 +139,13 @@ public class ChatService {
     }
 
     //채팅방 유저 리스트에 유저 추가
+/*
     public String addUser(String roomId, String user){
         ChatRoom chatRoom = chatRooms.get(roomId);
         chatRoom.addSellerId(user);
         return user;
     }
+*/
 
     // 채팅방 유저 리스트 삭제
     public void delUser(String roomId, String user){
@@ -138,7 +155,7 @@ public class ChatService {
 
     public String getUserName(String roomId){
         ChatRoom room = chatRooms.get(roomId);
-        return room.getUser();
+        return room.getUser().getNickname();
     }
 
     public void saveMessage(ChatMessage chatMessage){

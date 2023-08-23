@@ -94,18 +94,13 @@ public class GoodsService {
 
         for (Goods goods : goodsPage.getContent()) {
             boolean checkSameUser = goods.getUser().getUserId() == userDetails.getUser().getUserId();
-
-            List<Image> images = imageRepository.findByGoodsGoodsId(goods.getGoodsId());
-            List<String> imageUrls = new ArrayList<>();
-            for (Image image : images) {
-                imageUrls.add(image.getImageUrl());
-            }
+            Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
             boolean checkDibs = false;
             Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goods.getGoodsId());
             if(dibsGoods.isPresent()){
                 checkDibs = true;
             }
-            goodsResponseList.add(new GoodsListResponseDto(goods, imageUrls.get(0), checkDibs, checkSameUser));
+            goodsResponseList.add(new GoodsListResponseDto(goods, image.getImageUrl(), checkDibs, checkSameUser));
         }
 
         return new PageResponse<>(goodsResponseList, pageable, goodsPage.getTotalElements());
@@ -118,12 +113,8 @@ public class GoodsService {
         List<GoodsListResponseDto> goodsResponseList = new ArrayList<>();
 
         for (Goods goods : goodsPage.getContent()) {
-            List<Image> images = imageRepository.findByGoodsGoodsId(goods.getGoodsId());
-            List<String> imageUrls = new ArrayList<>();
-            for (Image image : images) {
-                imageUrls.add(image.getImageUrl());
-            }
-            goodsResponseList.add(new GoodsListResponseDto(goods, imageUrls.get(0)));
+            Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
+            goodsResponseList.add(new GoodsListResponseDto(goods, image.getImageUrl()));
         }
 
         return new PageResponse<>(goodsResponseList, pageable, goodsPage.getTotalElements());
@@ -144,10 +135,11 @@ public class GoodsService {
             checkSameUser = false;
         }
         WantedGoods wantedGoods = findWantedGoods(goodsId);
-        List<Image> images = imageRepository.findByGoodsGoodsId(goodsId);
-        List<String> imageUrls = images.stream()
-                .map(Image::getImageUrl)
-                .collect(Collectors.toList());
+        List<Image> images = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(goodsId);
+        for(int i = 0; i < goods.getImage().size(); i++){
+            images.add(goods.getImage().get(i));
+        }
+        List<String> imageUrls = new ArrayList<>();
         if (goodsRecent.size() >= MAX_RECENT_GOODS) {
             goodsRecent.remove(0);
         }
@@ -183,7 +175,7 @@ public class GoodsService {
         List<PocketListResponseDto> myGoods = new ArrayList<>();
         for (Goods goods : goodsList) {
             long ratingPrice = (long) ratingHelper.getAvgPriceByGoodsId(goods.getGoodsId());
-            Image firstImage = imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goods.getGoodsId());
+            Image firstImage = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
             myGoods.add(new PocketListResponseDto(goods, firstImage.getImageUrl(), ratingPrice));
         }
 
@@ -239,7 +231,7 @@ public class GoodsService {
     public Goods findGoods(Long goodsId) {
         Goods goods = goodsRepository.findById(goodsId).orElseThrow(() ->
                 new NullPointerException("해당 게시글은 존재하지 않습니다."));
-        if (goods.isDeleted()) {
+        if (goods.getIsDeleted()) {
             throw new IllegalStateException("삭제된 게시글입니다.");
         }
         return goods;
@@ -298,7 +290,7 @@ public class GoodsService {
         Page<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalse(user, pageable);
         List<GoodsListResponseDto> myGoods = new ArrayList<>();
         for (Goods goods : goodsList) {
-            Image firstImage = imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goods.getGoodsId());
+            Image firstImage = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
 
             boolean checkDibs = false;
             if(userDetails != null) {
@@ -338,7 +330,7 @@ public class GoodsService {
     public ApiResponse<GoodsResponseDto> getGoodsEveryone(Long goodsId) {
         Goods goods = findGoods(goodsId);
         WantedGoods wantedGoods = findWantedGoods(goodsId);
-        List<Image> images = imageRepository.findByGoodsGoodsId(goodsId);
+        List<Image> images = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(goodsId);
         List<String> imageUrls = images.stream()
                 .map(Image::getImageUrl)
                 .collect(Collectors.toList());
