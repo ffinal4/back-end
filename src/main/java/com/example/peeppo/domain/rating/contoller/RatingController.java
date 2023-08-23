@@ -5,6 +5,7 @@ import com.example.peeppo.domain.rating.dto.RatingRequestDto;
 import com.example.peeppo.domain.rating.dto.RatingScoreResponseDto;
 import com.example.peeppo.domain.rating.dto.TopRatingUserResponseDto;
 import com.example.peeppo.domain.rating.service.RatingService;
+import com.example.peeppo.domain.user.dto.RatingUserResponseDto;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class RatingController {
 
 
     @GetMapping("/main")
-    public ApiResponse<List<TopRatingUserResponseDto>> ratingTopFiveUsers(){
+    public ApiResponse<List<RatingUserResponseDto>> ratingTopFiveUsers(){
         return ratingService.ratingTopFiveUsers();
     }
     @GetMapping
