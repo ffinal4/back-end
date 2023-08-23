@@ -124,10 +124,6 @@ public class JwtUtil {
             if (redisUtil.hasKeyBlackList(token)) {
                 throw new RuntimeException("logout된 아이디입니다.");
             }
-            return true;
-        } catch (SecurityException | MalformedJwtException e) {
-            log.info("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
-        } catch (ExpiredJwtException e) {
             if (req.getHeader(REFRESH_TOKEN).isEmpty()) {
                 log.error("Expired JWT token, 만료된 JWT token 입니다.");
                 throw new RuntimeException();
@@ -137,7 +133,10 @@ public class JwtUtil {
                 res.addHeader(JwtUtil.ACCESS_TOKEN, newAccessToken);
                 res.addHeader(JwtUtil.REFRESH_TOKEN, RefreshToken);
                 log.info("토큰재발급 성공: {}", newAccessToken);
+                return true;
             }
+        } catch (SecurityException | MalformedJwtException e) {
+            log.info("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
         } catch (UnsupportedJwtException e) {
             log.info("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
         } catch (IllegalArgumentException e) {
