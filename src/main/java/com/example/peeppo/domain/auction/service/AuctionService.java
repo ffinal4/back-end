@@ -11,6 +11,8 @@ import com.example.peeppo.domain.bid.repository.BidRepository;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
+import com.example.peeppo.domain.notification.entity.Notification;
+import com.example.peeppo.domain.notification.repository.NotificationRepository;
 import com.example.peeppo.domain.rating.entity.RatingGoods;
 import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
 import com.example.peeppo.domain.user.entity.User;
@@ -53,6 +55,7 @@ public class AuctionService {
     private final UserRepository userRepository;
     private final RatingGoodsRepository ratingGoodsRepository;
     private final DibsService dibsService;
+    private final NotificationRepository notificationRepository;
 
     @Transactional
     public AuctionResponseDto createAuction(Long goodsId, AuctionRequestDto auctionRequestDto, User user) {
@@ -80,7 +83,7 @@ public class AuctionService {
         GoodsResponseDto goodsResponseDto = new GoodsResponseDto(getGoods);
         LocalDateTime auctionEndTime = calAuctionEndTime(auctionRequestDto.getEndTime()); // 마감기한 계산
         log.info("{}", auctionEndTime);
-        Auction auction = new Auction(getGoods, auctionEndTime, user, ratingGoods); // 경매와 마감기한 생성
+        Auction auction = new Auction(getGoods, auctionEndTime, user, ratingGoods, auctionRequestDto.getLowPrice()); // 경매와 마감기한 생성
         auction.getGoods().changeStatus(GoodsStatus.ONAUCTION);
         auctionRepository.save(auction);
         return new AuctionResponseDto(auction, goodsResponseDto, user, countDownTime(auction));
@@ -209,6 +212,19 @@ public class AuctionService {
         checkUsername(auctionId, user);
         Bid bid = findBidId(bidId);
         bid.changeBidStatus(SUCCESS);
+
+        Notification notification = notificationRepository.findByUserUserId(bid.getUser().getUserId());
+
+        if (notification == null) {
+            notification = new Notification();
+            notification.setUser(user);
+        }
+
+        notification.setIsRequest(false);
+        notification.updateRequestCount();
+        notification.Checked(false);
+
+        notificationRepository.save(notification);
 
         auction.changeAuctionStatus(REQUEST);
         auction.getGoods().changeStatus(SOLDOUT);
