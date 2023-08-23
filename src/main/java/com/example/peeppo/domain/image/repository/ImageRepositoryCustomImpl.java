@@ -33,6 +33,7 @@ public class ImageRepositoryCustomImpl implements ImageRepositoryCustom {
                 .selectFrom(qImage)
                 .where(qImage.goods.goodsId.eq(goodsId))
                 .orderBy(qImage.createdAt.asc())
+                .limit(1)
                 .fetchOne();
     }
 }
