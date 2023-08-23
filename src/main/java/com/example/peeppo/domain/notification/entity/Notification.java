@@ -1,10 +1,13 @@
 package com.example.peeppo.domain.notification.entity;
 
+import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+
+import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @Getter
@@ -16,16 +19,19 @@ public class Notification {
     @Column(name = "notification_id")
     private Long notificationId;
 
-    @ColumnDefault("false")
     private Boolean checked;
 
-    @ColumnDefault("false")
     private Boolean isRequest;
 
-    @ColumnDefault("false")
     private Boolean isAuction;
 
-    private Long newCount = 0L;
+    private Boolean isMessage;
+
+    private Long messageCount = 0L;
+
+    private Long auctionCount = 0L;
+
+    private Long requestCount = 0L;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_Id")
@@ -39,16 +45,32 @@ public class Notification {
         this.isRequest = isRequest;
     }
 
-    public void read() {
-        this.checked = true;
+    public void setIsMessage(Boolean isMessage) {
+        this.isMessage = isMessage;
     }
 
-    public void unread() {
-        this.checked = false;
+    public void Checked(Boolean checked) {
+        this.checked = checked;
     }
 
-    public void updateCount() {
-        this.newCount += 1;
+    public void messageRead(Long read) {
+        this.messageCount = read;
+    }
+
+    public void auctionRead(Long read) {
+        this.auctionCount = read;
+    }
+
+    public void requestRead(Long read) {
+        this.requestCount = read;
+    }
+
+    public void updateAuctionCount() {
+        this.auctionCount += 1;
+    }
+
+    public void updateRequestCount() {
+        this.requestCount += 1;
     }
 
     public void setUser(User user) {

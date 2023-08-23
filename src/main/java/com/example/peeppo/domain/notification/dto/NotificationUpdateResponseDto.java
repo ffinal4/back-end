@@ -1,17 +1,17 @@
 package com.example.peeppo.domain.notification.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 public class NotificationUpdateResponseDto {
 
-    private Boolean newNotification;
+    private Boolean isUpdate;
+    private Long count;
 
-    public void NotificationUpdateResponseDto(Boolean newNotification) {
-        this.newNotification = newNotification;
+    public NotificationUpdateResponseDto(Boolean isUpdate, Long count) {
+        this.isUpdate = isUpdate;
+        this.count = count;
     }
 }

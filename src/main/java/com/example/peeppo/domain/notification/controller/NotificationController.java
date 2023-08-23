@@ -1,7 +1,7 @@
 package com.example.peeppo.domain.notification.controller;
 
-import com.example.peeppo.domain.notification.dto.Test;
-import com.example.peeppo.domain.notification.dto.TestingResponseDto;
+import com.example.peeppo.domain.notification.dto.NotificationUpdateResponseDto;
+import com.example.peeppo.domain.notification.dto.NotificationResponseDto;
 import com.example.peeppo.domain.notification.service.NotificationService;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
@@ -21,7 +21,7 @@ public class NotificationController {
 
     //알림 목록
     @GetMapping("/notifications")
-    public ApiResponse<TestingResponseDto> getNotification(@AuthenticationPrincipal UserDetailsImpl userDetails){
+    public ApiResponse<NotificationResponseDto> getNotification(@AuthenticationPrincipal UserDetailsImpl userDetails){
 
         return ResponseUtils.ok(notificationService.getNotification(userDetails.getUser()));
     }
@@ -33,14 +33,20 @@ public class NotificationController {
 //    }
 
     @GetMapping("/notifications/auction")
-    public ApiResponse<Test> getNotificationAuction(@AuthenticationPrincipal UserDetailsImpl userDetails){
+    public ApiResponse<NotificationUpdateResponseDto> getNotificationAuction(@AuthenticationPrincipal UserDetailsImpl userDetails){
 
         return ResponseUtils.ok(notificationService.getNotificationAuction(userDetails.getUser()));
     }
 
     @GetMapping("/notifications/request")
-    public ApiResponse<Test> getNotificationRequest(@AuthenticationPrincipal UserDetailsImpl userDetails){
+    public ApiResponse<NotificationUpdateResponseDto> getNotificationRequest(@AuthenticationPrincipal UserDetailsImpl userDetails){
 
         return ResponseUtils.ok(notificationService.getNotificationRequest(userDetails.getUser()));
+    }
+
+    @GetMapping("/notifications/message")
+    public ApiResponse<NotificationUpdateResponseDto> getNotificationMessage(@AuthenticationPrincipal UserDetailsImpl userDetails){
+
+        return ResponseUtils.ok(notificationService.getNotificationMessage(userDetails.getUser()));
     }
 }

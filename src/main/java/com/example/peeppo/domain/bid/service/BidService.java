@@ -85,12 +85,16 @@ public class BidService {
         }
 
         Notification notification = notificationRepository.findByUserUserId(auction.getUser().getUserId());
+
         if (notification == null) {
             notification = new Notification();
             notification.setUser(user);
         }
+
         notification.setIsAuction(false);
-        notification.updateCount(); //true값만 counting하면 빼도 될듯?
+        notification.updateAuctionCount();
+        notification.Checked(false);
+
         notificationRepository.save(notification);
 
         bidRepository.saveAll(List);

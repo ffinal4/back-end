@@ -83,7 +83,7 @@ public class AuctionService {
         GoodsResponseDto goodsResponseDto = new GoodsResponseDto(getGoods);
         LocalDateTime auctionEndTime = calAuctionEndTime(auctionRequestDto.getEndTime()); // 마감기한 계산
         log.info("{}", auctionEndTime);
-        Auction auction = new Auction(getGoods, auctionEndTime, user, ratingGoods); // 경매와 마감기한 생성
+        Auction auction = new Auction(getGoods, auctionEndTime, user, ratingGoods, auctionRequestDto.getLowPrice()); // 경매와 마감기한 생성
         auction.getGoods().changeStatus(GoodsStatus.ONAUCTION);
         auctionRepository.save(auction);
         return new AuctionResponseDto(auction, goodsResponseDto, user, countDownTime(auction));
@@ -214,12 +214,16 @@ public class AuctionService {
         bid.changeBidStatus(SUCCESS);
 
         Notification notification = notificationRepository.findByUserUserId(bid.getUser().getUserId());
+
         if (notification == null) {
             notification = new Notification();
             notification.setUser(user);
         }
+
         notification.setIsRequest(false);
-        notification.updateCount(); //true값만 counting하면 빼도 될듯?
+        notification.updateRequestCount();
+        notification.Checked(false);
+
         notificationRepository.save(notification);
 
         auction.changeAuctionStatus(REQUEST);

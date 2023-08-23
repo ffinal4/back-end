@@ -22,15 +22,21 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public static final QNotification notification = new QNotification("notification");
 
+    public final NumberPath<Long> auctionCount = createNumber("auctionCount", Long.class);
+
     public final BooleanPath checked = createBoolean("checked");
 
     public final BooleanPath isAuction = createBoolean("isAuction");
 
+    public final BooleanPath isMessage = createBoolean("isMessage");
+
     public final BooleanPath isRequest = createBoolean("isRequest");
 
-    public final NumberPath<Long> newCount = createNumber("newCount", Long.class);
+    public final NumberPath<Long> messageCount = createNumber("messageCount", Long.class);
 
     public final NumberPath<Long> notificationId = createNumber("notificationId", Long.class);
+
+    public final NumberPath<Long> requestCount = createNumber("requestCount", Long.class);
 
     public final com.example.peeppo.domain.user.entity.QUser user;
 

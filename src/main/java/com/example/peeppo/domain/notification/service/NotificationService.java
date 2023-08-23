@@ -1,12 +1,10 @@
 package com.example.peeppo.domain.notification.service;
 
-import com.example.peeppo.domain.auction.repository.AuctionRepository;
-import com.example.peeppo.domain.notification.dto.Test;
-import com.example.peeppo.domain.notification.dto.TestingResponseDto;
+import com.example.peeppo.domain.notification.dto.NotificationUpdateResponseDto;
+import com.example.peeppo.domain.notification.dto.NotificationResponseDto;
 import com.example.peeppo.domain.notification.entity.Notification;
 import com.example.peeppo.domain.notification.repository.NotificationRepository;
 import com.example.peeppo.domain.user.entity.User;
-import com.example.peeppo.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,16 +14,10 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
 
-    public TestingResponseDto getNotification(User user) {
+    public NotificationResponseDto getNotification(User user) {
         Notification notification = notificationRepository.findByUserUserId(user.getUserId());
 
-        if(notification.getIsAuction() && notification.getIsRequest()){
-            return new TestingResponseDto(true);
-        }
-
-        notification.read();
-
-        return new TestingResponseDto(false);
+        return new NotificationResponseDto(notification.getChecked());
     }
 
 //    public ResponseDto deleteNotification(Long notificationId) {
@@ -35,19 +27,54 @@ public class NotificationService {
 //        return new ResponseDto("알림 확인 완료", HttpStatus.OK.value(), "OK");
 //    }
 
-    public Test getNotificationAuction(User user) {
-        Long count = notificationRepository.countByUserUserIdAndIsAuction(user.getUserId(), false);
+    public NotificationUpdateResponseDto getNotificationAuction(User user) {
+        Notification notification = notificationRepository.findByUserUserId(user.getUserId());
 
-        Test test = new Test(count > 0, count);
+        NotificationUpdateResponseDto notificationUpdateResponseDto = new NotificationUpdateResponseDto(notification.getIsAuction(), notification.getAuctionCount());
 
-        return test;
+        notification.setIsAuction(true);
+        notification.auctionRead(0L);
+
+        if(notification.getIsRequest() == true){
+            notification.Checked(true);
+        }
+
+        notificationRepository.save(notification);
+
+        return notificationUpdateResponseDto;
     }
 
-    public Test getNotificationRequest(User user) {
-        Long count = notificationRepository.countByUserUserIdAndIsRequest(user.getUserId(), false);
+    public NotificationUpdateResponseDto getNotificationRequest(User user) {
+        Notification notification = notificationRepository.findByUserUserId(user.getUserId());
 
-        Test test = new Test(count > 0, count);
+        NotificationUpdateResponseDto notificationUpdateResponseDto = new NotificationUpdateResponseDto(notification.getIsRequest(), notification.getRequestCount());
 
-        return test;
+        notification.setIsRequest(true);
+        notification.requestRead(0L);
+
+        if(notification.getIsAuction() == true){
+            notification.Checked(true);
+        }
+
+        notificationRepository.save(notification);
+
+        return notificationUpdateResponseDto;
+    }
+
+    public NotificationUpdateResponseDto getNotificationMessage(User user) {
+        Notification notification = notificationRepository.findByUserUserId(user.getUserId());
+
+        NotificationUpdateResponseDto notificationUpdateResponseDto = new NotificationUpdateResponseDto(notification.getIsRequest(), notification.getRequestCount());
+
+        notification.setIsRequest(true);
+        notification.requestRead(0L);
+
+        if(notification.getIsAuction() == true){
+            notification.Checked(true);
+        }
+
+        notificationRepository.save(notification);
+
+        return notificationUpdateResponseDto;
     }
 }

@@ -152,6 +152,7 @@ public class ChatService {
             chatMessage.setMessage(chatMessage.getSender() + "님이 방에 입장했습니다.");
             chatMessage.setSender("[알림]");
             System.out.println(chatMessage);
+
         } else if (ChatMessage.MessageType.LEAVE.equals(chatMessage.getType())) {
             System.out.println(chatMessage);
             chatMessage.setMessage(chatMessage.getSender() + "님이 방에서 나갔습니다.");
