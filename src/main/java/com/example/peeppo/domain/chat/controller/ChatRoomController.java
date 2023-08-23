@@ -1,9 +1,8 @@
 package com.example.peeppo.domain.chat.controller;
 
 
-import com.example.peeppo.domain.chat.dto.ChatRoomRequestDto;
+import com.example.peeppo.domain.chat.dto.ChatMessageResponseDto;
 import com.example.peeppo.domain.chat.dto.ChatRoomResponseDto;
-import com.example.peeppo.domain.chat.entity.ChatMessage;
 import com.example.peeppo.domain.chat.entity.ChatRoom;
 import com.example.peeppo.domain.chat.service.ChatService;
 import com.example.peeppo.global.security.UserDetailsImpl;
@@ -34,8 +33,9 @@ public class ChatRoomController {
 
     //채팅방 상세 조회
     @GetMapping("/room/{chatId}")
-    public List<ChatMessage> findChatRoom(@PathVariable("chatId") String roomId){
-        return chatService.findMessageById(roomId);
+    public List<ChatMessageResponseDto> findChatRoom(@PathVariable("chatId") String roomId,
+                                                     @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return chatService.findMessageById(roomId, userDetails);
     }
 
     @DeleteMapping("/room/{chatId}")

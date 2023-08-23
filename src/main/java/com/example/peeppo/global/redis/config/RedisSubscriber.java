@@ -63,7 +63,7 @@ public class RedisSubscriber {
             System.out.println("message 맵핑 완료");
             System.out.println(chatMessage);
             // 채팅방을 구독한 클라이언트에게 메시지 발송
-            messagingTemplate.convertAndSend("/sub/chat/room/" + chatMessage.getRoomId(), chatMessage);
+            messagingTemplate.convertAndSend("/sub/chat/room/" + chatMessage.getRoomId(), chatMessage); // 수정
             System.out.println("발송 요청 완료");
         } catch (Exception e) {
             log.error("Exception {}", e);

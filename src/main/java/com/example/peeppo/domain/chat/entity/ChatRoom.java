@@ -8,6 +8,7 @@ import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 
 @Getter
 @Setter
@@ -23,7 +24,9 @@ public class ChatRoom extends Timestamped implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String roomId; //채팅방 아이디
-    private String goodsTitle; //채팅방 물품이름 (제목)
+
+    @OneToMany(mappedBy = "chatRoom")
+    private List<ChatMessage> chatMessage;
 
    // @Transient //Serialize하는 과정을 제외하고 싶은 경우 선언하는 키워드
    // private Set<WebSocketSession> sessions = new HashSet<>(); // 중복저장을 막는다
