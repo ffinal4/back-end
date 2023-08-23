@@ -60,7 +60,7 @@ public class BidService {
                     Goods goods = getGoods(goodsId);
                     String goodsImg = String.valueOf(imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsId));
 
-                    if (goods.isDeleted() && !goods.getUser().getUserId().equals(user.getUserId())) {
+                    if (goods.getIsDeleted() && !goods.getUser().getUserId().equals(user.getUserId())) {
                         System.out.println(" ");
                         throw new IllegalAccessException();
                         //여기도 고민
