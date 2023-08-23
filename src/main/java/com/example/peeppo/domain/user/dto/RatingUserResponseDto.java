@@ -5,12 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class ResponseDto {
-
-    private String msg;
-
-    private int statusCode;
-
-    private String statusMessage;
-
+public class RatingUserResponseDto {
+    private String nickName;
+    private Long maxRatingCount;
 }
