@@ -136,10 +136,14 @@ public class GoodsService {
         }
         WantedGoods wantedGoods = findWantedGoods(goodsId);
         List<Image> images = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(goodsId);
-        for(int i = 0; i < goods.getImage().size(); i++){
-            images.add(goods.getImage().get(i));
-        }
-        List<String> imageUrls = new ArrayList<>();
+
+        List<String> imageUrls = images.stream()
+                .map(Image::getImageUrl)
+                .collect(Collectors.toList());
+       // images.stream().map(Image::getImageUrl).forEachOrdered(imageUrls::add);
+       /* for(Image image : images){
+            imageUrls.add(image.getImageUrl());
+        }*/
         if (goodsRecent.size() >= MAX_RECENT_GOODS) {
             goodsRecent.remove(0);
         }
