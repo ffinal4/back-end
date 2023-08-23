@@ -38,7 +38,7 @@ public class QChatRoom extends EntityPathBase<ChatRoom> {
 
     public final StringPath roomId = createString("roomId");
 
-    public final StringPath user = createString("user");
+    public final com.example.peeppo.domain.user.entity.QUser user;
 
     public QChatRoom(String variable) {
         this(ChatRoom.class, forVariable(variable), INITS);
@@ -59,6 +59,7 @@ public class QChatRoom extends EntityPathBase<ChatRoom> {
     public QChatRoom(Class<? extends ChatRoom> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.goods = inits.isInitialized("goods") ? new com.example.peeppo.domain.goods.entity.QGoods(forProperty("goods"), inits.get("goods")) : null;
+        this.user = inits.isInitialized("user") ? new com.example.peeppo.domain.user.entity.QUser(forProperty("user")) : null;
     }
 
 }

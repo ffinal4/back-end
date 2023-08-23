@@ -1,5 +1,6 @@
 package com.example.peeppo.global.redis.config;
 
+import com.example.peeppo.domain.chat.dto.ChatRoomResponseDto;
 import com.example.peeppo.domain.chat.entity.ChatRoom;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -50,11 +51,12 @@ public class RedisConfig {
         //* redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class)); //Json포맷 형식으로 메시지를 교환하기 위해
         redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class)); //Json포맷 형식으로 메시지를 교환하기 위해*//*
 
-
-
-        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class));
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());
         redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class));
+
+
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoomResponseDto.class));
+        redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoomResponseDto.class));
         redisTemplate.afterPropertiesSet();
 
         return redisTemplate;

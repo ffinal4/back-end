@@ -1,5 +1,6 @@
 package com.example.peeppo.domain.user.entity;
 
+import com.example.peeppo.domain.chat.entity.ChatRoom;
 import com.example.peeppo.domain.user.dto.MyPageRequestDto;
 import com.example.peeppo.domain.user.dto.SignupRequestDto;
 import jakarta.persistence.*;
@@ -7,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.DynamicUpdate;
+
+import java.util.List;
 
 import static lombok.AccessLevel.PROTECTED;
 
@@ -40,6 +43,9 @@ public class User {
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private UserRoleEnum role;
+
+    @OneToMany(mappedBy = "user")
+    private List<ChatRoom> chatRoom;
 
     @Column
     private Long maxRatingCount = 0L;
