@@ -8,6 +8,7 @@ import com.example.peeppo.domain.rating.dto.RatingScoreResponseDto;
 import com.example.peeppo.domain.rating.dto.TopRatingUserResponseDto;
 import com.example.peeppo.domain.rating.helper.RatingHelper;
 import com.example.peeppo.domain.rating.repository.ratingRepository.RatingRepository;
+import com.example.peeppo.domain.user.dto.RatingUserResponseDto;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
@@ -30,11 +31,10 @@ public class RatingService {
     private final RatingHelper ratingHelper;
 
 
-    public ApiResponse<List<TopRatingUserResponseDto>> ratingTopFiveUsers() {
-        List<User> ratingTopFiveUsers = userRepository.findTopFiveUsersByMaxRatingCount();
-
-        List<TopRatingUserResponseDto> responseDtoList = ratingTopFiveUsers.stream()
-                .map(user -> new TopRatingUserResponseDto(user.getNickname(), user.getMaxRatingCount()))
+    public ApiResponse<List<RatingUserResponseDto>> ratingTopFiveUsers() {
+        List<RatingUserResponseDto> responseDtoList = userRepository.findTopFiveUsersByMaxRatingCount()
+                .stream()
+                .map(user -> new RatingUserResponseDto(user.getNickname(), user.getMaxRatingCount()))
                 .collect(Collectors.toList());
 
         return new ApiResponse<>(true, responseDtoList, null);
