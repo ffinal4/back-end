@@ -2,6 +2,7 @@ package com.example.peeppo.domain.chat.handler;
 
 import com.example.peeppo.domain.chat.entity.ChatMessage;
 import com.example.peeppo.domain.chat.service.ChatService;
+import com.example.peeppo.global.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.Message;
@@ -20,9 +21,8 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class StompHandler implements ChannelInterceptor {
     //websocket을 통해서 들어온 요청이 처리 되기 전 실행된다
-
-    // private final JwtTokenProvider jwtTokenProvider;
     private final ChatService chatService;
+    private final JwtUtil jwtUtil;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -30,23 +30,23 @@ public class StompHandler implements ChannelInterceptor {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message); // 각종 웹소켓 정보 가져올 수 있다
         if (StompCommand.CONNECT == accessor.getCommand()) { // websocket 연결요청
             System.out.println("웹소켓 연결 요청");
-            //String jwtToken = accessor.getFirstNativeHeader("token");
-            //System.out.println("토큰 확인 토큰 값:"+ jwtToken);
-            //System.out.println("연결 요청");
-            //log.info("CONNECT {}", jwtToken);
-            //System.out.println("토큰 유효성 검증");
-            // Header의 jwt token 검증 -> 유효하지 않다면 websocket 연결을 하지 않음
-            //jwtTokenProvider.validateToken(jwtToken);
-            //System.out.println("완료");
+            String jwtToken = accessor.getFirstNativeHeader("AccessToken");
+            System.out.println("토큰 확인 토큰 값:"+ jwtToken);
+            String useremail = jwtUtil.getUserPk(jwtToken);
+            accessor.addNativeHeader("User", String.valueOf(useremail));
+
         } else if (StompCommand.SUBSCRIBE == accessor.getCommand()) { // 채팅룸 구독요청
             // header정보에서 구독 destination정보를 얻고, roomId를 추출한다.
             System.out.println("구독 요청");
             String roomId = chatService.getRoomId(Optional.ofNullable((String) message.getHeaders().get("simpDestination")).orElse("InvalidRoomId"));
+            String jwtToken = accessor.getFirstNativeHeader("AccessToken");
+            String useremail = jwtUtil.getUserPk(jwtToken);
             // 채팅방에 들어온 클라이언트 sessionId를 roomId와 맵핑해 놓는다.(나중에 특정 세션이 어떤 채팅방에 들어가 있는지 알기 위함)
             System.out.println("해당 룸 ID:" +roomId);
             String sessionId = (String) message.getHeaders().get("simpSessionId");
             System.out.println("요청한 session ID :"+ sessionId);
             System.out.println("입장 요청, 유저정보 셋팅 요청");
+            chatService.saveUserInfo(useremail,sessionId,roomId);
             chatService.setUserEnterInfo(sessionId, roomId);
             // 채팅방의 인원수를 +1한다.
 //            System.out.println("인원수 +1");

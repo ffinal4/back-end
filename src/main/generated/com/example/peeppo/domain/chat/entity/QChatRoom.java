@@ -24,12 +24,12 @@ public class QChatRoom extends EntityPathBase<ChatRoom> {
 
     public final com.example.peeppo.global.utils.QTimestamped _super = new com.example.peeppo.global.utils.QTimestamped(this);
 
+    public final ListPath<ChatMessage, QChatMessage> chatMessage = this.<ChatMessage, QChatMessage>createList("chatMessage", ChatMessage.class, QChatMessage.class, PathInits.DIRECT2);
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
     public final com.example.peeppo.domain.goods.entity.QGoods goods;
-
-    public final StringPath goodsTitle = createString("goodsTitle");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 

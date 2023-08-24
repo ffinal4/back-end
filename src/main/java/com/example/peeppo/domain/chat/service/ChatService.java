@@ -1,15 +1,18 @@
 package com.example.peeppo.domain.chat.service;
 
+import com.example.peeppo.domain.chat.dto.ChatMessageRequestDto;
+import com.example.peeppo.domain.chat.dto.ChatMessageResponseDto;
 import com.example.peeppo.domain.chat.dto.ChatRoomResponseDto;
 import com.example.peeppo.domain.chat.entity.ChatMessage;
 import com.example.peeppo.domain.chat.entity.ChatRoom;
+import com.example.peeppo.domain.chat.entity.UserChatRoomRelation;
 import com.example.peeppo.domain.chat.repository.ChatMessageRepository;
 import com.example.peeppo.domain.chat.repository.ChatRoomRepository;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.service.GoodsService;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
-import com.example.peeppo.domain.user.service.UserService;
+import com.example.peeppo.global.security.UserDetailsImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -68,10 +71,10 @@ public class ChatService {
                 .goods(goods)
                 .user(enterUser)
                 .build();
-        hashOpsChatRoom.put(CHAT_ROOMS, randomId, new ChatRoomResponseDto(chatRoom, enterUser));
+        hashOpsChatRoom.put(CHAT_ROOMS, randomId, new ChatRoomResponseDto(chatRoom));
         System.out.println(hashOpsChatRoom.get(CHAT_ROOMS, randomId));
         chatRoomRepository.save(chatRoom);
-        return new ChatRoomResponseDto(chatRoom, enterUser);
+        return new ChatRoomResponseDto(chatRoom);
     }
     //채팅방 아이디는 랜덤 !
 
@@ -134,8 +137,14 @@ public class ChatService {
     }
 
     //roomId 기준으로 채팅방 메시지 내용 찾기
-    public List<ChatMessage> findMessageById(String roomId) {
-        return chatMessageRepository.findAllByRoomId(roomId);
+    public List<ChatMessageResponseDto> findMessageById(String roomId, UserDetailsImpl userDetails) {
+        List<ChatMessage> chatMessageList = chatMessageRepository.findAllByRoomIdAndUserUserId(roomId, userDetails.getUser().getUserId());
+        List<ChatMessageResponseDto> chatMessageResponseDtos = new ArrayList<>();
+        for(ChatMessage chatMessage : chatMessageList){
+            ChatMessageResponseDto chatMessageResponseDto = new ChatMessageResponseDto(chatMessage);
+            chatMessageResponseDtos.add(chatMessageResponseDto);
+        }
+        return chatMessageResponseDtos;
     }
 
     //채팅방 유저 리스트에 유저 추가
@@ -147,32 +156,30 @@ public class ChatService {
     }
 */
 
+/*
     // 채팅방 유저 리스트 삭제
     public void delUser(String roomId, String user){
         ChatRoom room = chatRooms.get(roomId);
         room.remove(user);
     }
-
     public String getUserName(String roomId){
         ChatRoom room = chatRooms.get(roomId);
         return room.getUser().getNickname();
     }
+*/
 
-    public void saveMessage(ChatMessage chatMessage){
+    public void saveMessage(ChatMessageRequestDto chatMessageRequestDto){
         System.out.println("메세지 발송 단계 진입");
         long systemTime = System.currentTimeMillis();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA);
         String dTime = formatter.format(systemTime);
-        chatMessage.setTime(dTime);
+        ChatRoom chatRoom = findRoomById(chatMessageRequestDto.getChatRoom());
+        ChatMessage chatMessage = new ChatMessage(chatMessageRequestDto, chatRoom, dTime, user);
         if (ChatMessage.MessageType.ENTER.equals(chatMessage.getType())) {
-            System.out.println(chatMessage);
-            chatMessage.setMessage(chatMessage.getSender() + "님이 방에 입장했습니다.");
-            chatMessage.setSender("[알림]");
+            chatMessage.sendMessage(user + "님이 방에 입장했습니다.");
             System.out.println(chatMessage);
         } else if (ChatMessage.MessageType.LEAVE.equals(chatMessage.getType())) {
-            System.out.println(chatMessage);
-            chatMessage.setMessage(chatMessage.getSender() + "님이 방에서 나갔습니다.");
-            chatMessage.setSender("[알림]");
+            chatMessage.sendMessage(user + "님이 방에서 나갔습니다.");
             System.out.println(chatMessage);
         }
         chatMessageRepository.save(chatMessage);
@@ -182,9 +189,15 @@ public class ChatService {
         System.out.println("전송 완료");
     }
 
-
     public void deleteChatRoom(String roomId) {
         ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId);
         chatRoomRepository.delete(chatRoom);
     }
+
+    public void saveUserInfo(String useremail, String sessionId, String roomId) {
+        ChatRoom chatRoom = findRoomById(roomId);
+        User user = userRepository.findByEmail(useremail).orElse(null);
+        UserChatRoomRelation userChatRoomRelation = new UserChatRoomRelation(chatRoom, user, sessionId);
+    }
+
 }

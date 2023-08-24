@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.user.entity;
 
 import com.example.peeppo.domain.chat.entity.ChatRoom;
+import com.example.peeppo.domain.chat.entity.UserChatRoomRelation;
 import com.example.peeppo.domain.user.dto.MyPageRequestDto;
 import com.example.peeppo.domain.user.dto.SignupRequestDto;
 import jakarta.persistence.*;
@@ -44,8 +45,11 @@ public class User {
     @Enumerated(value = EnumType.STRING)
     private UserRoleEnum role;
 
-    @OneToMany(mappedBy = "user")
-    private List<ChatRoom> chatRoom;
+    @OneToMany(mappedBy = "buyer")
+    private List<UserChatRoomRelation> buyerRelation;
+
+    @OneToMany(mappedBy = "seller")
+    private List<UserChatRoomRelation> sellerRelation;
 
     @Column
     private Long maxRatingCount = 0L;

@@ -27,6 +27,7 @@ public class GoodsController {
                                                      @RequestPart(value = "wanted") WantedRequestDto wantedRequestDto,
                                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
+
         return goodsService.goodsCreate(goodsRequestDto, images, wantedRequestDto, userDetails.getUser());
     }
 

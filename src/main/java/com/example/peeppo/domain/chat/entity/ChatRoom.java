@@ -8,6 +8,7 @@ import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.List;
 
 @Getter
 @Setter
@@ -32,15 +33,21 @@ public class ChatRoom extends Timestamped implements Serializable {
     @JoinColumn(name = "goods_id", nullable = false)
     private Goods goods;
 
+/*
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+*/
+    @OneToMany(mappedBy = "chatRoom")
+    private List<UserChatRoomRelation> userChatRoomRelation;
+
 
     @Builder
     public ChatRoom(String roomId, Goods goods, User user){
         this.roomId = roomId;
         this.goods = goods;
-        this.user = user;
+        //this.user = user;
     }
 
     /*
@@ -64,7 +71,10 @@ public class ChatRoom extends Timestamped implements Serializable {
         this.user= user;
     }*/
 
+/*
     public void remove(String user) {
         this.user = null;
     }
+*/
+
 }

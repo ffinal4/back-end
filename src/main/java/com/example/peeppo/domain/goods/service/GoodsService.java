@@ -64,6 +64,7 @@ public class GoodsService {
                                                      WantedRequestDto wantedRequestDto,
                                                      User user) {
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
+        System.out.println("실행체크");
         Goods goods = new Goods(goodsRequestDto, wantedGoods, user, GoodsStatus.ONSALE);
         goodsRepository.save(goods);
 
