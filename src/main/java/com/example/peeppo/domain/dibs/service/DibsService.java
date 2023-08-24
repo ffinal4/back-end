@@ -28,6 +28,17 @@ public class DibsService {
     private final GoodsRepository goodsRepository;
     private final DibsRepository dibsRepository;
 
+    public boolean checkDibsGoods(Long userId, Long GoodsId){
+        Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsId(userId, GoodsId);
+
+//        if(dibsGoods.isPresent()){
+//            return true;
+//        }
+//        return false;
+        return dibsGoods.isPresent();
+    }
+
+
     public ResponseEntity<CheckResponseDto> dibsGoods(User user, DibsRequestDto dibsRequestDto) {
         findUser(user.getUserId());
         Goods goods = findGoods(dibsRequestDto.getGoodsId());

@@ -42,9 +42,10 @@ public class AuctionController {
     public ApiResponse<Page<AuctionListResponseDto>> allAuction(@RequestParam("page") int page,
                                                                 @RequestParam("size") int size,
                                                                 @RequestParam("sortBy") String sortBy,
-                                                                @RequestParam("isAsc") boolean isAsc) {
+                                                                @RequestParam("isAsc") boolean isAsc,
+                                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        return ResponseUtils.ok(auctionService.findAllAuction(page - 1, size, sortBy, isAsc));
+        return ResponseUtils.ok(auctionService.findAllAuction(page - 1, size, sortBy, isAsc, userDetails));
     }
 
     @GetMapping("/{auctionId}")
