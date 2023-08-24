@@ -315,15 +315,15 @@ public class GoodsService {
 
     private List<GoodsResponseDto> getGoodsResponseDtos(User user){
         List<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalseAndGoodsStatus(user, GoodsStatus.ONSALE);
-//        List<GoodsResponseDto> goodsResponseDtos = new ArrayList<>();
-//        for (Goods goods : goodsList) {
-//            GoodsResponseDto goodsResponseDto = new GoodsResponseDto(goods);
-//            goodsResponseDtos.add(goodsResponseDto);
-//        }
-        //        return goodsResponseDtos;
-        return goodsList.stream()
-                .map(goods -> new GoodsResponseDto(goods))
-                .collect(Collectors.toList());
+        List<GoodsResponseDto> goodsResponseDtoList = new ArrayList<>();
+            for(Goods goods : goodsList){
+                List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(goods.getGoodsId())
+                        .stream()
+                        .map(Image::getImageUrl)
+                        .collect(Collectors.toList());
+                goodsResponseDtoList.add(new GoodsResponseDto(goods, imageUrls));
+            }
+        return goodsResponseDtoList;
     }
 
     public ApiResponse<List<GoodsListResponseDto>> searchGoods(String keyword) {
