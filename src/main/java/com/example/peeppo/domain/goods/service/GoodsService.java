@@ -4,10 +4,10 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.example.peeppo.domain.dibs.entity.Dibs;
 import com.example.peeppo.domain.dibs.repository.DibsRepository;
 import com.example.peeppo.domain.dibs.service.DibsService;
+import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.entity.WantedGoods;
-import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.goods.repository.WantedGoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
@@ -72,7 +72,7 @@ public class GoodsService {
 
         wantedGoodsRepository.save(wantedGoods);
 
-        List<String> imageUuids = imageHelper
+        List<String> imageUrls = imageHelper
                 .saveImagesToS3AndRepository(images, amazonS3, bucket, goods)
                 .stream()
                 .map(Image::getImageUrl)
@@ -80,7 +80,7 @@ public class GoodsService {
 
 //        ratingHelper.createRating(sellerPriceRequestDto.getSellerPrice(), goods, image);
 
-        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUuids, wantedGoods), null);
+        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods), null);
     }
 
     @CachePut(key = "#page", value = "allGoods")
@@ -98,11 +98,8 @@ public class GoodsService {
         for (Goods goods : goodsPage.getContent()) {
             boolean checkSameUser = goods.getUser().getUserId() == userDetails.getUser().getUserId();
             Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
-            boolean checkDibs = false;
-            Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goods.getGoodsId());
-            if(dibsGoods.isPresent()){
-                checkDibs = true;
-            }
+            boolean checkDibs = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goods.getGoodsId())
+                    .isPresent();
             goodsResponseList.add(new GoodsListResponseDto(goods, image.getImageUrl(), checkDibs, checkSameUser));
         }
 
@@ -133,30 +130,28 @@ public class GoodsService {
 
     public ApiResponse<GoodsResponseDto> getGoods(Long goodsId, User user) {
         Goods goods = findGoods(goodsId);
-        boolean checkSameUser = true;
-        if(goods.getUser().getUserId() != user.getUserId()){
-            checkSameUser = false;
-        }
+        boolean checkSameUser = goods.getUser().getUserId() == user.getUserId();
+//        boolean checkSameUser = true;
+//        if(goods.getUser().getUserId() != user.getUserId()){
+//            checkSameUser = false;
+//        }
         WantedGoods wantedGoods = findWantedGoods(goodsId);
-        List<Image> images = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(goodsId);
-
-        List<String> imageUrls = images.stream()
+        List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(goodsId)
+                .stream()
                 .map(Image::getImageUrl)
                 .collect(Collectors.toList());
-       // images.stream().map(Image::getImageUrl).forEachOrdered(imageUrls::add);
-       /* for(Image image : images){
-            imageUrls.add(image.getImageUrl());
-        }*/
+
         if (goodsRecent.size() >= MAX_RECENT_GOODS) {
             goodsRecent.remove(0);
         }
        // goodsRecent.add(Long.toString(goods.getGoodsId())); // 조회시에 리스트에 추가 !
-        boolean checkDibs = false;
+//        boolean checkDibs = false;
         Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goodsId);
-        if(dibsGoods.isPresent()){
-            checkDibs = true;
-            System.out.println("true 입니다사ㅏㅏㅏㅏ");
-        }
+        boolean checkDibs = dibsGoods.isPresent();
+//        if(dibsGoods.isPresent()){
+//            checkDibs = true;
+//            System.out.println("true 입니다사ㅏㅏㅏㅏ");
+//        }
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods, checkSameUser, checkDibs), null);
     }
 
@@ -176,7 +171,7 @@ public class GoodsService {
         Page<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalse(user, pageable);
 
         if(goodsList.isEmpty()){
-            return  new ApiResponse<>(true, new PocketResponseDto(), null);
+            return new ApiResponse<>(true, new PocketResponseDto(), null);
         }
 
         List<PocketListResponseDto> myGoods = new ArrayList<>();
@@ -315,12 +310,15 @@ public class GoodsService {
 
     private List<GoodsResponseDto> getGoodsResponseDtos(User user){
         List<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalseAndGoodsStatus(user, GoodsStatus.ONSALE);
-        List<GoodsResponseDto> goodsResponseDtos = new ArrayList<>();
-        for (Goods goods : goodsList) {
-            GoodsResponseDto goodsResponseDto = new GoodsResponseDto(goods);
-            goodsResponseDtos.add(goodsResponseDto);
-        }
-        return goodsResponseDtos;
+//        List<GoodsResponseDto> goodsResponseDtos = new ArrayList<>();
+//        for (Goods goods : goodsList) {
+//            GoodsResponseDto goodsResponseDto = new GoodsResponseDto(goods);
+//            goodsResponseDtos.add(goodsResponseDto);
+//        }
+        //        return goodsResponseDtos;
+        return goodsList.stream()
+                .map(goods -> new GoodsResponseDto(goods))
+                .collect(Collectors.toList());
     }
 
     public ApiResponse<List<GoodsListResponseDto>> searchGoods(String keyword) {
