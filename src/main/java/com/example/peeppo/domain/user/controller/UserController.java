@@ -18,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api")
@@ -50,11 +49,11 @@ public class UserController {
         return ResponseUtils.ok(userService.myPage(userDetails.getUser()));
     }
 
-    @PatchMapping("/users/mypage")
+    @PutMapping("/users/mypage")
     public ApiResponse<ResponseDto> updateMyPage(@RequestPart(value = "data") @Valid MyPageRequestDto myPageRequestDto,
                                                         @RequestPart(value = "image") MultipartFile multipartFile,
                                                         @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
-        return ResponseUtils.ok(userService.updateMyPage(myPageRequestDto, multipartFile, userDetails.getUser()));
+        return userService.updateMyPage(myPageRequestDto, multipartFile, userDetails.getUser());
     }
 
     @DeleteMapping("/users")

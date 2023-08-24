@@ -29,6 +29,9 @@ public class Auction extends Timestamped {
 
     @Min(1000)
     @Column
+    private double avgPrice;
+
+    @Column
     private double lowPrice;
 
     @Enumerated(EnumType.STRING)
@@ -50,23 +53,12 @@ public class Auction extends Timestamped {
     @ColumnDefault("false")
     private Boolean isDeleted;
 
-
-    public Auction(Goods goods){
-        this.goods = goods;
-    }
-
-    public Auction(Goods getGoods, LocalDateTime auctionEndTime,  AuctionRequestDto auctionRequestDto) {
+    public Auction(Goods getGoods, LocalDateTime auctionEndTime, User user, RatingGoods ratingGoods, Double lowPrice) {
         this.goods = getGoods;
         this.isDeleted = false;
         this.auctionEndTime = auctionEndTime;
-        this.lowPrice = getGoods.getSellerPrice();
-    }
-
-    public Auction(Goods getGoods, LocalDateTime auctionEndTime, User user, RatingGoods ratingGoods) {
-        this.goods = getGoods;
-        this.isDeleted = false;
-        this.auctionEndTime = auctionEndTime;
-        this.lowPrice = ratingGoods.getAvgRatingPrice();
+        this.avgPrice = ratingGoods.getAvgRatingPrice();
+        this.lowPrice = lowPrice;
         this.user = user;
     }
 

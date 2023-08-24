@@ -32,7 +32,8 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
             "having COUNT(r.rating_id) <= 3) " +
             "and g1.user_id <> :#{#targetUser.userId} " +
             "and g1.is_deleted = false " +
-            "order by rand() limit 1", nativeQuery = true)
+            "and g1.rating_check = true " +
+            "order by rand() limit 1 ", nativeQuery = true)
     Optional<Goods> findRandomGoodsWithLowRatingCount(@Param("targetUser") User user);
 
     @Query(value = "select g1.* " +
@@ -47,13 +48,14 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
             "where u.user_id = :#{#targetUser.userId}) " +
             "and g1.user_id <> :#{#targetUser.userId} " +
             "and g1.is_deleted = false " +
-            "order by rand() limit 1", nativeQuery = true)
+            "and g1.rating_check = true " +
+            "order by rand() limit 1 ", nativeQuery = true)
     Optional<Goods> findRandomGoods(@Param("targetUser") User user);
 
     Optional<Goods> findByGoodsId(Long goodsId);
 
 
-    @Query(value = "SELECT g.* from goods g ORDER BY g.created_at desc LIMIT 8", nativeQuery = true)
+    @Query(value = "SELECT g.* from goods g where g.is_deleted = false ORDER BY g.created_at desc LIMIT 8 ", nativeQuery = true)
     List<Goods> findTop8ByCreatedAt();
     List<Goods> findAllByUserAndIsDeletedFalseAndGoodsStatus(User user, GoodsStatus onsale);
 

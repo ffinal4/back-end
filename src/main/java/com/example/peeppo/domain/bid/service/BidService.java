@@ -7,13 +7,17 @@ import com.example.peeppo.domain.bid.dto.BidListResponseDto;
 import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
 import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.bid.entity.Choice;
-import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.bid.repository.BidRepository;
 import com.example.peeppo.domain.bid.repository.ChoiceBidRepository;
 import com.example.peeppo.domain.bid.repository.QueryRepository;
 import com.example.peeppo.domain.goods.entity.Goods;
+import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.image.repository.ImageRepository;
+import com.example.peeppo.domain.notification.entity.Notification;
+import com.example.peeppo.domain.notification.repository.NotificationRepository;
+import com.example.peeppo.domain.rating.entity.RatingGoods;
+import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
 import com.example.peeppo.domain.rating.repository.ratingRepository.RatingRepository;
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
@@ -25,7 +29,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -42,7 +45,8 @@ public class BidService {
     private final ImageRepository imageRepository;
     private final QueryRepository queryRepository;
     private final ChoiceBidRepository choiceBidRepository;
-    private final RatingRepository ratingRepository;
+    private final RatingGoodsRepository ratingGoodsRepository;
+    private final NotificationRepository notificationRepository;
 
     public ResponseDto bidding(User user, Long auctionId, BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
 
@@ -54,27 +58,44 @@ public class BidService {
                 !auction.getUser().getUserId().equals(user.getUserId())) {
                 for (Long goodsId : bidGoodsListRequestDto.getGoodsId()) {
                     Goods goods = getGoods(goodsId);
-                    String goodsImg = String.valueOf(imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goodsId));
+                    String goodsImg = String.valueOf(imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsId));
 
-                    if (goods.isDeleted() && !goods.getUser().getUserId().equals(user.getUserId())) {
-                        throw new IllegalAccessException();        //여기도 고민
+                    if (goods.getIsDeleted() && !goods.getUser().getUserId().equals(user.getUserId())) {
+                        System.out.println(" ");
+                        throw new IllegalAccessException();
+                        //여기도 고민
                     }
-
                     if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {
-                        //Rating rating = ratingRepository.findByRatingGoodsId(goodsId);
+                        RatingGoods ratingGoods = ratingGoodsRepository.findByGoodsGoodsId(goodsId);
                         //시작가보다 낮을 경우
-//                        if (auction.getLowPrice() > rating.getAvgRatingPrice()) {   //평균가 이상함
-//                            throw new IllegalAccessException();
-//                        }
+                        if (auction.getLowPrice() > ratingGoods.getAvgRatingPrice()) {   //평균가 이상함
+                            System.out.println("2 ");
+                            throw new IllegalAccessException();
+                        }
                         List.add(new Bid(user, auction, goods, goodsImg));
                         goods.changeStatus(GoodsStatus.BIDDING);
                     } else {
+                        System.out.println("3 ");
                         throw new IllegalAccessException();
                     }
                 }
         } else {
+            System.out.println("4 ");
             throw new IllegalAccessException();
         }
+
+        Notification notification = notificationRepository.findByUserUserId(auction.getUser().getUserId());
+
+        if (notification == null) {
+            notification = new Notification();
+            notification.setUser(user);
+        }
+
+        notification.setIsAuction(false);
+        notification.updateAuctionCount();
+        notification.Checked(false);
+
+        notificationRepository.save(notification);
 
         bidRepository.saveAll(List);
 
@@ -88,7 +109,7 @@ public class BidService {
         Auction auction = getAuction(auctionId);
         Long goodsId = auction.getGoods().getGoodsId();
 
-        String goodsImg = String.valueOf(imageRepository.findFirstByGoodsGoodsIdOrderByCreatedAtAsc(goodsId));
+        String goodsImg = String.valueOf(imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsId));
 
         List<BidListResponseDto> bidList = bidPage.getContent().stream()
                 .map(Bid -> new BidListResponseDto(Bid, goodsImg))

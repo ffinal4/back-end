@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.goods.entity;
 
 import com.example.peeppo.domain.auction.entity.Auction;
+import com.example.peeppo.domain.chat.entity.ChatRoom;
 import com.example.peeppo.domain.dibs.entity.Dibs;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.dto.GoodsRequestDto;
@@ -35,7 +36,10 @@ public class Goods extends Timestamped {
     private Category category;
 
     private Long sellerPrice;
-    private boolean isDeleted;
+    @Column(nullable = false)
+    private Boolean isDeleted = false;
+
+    private Boolean ratingCheck;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -57,6 +61,9 @@ public class Goods extends Timestamped {
     @OneToMany(mappedBy = "goods")
     private List<Dibs> dibs;
 
+    @OneToMany(mappedBy = "goods")
+    private List<ChatRoom> chatRooms;
+
 
 
     public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods){
@@ -67,6 +74,7 @@ public class Goods extends Timestamped {
         this.tradeType = requestDto.getTradeType();
         this.category = requestDto.getCategory();
         this.wantedGoods = wantedGoods;
+
     }
 
     public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods, User user, GoodsStatus goodsStatus) {
@@ -76,7 +84,15 @@ public class Goods extends Timestamped {
         this.goodsCondition = requestDto.getGoodsCondition();
         this.tradeType = requestDto.getTradeType();
         this.category = requestDto.getCategory();
-        this.sellerPrice = requestDto.getSellerPrice();
+        this.ratingCheck = requestDto.getRatingCheck();
+        if(ratingCheck == false){
+            sellerPrice = 0L;
+        } else if(ratingCheck == true && requestDto.getSellerPrice() != null) {
+            this.sellerPrice = requestDto.getSellerPrice();
+        }
+        else{
+            new IllegalArgumentException("올바르지 않은 값입니다.");
+        }
         this.wantedGoods = wantedGoods;
         this.goodsStatus = goodsStatus;
         this.user = user;

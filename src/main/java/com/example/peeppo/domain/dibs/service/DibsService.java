@@ -9,15 +9,18 @@ import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.user.dto.CheckResponseDto;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
+import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.OK;
 
 @Service
@@ -39,7 +42,8 @@ public class DibsService {
     }
 
 
-    public ResponseEntity<CheckResponseDto> dibsGoods(User user, DibsRequestDto dibsRequestDto) {
+    public CheckResponseDto dibsGoods(UserDetailsImpl userDetails, DibsRequestDto dibsRequestDto) {
+        User user = userDetails.getUser();
         findUser(user.getUserId());
         Goods goods = findGoods(dibsRequestDto.getGoodsId());
 
@@ -48,14 +52,12 @@ public class DibsService {
         // 찜한 경우
         if (dibsGoods.isPresent()) {
             dibsRepository.delete(dibsGoods.get());
-            CheckResponseDto response = new CheckResponseDto("이미 찜하신 목록입니다.", dibsGoods.isPresent(), OK.value(), "OK");
-            return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+            return new CheckResponseDto("이미 찜하신 목록입니다.", dibsGoods.isPresent(), OK.value(), "OK");
         }
 
         dibsRepository.save(new Dibs(goods, user));
 
-        CheckResponseDto response = new CheckResponseDto("찜하셨습니다.", dibsGoods.isPresent(), OK.value(), "OK");
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return new CheckResponseDto("찜하셨습니다.", dibsGoods.isPresent(), OK.value(), "OK");
     }
 
     public User findUser(Long userId) {

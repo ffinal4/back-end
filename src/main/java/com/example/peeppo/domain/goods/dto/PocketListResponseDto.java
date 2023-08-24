@@ -15,6 +15,7 @@ public class PocketListResponseDto {
     private String image;
     private GoodsStatus goodsStatus;
     private Long ratingPrice;
+    private Boolean ratingCheck;
 
     public PocketListResponseDto(Goods goods,
                                  String userImageUrl,
@@ -26,5 +27,6 @@ public class PocketListResponseDto {
         this.image = userImageUrl;
         this.goodsStatus = goods.getGoodsStatus();
         this.ratingPrice = ratingPrice;
+        this.ratingCheck = goods.getRatingCheck();
     }
 }

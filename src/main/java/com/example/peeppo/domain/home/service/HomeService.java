@@ -11,12 +11,17 @@ import com.example.peeppo.domain.goods.dto.GoodsListResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.home.dto.HomeResponseDto;
+import com.example.peeppo.domain.user.dto.RatingUserResponseDto;
+import com.example.peeppo.domain.user.entity.User;
+import com.example.peeppo.domain.user.repository.UserRepository;
+import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +30,7 @@ public class HomeService {
     private final DibsService dibsService;
     private final AuctionRepository auctionRepository;
     private final AuctionService auctionService;
+    private final UserRepository userRepository;
 
     public HomeResponseDto peeppoHome(UserDetailsImpl user) {
         List<Goods> goodsList = goodsRepository.findTop8ByCreatedAt();
@@ -37,6 +43,12 @@ public class HomeService {
             GoodsListResponseDto goodsListResponseDto = new GoodsListResponseDto(goods, checkDibs);
             goodsListResponseDtos.add(goodsListResponseDto);
         }
+
+        List<RatingUserResponseDto> ratingUserListResponseDto = userRepository.findTopThreeUsersByMaxRatingCount()
+                .stream()
+                .map(ratingUser -> new RatingUserResponseDto(ratingUser.getUserImg(), ratingUser.getNickname(), ratingUser.getMaxRatingCount()))
+                .collect(Collectors.toList());
+
         List<Auction> auctionList = auctionRepository.findTop3Auction();
         List<AuctionListResponseDto> auctionResponseDtos = new ArrayList<>();
         for(Auction auction : auctionList){
@@ -48,7 +60,9 @@ public class HomeService {
             AuctionListResponseDto auctionResponseDto = new AuctionListResponseDto(auction, timeRemaining, auctionService.findBidCount(auction.getAuctionId()),checkDibs);
             auctionResponseDtos.add(auctionResponseDto);
         }
-        return new HomeResponseDto(goodsListResponseDtos, auctionResponseDtos);
+
+
+        return new HomeResponseDto(goodsListResponseDtos, ratingUserListResponseDto, auctionResponseDtos);
     }
 }
 

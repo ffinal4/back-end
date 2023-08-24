@@ -16,8 +16,8 @@ import java.util.List;
 @NoArgsConstructor
 public class GoodsResponseDto {
     private Long goodsId;
-    private boolean checkDibs;
     private Long userId;
+    private Long sellerPrice;
     private String title;
     private String content;
     private Category category;
@@ -26,12 +26,14 @@ public class GoodsResponseDto {
     private String tradeType;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
-    private List<String> images;
-    private WantedGoods wantedGoods;
     private GoodsStatus goodsStatus;
-
     private String nickname;
     private boolean checkSameUser;
+    private boolean checkDibs;
+    private Boolean ratingCheck;
+    private List<String> images;
+    private WantedGoods wantedGoods;
+
 
 
     public GoodsResponseDto(Goods goods, List<String> images, WantedGoods wantedGoods) {
@@ -49,6 +51,8 @@ public class GoodsResponseDto {
         this.wantedGoods = wantedGoods;
         this.nickname = goods.getUser().getNickname();
         this.goodsStatus = goods.getGoodsStatus();
+        this.sellerPrice = goods.getSellerPrice();
+        this.ratingCheck = goods.getRatingCheck();
     }
 
     public GoodsResponseDto(Goods goods) {
@@ -68,22 +72,6 @@ public class GoodsResponseDto {
         this.goodsStatus = goods.getGoodsStatus();
     }
 
-    public GoodsResponseDto(Goods goods, List<String> images, WantedGoods wantedGoods, User user) {
-        this.goodsId = goods.getGoodsId();
-        this.userId = goods.getUser().getUserId();
-        this.title = goods.getTitle();
-        this.content = goods.getContent();
-        this.category = goods.getCategory();
-        this.location = goods.getLocation();
-        this.goodsCondition = goods.getGoodsCondition();
-        this.tradeType = goods.getTradeType();
-        this.createdAt = goods.getCreatedAt();
-        this.modifiedAt = goods.getModifiedAt();
-        this.images = images;
-        this.wantedGoods = wantedGoods;
-        this.nickname = user.getNickname();
-        this.goodsStatus = goods.getGoodsStatus();
-    }
 
     public GoodsResponseDto(Goods goods, List<String> imageUrls, WantedGoods wantedGoods, boolean checkSameUser, boolean checkDibs) {
         this.goodsId = goods.getGoodsId();
@@ -100,5 +88,25 @@ public class GoodsResponseDto {
         this.wantedGoods = wantedGoods;
         this.nickname = goods.getUser().getNickname();
         this.checkSameUser = checkSameUser;
+        this.checkDibs = checkDibs;
+    }
+
+    public GoodsResponseDto(Goods goods, List<String> imageUrls, WantedGoods wantedGoods, boolean checkSameUser) {
+        this.goodsId = goods.getGoodsId();
+        this.userId = goods.getUser().getUserId();
+        this.title = goods.getTitle();
+        this.content = goods.getContent();
+        this.category = goods.getCategory();
+        this.location = goods.getLocation();
+        this.goodsCondition = goods.getGoodsCondition();
+        this.tradeType = goods.getTradeType();
+        this.createdAt = goods.getCreatedAt();
+        this.modifiedAt = goods.getModifiedAt();
+        this.images =  imageUrls;
+        this.wantedGoods = wantedGoods;
+        this.nickname = goods.getUser().getNickname();
+        this.ratingCheck = goods.getRatingCheck();
+        this.goodsStatus = goods.getGoodsStatus();
+        this.sellerPrice = goods.getSellerPrice();
     }
 }

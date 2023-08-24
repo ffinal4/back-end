@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.goods.controller;
 
 import com.example.peeppo.domain.goods.dto.*;
+
 import com.example.peeppo.domain.goods.service.GoodsService;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
@@ -36,10 +37,7 @@ public class GoodsController {
                                                @RequestParam("sortBy") String sortBy,
                                                @RequestParam("isAsc") boolean isAsc,
                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        if(userDetails!=null){
-            return goodsService.allGoods(page -1, size, sortBy, isAsc,userDetails.getUser());
-        }
-        return goodsService.allGoodsEveryone(page - 1, size, sortBy, isAsc);
+            return goodsService.allGoods(page -1, size, sortBy, isAsc, userDetails);
     }
 
     // 게시물 상세조회
@@ -97,8 +95,10 @@ public class GoodsController {
         return goodsService.recentGoods(response);
     }
 
+
     @GetMapping("/search")
     public ApiResponse<List<GoodsListResponseDto>> searchGoods(@RequestParam("keyword") String keyword){
         return goodsService.searchGoods(keyword);
     }
 }
+
