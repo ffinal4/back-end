@@ -69,7 +69,8 @@ public class ChatService {
                 .goods(goods)
                 .user(enterUser)
                 .build();
-        hashOpsChatRoom.put(CHAT_ROOMS, randomId, new ChatRoomResponseDto(chatRoom));
+        ChatRoomResponseDto chatRoomResponseDto = new ChatRoomResponseDto(chatRoom);
+        hashOpsChatRoom.put(CHAT_ROOMS, randomId, chatRoomResponseDto);
         System.out.println(hashOpsChatRoom.get(CHAT_ROOMS, randomId));
         chatRoomRepository.save(chatRoom);
         return new ChatRoomResponseDto(chatRoom);
