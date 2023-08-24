@@ -24,12 +24,12 @@ public class QChatRoom extends EntityPathBase<ChatRoom> {
 
     public final com.example.peeppo.global.utils.QTimestamped _super = new com.example.peeppo.global.utils.QTimestamped(this);
 
-    public final ListPath<ChatMessage, QChatMessage> chatMessage = this.<ChatMessage, QChatMessage>createList("chatMessage", ChatMessage.class, QChatMessage.class, PathInits.DIRECT2);
-
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
     public final com.example.peeppo.domain.goods.entity.QGoods goods;
+
+    public final StringPath goodsTitle = createString("goodsTitle");
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
@@ -38,7 +38,7 @@ public class QChatRoom extends EntityPathBase<ChatRoom> {
 
     public final StringPath roomId = createString("roomId");
 
-    public final com.example.peeppo.domain.user.entity.QUser user;
+    public final ListPath<UserChatRoomRelation, QUserChatRoomRelation> userChatRoomRelation = this.<UserChatRoomRelation, QUserChatRoomRelation>createList("userChatRoomRelation", UserChatRoomRelation.class, QUserChatRoomRelation.class, PathInits.DIRECT2);
 
     public QChatRoom(String variable) {
         this(ChatRoom.class, forVariable(variable), INITS);
@@ -59,7 +59,6 @@ public class QChatRoom extends EntityPathBase<ChatRoom> {
     public QChatRoom(Class<? extends ChatRoom> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.goods = inits.isInitialized("goods") ? new com.example.peeppo.domain.goods.entity.QGoods(forProperty("goods"), inits.get("goods")) : null;
-        this.user = inits.isInitialized("user") ? new com.example.peeppo.domain.user.entity.QUser(forProperty("user")) : null;
     }
 
 }

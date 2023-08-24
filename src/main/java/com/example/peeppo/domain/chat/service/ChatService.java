@@ -71,10 +71,11 @@ public class ChatService {
                 .goods(goods)
                 .user(enterUser)
                 .build();
-        hashOpsChatRoom.put(CHAT_ROOMS, randomId, new ChatRoomResponseDto(chatRoom));
+       /* hashOpsChatRoom.put(CHAT_ROOMS, randomId, new ChatRoomResponseDto(chatRoom));
         System.out.println(hashOpsChatRoom.get(CHAT_ROOMS, randomId));
-        chatRoomRepository.save(chatRoom);
-        return new ChatRoomResponseDto(chatRoom);
+        chatRoomRepository.save(chatRoom);*/
+       // return new ChatRoomResponseDto(chatRoom);
+        return null;
     }
     //채팅방 아이디는 랜덤 !
 
@@ -137,8 +138,9 @@ public class ChatService {
     }
 
     //roomId 기준으로 채팅방 메시지 내용 찾기
-    public List<ChatMessageResponseDto> findMessageById(String roomId, UserDetailsImpl userDetails) {
-        List<ChatMessage> chatMessageList = chatMessageRepository.findAllByRoomIdAndUserUserId(roomId, userDetails.getUser().getUserId());
+    public List<ChatMessageResponseDto> findMessageById(String roomId, User user) {
+        ChatRoom chatRoom = findRoomById(roomId);
+        List<ChatMessage> chatMessageList = chatMessageRepository.findAllByChatRoomAndSenderId(chatRoom, user.getUserId());
         List<ChatMessageResponseDto> chatMessageResponseDtos = new ArrayList<>();
         for(ChatMessage chatMessage : chatMessageList){
             ChatMessageResponseDto chatMessageResponseDto = new ChatMessageResponseDto(chatMessage);
@@ -174,14 +176,15 @@ public class ChatService {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.KOREA);
         String dTime = formatter.format(systemTime);
         ChatRoom chatRoom = findRoomById(chatMessageRequestDto.getChatRoom());
-        ChatMessage chatMessage = new ChatMessage(chatMessageRequestDto, chatRoom, dTime, user);
-        if (ChatMessage.MessageType.ENTER.equals(chatMessage.getType())) {
+        //ChatMessage chatMessage = new ChatMessage(chatMessageRequestDto, chatRoom, dTime, user);
+        ChatMessage chatMessage = new ChatMessage(chatMessageRequestDto, chatRoom, dTime);
+      /*  if (ChatMessage.MessageType.ENTER.equals(chatMessage.getType())) {
             chatMessage.sendMessage(user + "님이 방에 입장했습니다.");
             System.out.println(chatMessage);
         } else if (ChatMessage.MessageType.LEAVE.equals(chatMessage.getType())) {
             chatMessage.sendMessage(user + "님이 방에서 나갔습니다.");
             System.out.println(chatMessage);
-        }
+        }*/
         chatMessageRepository.save(chatMessage);
         System.out.println("전송 요청");
         //template.convertAndSend("/sub/chat/room/" + chatMessage.getRoomId(), chatMessage);

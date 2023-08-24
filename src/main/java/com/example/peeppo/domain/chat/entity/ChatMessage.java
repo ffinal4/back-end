@@ -15,6 +15,13 @@ import lombok.Setter;
 public class ChatMessage {
 
 
+    public ChatMessage(ChatMessageRequestDto chatMessageRequestDto, ChatRoom chatRoom, String dTime) {
+        this.type = chatMessageRequestDto.getMessageType();
+        this.chatRoom = chatRoom;
+        this.message = chatMessageRequestDto.getMessage();
+        this.time = dTime;
+    }
+
     public void sendMessage(String enterMessage) {
         this.message = enterMessage;
     }

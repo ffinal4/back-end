@@ -1,5 +1,6 @@
 package com.example.peeppo.domain.chat.controller;
 
+import com.example.peeppo.domain.chat.dto.ChatMessageRequestDto;
 import com.example.peeppo.domain.chat.entity.ChatMessage;
 import com.example.peeppo.domain.chat.repository.ChatMessageRepository;
 import com.example.peeppo.domain.chat.service.ChatService;
@@ -35,9 +36,8 @@ public class ChatController { //채팅을 수신하고 송신하기 위한 컨�
     @MessageMapping("/chatroom/{chatroomId}")
     public void sendMessage(@DestinationVariable("chatroomId") String id, @Payload ChatMessageRequestDto chat) {
         log.info("CHAT {}", chat);
-
         chatService.saveMessage(chat);
     }
 // @Header("AccessToken") String token
-    // @AuthenticationPrincipal UserDetailsImpl userDetails
+// @AuthenticationPrincipal UserDetailsImpl userDetails
 }
