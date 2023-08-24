@@ -160,7 +160,9 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                                                 "/api/users/login",
                                                 "/chat/**",
                                                 "/chatroom/**",
-                                                "/stomp/chat").permitAll()
+                                                "/stomp/chat",
+                                                "/.well-known/pki-validation/8ADC75F30FBE0655942F5FB97EE1F9FA.txt")
+                                        .permitAll()
                                         .requestMatchers(HttpMethod.POST,
                                                 "/api/users/signup",
                                                 "/api/users/nickname",
