@@ -72,6 +72,23 @@ public class GoodsResponseDto {
         this.goodsStatus = goods.getGoodsStatus();
     }
 
+    public GoodsResponseDto(Goods goods, List<String> imageUrls) {
+        this.goodsId = goods.getGoodsId();
+        this.userId = goods.getUser().getUserId();
+        this.title = goods.getTitle();
+        this.content = goods.getContent();
+        this.category = goods.getCategory();
+        this.location = goods.getLocation();
+        this.goodsCondition = goods.getGoodsCondition();
+        this.tradeType = goods.getTradeType();
+        this.createdAt = goods.getCreatedAt();
+        this.images = imageUrls;
+        this.modifiedAt = goods.getModifiedAt();
+        this.wantedGoods = goods.getWantedGoods();
+        this.nickname = goods.getUser().getNickname();
+        this.goodsStatus = goods.getGoodsStatus();
+    }
+
 
     public GoodsResponseDto(Goods goods, List<String> imageUrls, WantedGoods wantedGoods, boolean checkSameUser, boolean checkDibs) {
         this.goodsId = goods.getGoodsId();
