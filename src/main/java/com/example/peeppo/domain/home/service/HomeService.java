@@ -17,6 +17,7 @@ import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -32,6 +33,7 @@ public class HomeService {
     private final AuctionService auctionService;
     private final UserRepository userRepository;
 
+    @Cacheable(value = "allGoodsCache", key = "'defaultKey'")
     public HomeResponseDto peeppoHome(UserDetailsImpl user) {
         List<Goods> goodsList = goodsRepository.findTop8ByCreatedAt();
         List<GoodsListResponseDto> goodsListResponseDtos = new ArrayList<>();
