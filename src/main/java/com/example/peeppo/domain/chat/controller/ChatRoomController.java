@@ -33,9 +33,8 @@ public class ChatRoomController {
 
     //채팅방 상세 조회
     @GetMapping("/room/{chatId}")
-    public List<ChatMessageResponseDto> findChatRoom(@PathVariable("chatId") String roomId,
-                                                     @AuthenticationPrincipal UserDetailsImpl userDetails){
-        return chatService.findMessageById(roomId, userDetails);
+    public List<ChatMessageResponseDto> findChatRoom(@PathVariable("chatId") String roomId){
+        return chatService.findMessageById(roomId);
     }
 
     @DeleteMapping("/room/{chatId}")

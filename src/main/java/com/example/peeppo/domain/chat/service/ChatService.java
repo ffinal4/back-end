@@ -135,8 +135,8 @@ public class ChatService {
     }
 
     //roomId 기준으로 채팅방 메시지 내용 찾기
-    public List<ChatMessageResponseDto> findMessageById(String roomId, UserDetailsImpl userDetails) {
-        List<ChatMessage> chatMessageList = chatMessageRepository.findAllByRoomIdAndUserUserId(roomId, userDetails.getUser().getUserId());
+    public List<ChatMessageResponseDto> findMessageById(String roomId) {
+        List<ChatMessage> chatMessageList = chatMessageRepository.findAllByChatRoomRoomId(roomId);
         List<ChatMessageResponseDto> chatMessageResponseDtos = new ArrayList<>();
         for(ChatMessage chatMessage : chatMessageList){
             ChatMessageResponseDto chatMessageResponseDto = new ChatMessageResponseDto(chatMessage);
