@@ -60,7 +60,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList("*","https://localhost:3000", "https://www.peeppo.store", "https://54.180.87.141:8080", "https://54.180.87.141:80", "https://peeppo.store", "https://apic.app", "chrome-extension://ggnhohnkfcpcanfekomdkjffnfcjnjam")); // 이 부분에 출처를 추가합니다.
+        config.setAllowedOrigins(Arrays.asList("http://localhost:3000","https://localhost:3000", "https://www.peeppo.store", "https://54.180.87.141:8080", "https://54.180.87.141:80", "https://peeppo.store", "http://peeppo.store","https://apic.app", "chrome-extension://ggnhohnkfcpcanfekomdkjffnfcjnjam")); // 이 부분에 출처를 추가합니다.
         config.setAllowedMethods(Arrays.asList("HEAD", "POST", "GET", "DELETE", "PUT", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(Arrays.asList("*"));
         config.addExposedHeader("*");
