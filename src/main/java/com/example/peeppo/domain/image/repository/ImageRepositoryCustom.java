@@ -8,5 +8,5 @@ public interface ImageRepositoryCustom {
 
     List<Image> findByGoodsGoodsIdOrderByCreatedAtAsc(Long goodsId);
 
-    Image findByGoodsGoodsIdOrderByCreatedAtAscFirst(Long userId);
+    Image findByGoodsGoodsIdOrderByCreatedAtAscFirst(Long goodsId);
 }

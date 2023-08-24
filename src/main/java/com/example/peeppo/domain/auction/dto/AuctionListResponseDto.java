@@ -28,9 +28,7 @@ public class AuctionListResponseDto {
     private TimeRemaining timeRemaining;
     private AuctionStatus auctionStatus;
 
-
-
-    public AuctionListResponseDto(Auction auction, TimeRemaining timeRemaining, Long bidCount) {
+    public AuctionListResponseDto(Auction auction, String imageUrl, TimeRemaining timeRemaining, Long bidCount, boolean checkDibs) {
         this.auctionId = auction.getAuctionId();
         this.deleteStatus = auction.getIsDeleted();
         this.nickname = auction.getUser().getNickname();
@@ -42,9 +40,10 @@ public class AuctionListResponseDto {
         this.location = auction.getGoods().getLocation();
         this.title = auction.getGoods().getTitle();
         this.content = auction.getGoods().getContent();
-        this.image = auction.getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
+        this.image = imageUrl;
         this.timeRemaining = timeRemaining;
         this.auctionStatus = auction.getAuctionStatus();
+        this.checkDibs = checkDibs;
     }
 
 
