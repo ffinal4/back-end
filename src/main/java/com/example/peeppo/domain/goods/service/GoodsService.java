@@ -13,7 +13,9 @@ import com.example.peeppo.domain.goods.repository.WantedGoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.helper.ImageHelper;
 import com.example.peeppo.domain.image.repository.ImageRepository;
+import com.example.peeppo.domain.rating.entity.RatingGoods;
 import com.example.peeppo.domain.rating.helper.RatingHelper;
+import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
@@ -48,6 +50,7 @@ public class GoodsService {
     private final AmazonS3 amazonS3;
     private final String bucket;
     private final UserRepository userRepository;
+    private final RatingGoodsRepository ratingGoodsRepository;
 
     private final RatingHelper ratingHelper;
     private final DibsService dibsService;
@@ -68,8 +71,10 @@ public class GoodsService {
         }
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
         Goods goods = new Goods(goodsRequestDto, wantedGoods, user, GoodsStatus.ONSALE);
-        goodsRepository.save(goods);
+        RatingGoods ratingGoods = new RatingGoods(0L, (double) 0, (double) 0, 0L, goods);
 
+        goodsRepository.save(goods);
+        ratingGoodsRepository.save(ratingGoods);
         wantedGoodsRepository.save(wantedGoods);
 
         List<String> imageUrls = imageHelper
