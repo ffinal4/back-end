@@ -70,6 +70,8 @@ public class GoodsResponseDto {
         this.wantedGoods = goods.getWantedGoods();
         this.nickname = goods.getUser().getNickname();
         this.goodsStatus = goods.getGoodsStatus();
+        this.sellerPrice = goods.getSellerPrice();
+        this.ratingCheck = goods.getRatingCheck();
     }
 
     public GoodsResponseDto(Goods goods, List<String> imageUrls) {
@@ -87,6 +89,8 @@ public class GoodsResponseDto {
         this.wantedGoods = goods.getWantedGoods();
         this.nickname = goods.getUser().getNickname();
         this.goodsStatus = goods.getGoodsStatus();
+        this.sellerPrice = goods.getSellerPrice();
+        this.ratingCheck = goods.getRatingCheck();
     }
 
 
@@ -106,6 +110,8 @@ public class GoodsResponseDto {
         this.nickname = goods.getUser().getNickname();
         this.checkSameUser = checkSameUser;
         this.checkDibs = checkDibs;
+        this.sellerPrice = goods.getSellerPrice();
+        this.ratingCheck = goods.getRatingCheck();
     }
 
     public GoodsResponseDto(Goods goods, List<String> imageUrls, WantedGoods wantedGoods, boolean checkSameUser) {
