@@ -27,10 +27,8 @@ public class ChatRoom extends Timestamped implements Serializable {
 
     @OneToMany(mappedBy = "chatRoom")
     private List<ChatMessage> chatMessage;
-
    // @Transient //Serialize하는 과정을 제외하고 싶은 경우 선언하는 키워드
    // private Set<WebSocketSession> sessions = new HashSet<>(); // 중복저장을 막는다
-
     @ManyToOne
     @JoinColumn(name = "goods_id", nullable = false)
     private Goods goods;
@@ -47,7 +45,6 @@ public class ChatRoom extends Timestamped implements Serializable {
     }
 
     /*
-
     public void handlerActions(WebSocketSession session, ChatMessage message, ChatService chatService){
         if(message.getType().equals(ChatMessage.MessageType.ENTER)){
             sessions.add(session);
