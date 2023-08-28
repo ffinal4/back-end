@@ -35,7 +35,7 @@ public class HomeService {
     private final UserRepository userRepository;
     private final ImageRepository imageRepository;
 
-//    @Cacheable(value = "homeCache")
+    @Cacheable(value = "homeCache", cacheManager = "cacheManager")
     public HomeResponseDto peeppoHome(UserDetailsImpl user) {
         List<Goods> goodsList = goodsRepository.findTop8ByCreatedAt();
         List<GoodsListResponseDto> goodsListResponseDtos = new ArrayList<>();
