@@ -242,9 +242,8 @@ public class GoodsService {
         return goodsRecentDtos;
     }
 
-    public List<GoodsSingleResponseDto> getMyGoodsWithoutPagenation(User user) {
-        return null;
-        //        return getGoodsResponseDtos(user);
+    public List<GoodsResponseDto> getMyGoodsWithoutPagenation(User user) {
+       return getGoodsResponseDtos(user);
     }
 
     public ApiResponse<UrPocketResponseDto> getPocket(String nickname, UserDetailsImpl userDetails, int page,
@@ -280,19 +279,18 @@ public class GoodsService {
 //        return getGoodsResponseDtos(user);
     }
 
-//    private List<GoodsSingleResponseDto> getGoodsResponseDtos(User user) {
-//        List<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalseAndGoodsStatus(user, GoodsStatus.ONSALE);
-//        List<GoodsResponseDto> goodsResponseDtoList = new ArrayList<>();
-//            for(Goods goods : goodsList){
-//                List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(goods.getGoodsId())
-//                        .stream()
-//                        .map(Image::getImageUrl)
-//                        .collect(Collectors.toList());
-//                goodsResponseDtoList.add(new GoodsResponseDto(goods, imageUrls));
-//            }
-//        return goodsResponseDtoList;
-//    }
-
+    private List<GoodsResponseDto> getGoodsResponseDtos(User user) {
+        List<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalseAndGoodsStatus(user, GoodsStatus.ONSALE);
+        List<GoodsResponseDto> goodsResponseDtoList = new ArrayList<>();
+        for (Goods goods : goodsList) {
+            List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(goods.getGoodsId())
+                    .stream()
+                    .map(Image::getImageUrl)
+                    .collect(Collectors.toList());
+            goodsResponseDtoList.add(new GoodsResponseDto(goods, imageUrls));
+        }
+        return goodsResponseDtoList;
+    }
     public ApiResponse<List<GoodsListResponseDto>> searchGoods(String keyword) {
         List<Goods> searchList = goodsRepository.findByTitleContaining(keyword);
         List<GoodsListResponseDto> goodsListResponseDtos = new ArrayList<>();

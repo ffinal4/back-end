@@ -14,6 +14,7 @@ import com.example.peeppo.domain.bid.repository.BidRepository;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
+import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.domain.notification.entity.Notification;
 import com.example.peeppo.domain.notification.repository.NotificationRepository;
@@ -87,7 +88,7 @@ public class AuctionService {
         }
 
         String imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsId).getImageUrl();
-        GoodsSingleResponseDto goodsResponseDto = new GoodsSingleResponseDto(getGoods, imageUrl);
+        GoodsResponseDto goodsResponseDto = new GoodsResponseDto(getGoods, imageUrl);
         LocalDateTime auctionEndTime = calAuctionEndTime(auctionRequestDto.getEndTime()); // 마감기한 계산
         log.info("{}", auctionEndTime);
         Auction auction = new Auction(getGoods, auctionEndTime, user, ratingGoods, auctionRequestDto.getLowPrice()); // 경매와 마감기한 생성
@@ -176,7 +177,7 @@ public class AuctionService {
         if (auction.getUser().getUserId() != user.getUserId()) {
             checkSameUser = false;
         }
-        String imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(auction.getGoods().getGoodsId()).getImageUrl();
+        List<String> imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(auction.getGoods().getGoodsId()).stream().map(Image::getImageUrl).collect(Collectors.toList());
         return new AuctionResponseDto(auction, auction.getGoods(), countDownTime(auction), findBidCount(auctionId), checkSameUser, imageUrl);
     }
 
