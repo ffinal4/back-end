@@ -2,6 +2,7 @@ package com.example.peeppo.domain.chat.entity;
 
 import com.example.peeppo.domain.chat.dto.ChatMessageRequestDto;
 import com.example.peeppo.domain.user.entity.User;
+import com.querydsl.jpa.JPAExpressions;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,13 +15,6 @@ import lombok.Setter;
 @Entity
 public class ChatMessage {
 
-
-    public ChatMessage(ChatMessageRequestDto chatMessageRequestDto, ChatRoom chatRoom, String dTime) {
-        this.type = chatMessageRequestDto.getMessageType();
-        this.chatRoom = chatRoom;
-        this.message = chatMessageRequestDto.getMessage();
-        this.time = dTime;
-    }
 
     public void sendMessage(String enterMessage) {
         this.message = enterMessage;
@@ -53,5 +47,13 @@ public class ChatMessage {
         this.time = dTime;
     }
 
+    @Builder
+    public ChatMessage(MessageType type, ChatRoom chatRoom, Long userId,String message, String createdAt) {
+        this.type = type;
+        this.chatRoom = chatRoom;
+        this.senderId = userId;
+        this.message = message;
+        this.time = createdAt;
+    }
 
 }

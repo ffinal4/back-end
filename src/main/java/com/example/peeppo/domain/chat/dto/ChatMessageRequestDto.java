@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 @Getter
 public class ChatMessageRequestDto {
     private ChatMessage.MessageType messageType;
-//    private String sender;
     private String chatRoom;
     private String message;
 }

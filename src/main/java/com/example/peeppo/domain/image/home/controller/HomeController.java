@@ -1,7 +1,7 @@
-package com.example.peeppo.domain.home.controller;
+package com.example.peeppo.domain.image.home.controller;
 
-import com.example.peeppo.domain.home.dto.HomeResponseDto;
-import com.example.peeppo.domain.home.service.HomeService;
+import com.example.peeppo.domain.image.home.dto.HomeResponseDto;
+import com.example.peeppo.domain.image.home.service.HomeService;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import com.example.peeppo.global.utils.ResponseUtils;

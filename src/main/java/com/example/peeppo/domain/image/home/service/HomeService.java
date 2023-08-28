@@ -1,4 +1,4 @@
-package com.example.peeppo.domain.home.service;
+package com.example.peeppo.domain.image.home.service;
 
 
 import com.example.peeppo.domain.auction.dto.AuctionListResponseDto;
@@ -10,7 +10,7 @@ import com.example.peeppo.domain.dibs.service.DibsService;
 import com.example.peeppo.domain.goods.dto.GoodsListResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
-import com.example.peeppo.domain.home.dto.HomeResponseDto;
+import com.example.peeppo.domain.image.home.dto.HomeResponseDto;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

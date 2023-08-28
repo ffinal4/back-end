@@ -34,9 +34,10 @@ public class ChatController { //채팅을 수신하고 송신하기 위한 컨�
      */
 
     @MessageMapping("/chatroom/{chatroomId}")
-    public void sendMessage(@DestinationVariable("chatroomId") String id, @Payload ChatMessageRequestDto chat) {
+    public void sendMessage(@DestinationVariable("chatroomId") String id, @Payload ChatMessageRequestDto chat,
+                            @Header("AccessToken") String token) {
         log.info("CHAT {}", chat);
-        chatService.saveMessage(chat);
+        chatService.saveMessage(id,chat,token);
     }
 // @Header("AccessToken") String token
 // @AuthenticationPrincipal UserDetailsImpl userDetails

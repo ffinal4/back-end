@@ -60,7 +60,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://54.180.87.141:8080", "http://54.180.87.141:80", "http://peeppo.store", "https://apic.app", "chrome-extension://ggnhohnkfcpcanfekomdkjffnfcjnjam")); // 이 부분에 출처를 추가합니다.
+        config.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://54.180.87.141:8080", "http://54.180.87.141:80", "http://peeppo.store", "https://apic.app", "chrome-extension://ggnhohnkfcpcanfekomdkjffnfcjnjam", "https://jxy.me")); // 이 부분에 출처를 추가합니다.
         config.setAllowedMethods(Arrays.asList("HEAD", "POST", "GET", "DELETE", "PUT", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(Arrays.asList("*"));
         config.addExposedHeader("*");
@@ -165,7 +165,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                                                 "/api/users/signup",
                                                 "/api/users/nickname",
                                                 "/api/users/login",
-                                                "/chat/room/**").permitAll()
+                                                "/api/chat/room/**").permitAll()
                                         .anyRequest().authenticated() // 그 외 모든 요청 인증처리
 
                 );
