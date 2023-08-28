@@ -26,10 +26,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,6 +34,7 @@ import org.springframework.web.util.UriUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -71,7 +69,7 @@ public class GoodsService {
         }
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
         Goods goods = new Goods(goodsRequestDto, wantedGoods, user, GoodsStatus.ONSALE);
-        RatingGoods ratingGoods = new RatingGoods(0L, (double) 0, (double) 0, 0L, goods);
+        RatingGoods ratingGoods = new RatingGoods(goods);
 
         goodsRepository.save(goods);
         ratingGoodsRepository.save(ratingGoods);
@@ -88,8 +86,6 @@ public class GoodsService {
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods), null);
     }
 
-    @CachePut(key = "#page", value = "allGoods")
-    @Cacheable(key = "#page", value = "allGoods", condition = "#page == 0", cacheManager = "cacheManager")
     public Page<GoodsListResponseDto> allGoods(int page, int size, String sortBy, boolean isAsc, UserDetailsImpl userDetails) {
         if(userDetails == null){ // 비로그인시
            return allGoodsEveryone(page, size, sortBy, isAsc);
@@ -101,7 +97,7 @@ public class GoodsService {
         List<GoodsListResponseDto> goodsResponseList = new ArrayList<>();
 
         for (Goods goods : goodsPage.getContent()) {
-            boolean checkSameUser = goods.getUser().getUserId() == userDetails.getUser().getUserId();
+            boolean checkSameUser = Objects.equals(goods.getUser().getUserId(), userDetails.getUser().getUserId());
             Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
             boolean checkDibs = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goods.getGoodsId())
                     .isPresent();
@@ -124,13 +120,6 @@ public class GoodsService {
 
         return new PageResponse<>(goodsResponseList, pageable, goodsPage.getTotalElements());
     }
-
-//    public ApiResponse<List<GoodsResponseDto>> locationAllGoods(Long locationId) {
-//        List<Goods> goodsList = goodsRepository.findAllByLocationIdAndIsDeletedFalseOrderByGoodsIdDesc(locationId);
-//        List<GoodsResponseDto> goodsResponseList = responseDtoList(goodsList);
-//
-//        return new ApiResponse<>(true, goodsResponseList, null);
-//    }
 
 
     public ApiResponse<GoodsResponseDto> getGoods(Long goodsId, User user) {
@@ -175,18 +164,15 @@ public class GoodsService {
         User user = findUserId(userId);
         Page<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalse(user, pageable);
 
-        if(goodsList.isEmpty()){
-            return new ApiResponse<>(true, new PocketResponseDto(), null);
-        }
+        List<PocketListResponseDto> myGoods = goodsList.stream()
+                .map(goods -> {
+                    long ratingPrice = (long) ratingHelper.getAvgPriceByGoodsId(goods.getGoodsId());
+                    Image firstImage = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
+                    return new PocketListResponseDto(goods, firstImage.getImageUrl(), ratingPrice);
+                }).collect(Collectors.toList());
 
-        List<PocketListResponseDto> myGoods = new ArrayList<>();
-        for (Goods goods : goodsList) {
-            long ratingPrice = (long) ratingHelper.getAvgPriceByGoodsId(goods.getGoodsId());
-            Image firstImage = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
-            myGoods.add(new PocketListResponseDto(goods, firstImage.getImageUrl(), ratingPrice));
-        }
-
-        return new ApiResponse<>(true, new PocketResponseDto(user, myGoods), null);
+        return new ApiResponse<>(true, new PocketResponseDto(user,
+                new PageImpl<>(myGoods, pageable, goodsList.getTotalElements())), null);
     }
 
     @Transactional
@@ -217,7 +203,7 @@ public class GoodsService {
     @Transactional
     public ApiResponse<DeleteResponseDto> deleteGoods(Long goodsId, Long userId) throws IllegalAccessException {
         Goods goods = findGoods(goodsId);
-        if (userId == goods.getUser().getUserId()) {
+        if (Objects.equals(userId, goods.getUser().getUserId())) {
             goods.delete();
             goodsRepository.save(goods);
         } else {
@@ -225,15 +211,6 @@ public class GoodsService {
         }
         return new ApiResponse<>(true, new DeleteResponseDto("삭제되었습니다"), null);
     }
-
-
-    // 최근 본 목록에 상품 ID를 추가
-//        List<Long> recentlyViewedGoodsIds = user.getRecentlyViewedGoodsIds();
-//        if (!recentlyViewedGoodsIds.contains(goodsId)) {
-//            recentlyViewedGoodsIds.add(goodsId);
-//            user.setRecentlyViewedGoodsIds(recentlyViewedGoodsIds);
-//            userRepository.save(user);
-//        }
 
     public Goods findGoods(Long goodsId) {
         Goods goods = goodsRepository.findById(goodsId).orElseThrow(() ->
