@@ -1,6 +1,5 @@
 package com.example.peeppo.domain.goods.repository;
 
-import com.example.peeppo.domain.goods.dto.GoodsListResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.user.entity.User;
@@ -10,12 +9,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-
 import java.util.List;
 import java.util.Optional;
 
-public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsRepositoryCustom{
+public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsRepositoryCustom {
     Page<Goods> findAllByIsDeletedFalse(Pageable pageable);
+
     Page<Goods> findAllByUserAndIsDeletedFalse(User user, Pageable pageable);
 
     @Query(value = "select g1.* " +
@@ -57,8 +56,13 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
 
     @Query(value = "SELECT g.* from goods g where g.is_deleted = false ORDER BY g.created_at desc LIMIT 8 ", nativeQuery = true)
     List<Goods> findTop8ByCreatedAt();
+
     List<Goods> findAllByUserAndIsDeletedFalseAndGoodsStatus(User user, GoodsStatus onsale);
 
     List<Goods> findByTitleContaining(String keyword);
+
+    Page<Goods> findByUserUserIdAndGoodsStatus(Long userId, Pageable pageable, GoodsStatus goodsStatus);
+
+    Page<Goods> findByUserUserId(Long userId, Pageable pageable);
 
 }

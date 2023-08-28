@@ -7,7 +7,13 @@ public enum GoodsStatus {
     ONSALE("on sale"),
     SOLDOUT("sold out"),
     ONAUCTION("on auction"),
-    BIDDING("bidding");
+    BIDDING("bidding"),
+
+    REQUEST("trading request"),
+    CANCEL("trading cancel"),
+    DONE("trading complete"),
+    TRADING("trading continue"),
+    REQUESTED("trading requested");
 
     private final String status;
 

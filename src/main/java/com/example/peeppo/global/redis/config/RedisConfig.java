@@ -1,6 +1,5 @@
 package com.example.peeppo.global.redis.config;
 
-import com.example.peeppo.domain.chat.dto.ChatRoomResponseDto;
 import com.example.peeppo.domain.chat.entity.ChatRoom;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -49,19 +48,21 @@ public class RedisConfig {
         redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(String.class)); //Json포맷 형식으로 메시지를 교환하기 위해
 
         //* redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class)); //Json포맷 형식으로 메시지를 교환하기 위해
-        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class)); //Json포맷 형식으로 메시지를 교환하기 위해*//*
+       // redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class)); //Json포맷 형식으로 메시지를 교환하기 위해*//*
 
+
+        redisTemplate.setHashValueSerializer(new StringRedisSerializer());
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-        redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class));
+        //redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class));
+        //redisTemplate.setHashKeySerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class));
 
 
-        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoomResponseDto.class));
-        redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoomResponseDto.class));
+      //  redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoomResponseDto.class));
+       // redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoomResponseDto.class));
         redisTemplate.afterPropertiesSet();
 
         return redisTemplate;
     }
-
 
     @Bean
     //redismessageListenercontainer 는 Redis channel(Topic)으로 부터 메시지를 받고,
@@ -69,7 +70,7 @@ public class RedisConfig {
     // 즉, redis에 발행된 (pub)된 메시지 처리를 위한 리스너 설정
     public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory connectionFactory,
                                                                        MessageListenerAdapter listenerAdapter,
-                                                                       ChannelTopic channelTopic){
+                                                                       ChannelTopic channelTopic) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(connectionFactory);
         container.addMessageListener(listenerAdapter, channelTopic);
@@ -79,7 +80,7 @@ public class RedisConfig {
     @Bean
     //위의 컨테이너로부터 메시지를 dispatch 받고 실제 메시지를 처리하는 로직인 subscriber bean을 추가해준다
     // 메시지를 구독자에게 보내는 역할
-    public MessageListenerAdapter listenerAdapter(RedisSubscriber subscriber){
+    public MessageListenerAdapter listenerAdapter(RedisSubscriber subscriber) {
         return new MessageListenerAdapter(subscriber, "sendMessage");
     }
 
@@ -113,6 +114,7 @@ public class RedisConfig {
 
         return redisTemplate;
     }
+
     //Topic 공유를 위해 Channel Topic을 빈으로 등록해 단일화 시켜준다.
     @Bean
     public ChannelTopic channelTopic() {
