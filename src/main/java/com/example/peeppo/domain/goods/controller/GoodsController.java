@@ -59,9 +59,10 @@ public class GoodsController {
                                                      @RequestParam("size") int size,
                                                      @RequestParam("sortBy") String sortBy,
                                                      @RequestParam("isAsc") boolean isAsc,
+                                                     @RequestParam(value = "goodsStatus", required = false) String goodsStatus,
                                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        return goodsService.getMyGoods(page - 1, size, sortBy, isAsc, userDetails.getUser().getUserId());
+        return goodsService.getMyGoods(page - 1, size, sortBy, isAsc, goodsStatus, userDetails.getUser().getUserId());
     }
 
     @GetMapping("/mypocket")
