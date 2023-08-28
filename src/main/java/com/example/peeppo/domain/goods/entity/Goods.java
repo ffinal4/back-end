@@ -87,11 +87,11 @@ public class Goods extends Timestamped {
         this.ratingCheck = requestDto.getRatingCheck();
         if(ratingCheck == false){
             sellerPrice = 0L;
-        } else if(ratingCheck == true && requestDto.getSellerPrice() != null) {
+        } else if(requestDto.getSellerPrice() != null) {
             this.sellerPrice = requestDto.getSellerPrice();
         }
         else{
-            new IllegalArgumentException("올바르지 않은 값입니다.");
+            throw new IllegalArgumentException("올바르지 않은 값입니다.");
         }
         this.wantedGoods = wantedGoods;
         this.goodsStatus = goodsStatus;
