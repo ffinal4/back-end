@@ -1,6 +1,5 @@
 package com.example.peeppo.domain.goods.dto;
 
-import com.example.peeppo.domain.dibs.entity.Dibs;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.image.entity.Image;
@@ -31,6 +30,7 @@ public class GoodsListResponseDto {
         this.nickname = goods.getUser().getNickname();
         this.goodsStatus = goods.getGoodsStatus();
     }
+
     public GoodsListResponseDto(Goods goods, String image, Boolean checkDibs) {
         this.goodsId = goods.getGoodsId();
         this.checkDibs = checkDibs;
@@ -52,7 +52,7 @@ public class GoodsListResponseDto {
         this.goodsStatus = goods.getGoodsStatus();
     }
 
-    public GoodsListResponseDto(Goods goods, boolean checkDibs) {
+    public GoodsListResponseDto(Goods goods, boolean checkDibs, String Img) {
         this.goodsId = goods.getGoodsId();
         this.checkDibs = checkDibs;
         this.title = goods.getTitle();
@@ -61,6 +61,7 @@ public class GoodsListResponseDto {
         this.image = goods.getImage().stream().map(Image::getImageUrl).toList().get(0);
         this.nickname = goods.getUser().getNickname();
         this.goodsStatus = goods.getGoodsStatus();
+        this.image = Img;
     }
 
     public GoodsListResponseDto(Goods goods, String image, Boolean checkDibs, boolean checkSameUser) {

@@ -23,6 +23,7 @@ public class MyPageRequestDto {
     @Pattern(regexp = "^(?=.*?[A-Za-z])(?=.*?[0-9])[A-Za-z\\d~!@#$%^&*()+|=]{8,15}$")
     String password;
 
+    @NotBlank
     String originPassword;
 
     @NotBlank
