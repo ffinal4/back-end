@@ -28,6 +28,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -55,7 +57,6 @@ public class GoodsService {
     private final DibsService dibsService;
 
     private final DibsRepository dibsRepository;
-    private final RatingGoodsRepository ratingGoodsRepository;
     private static final String RECENT_GOODS = "goods";
     private static final int MAX_RECENT_GOODS = 4;
     //private List<Long> goodsRecent = new ArrayList<>();
@@ -126,10 +127,6 @@ public class GoodsService {
 
     public ApiResponse<GoodsResponseDto> getGoods(Long goodsId, User user) {
         Goods goods = findGoods(goodsId);
-        boolean checkSameUser = true;
-        if (goods.getUser().getUserId() != user.getUserId()) {
-            checkSameUser = false;
-        }
         boolean checkSameUser = goods.getUser().getUserId() == user.getUserId();
         WantedGoods wantedGoods = findWantedGoods(goodsId);
         List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(goodsId)
@@ -252,7 +249,7 @@ public class GoodsService {
         return goodsRecentDtos;
     }
 
-    public List<GoodsSingleResponseDto> getMyGoodsWithoutPagenation(User user) {
+    public List<GoodsResponseDto> getMyGoodsWithoutPagenation(User user) {
         return getGoodsResponseDtos(user);
     }
 
@@ -288,7 +285,7 @@ public class GoodsService {
 //        return getGoodsResponseDtos(user);
     }
 
-    private List<GoodsSingleResponseDto> getGoodsResponseDtos(User user) {
+    private List<GoodsResponseDto> getGoodsResponseDtos(User user) {
         List<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalseAndGoodsStatus(user, GoodsStatus.ONSALE);
         List<GoodsResponseDto> goodsResponseDtoList = new ArrayList<>();
             for(Goods goods : goodsList){

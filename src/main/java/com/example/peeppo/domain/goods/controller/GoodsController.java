@@ -67,7 +67,7 @@ public class GoodsController {
     }
 
     @GetMapping("/mypocket")
-    public ApiResponse<List<GoodsSingleResponseDto>> getMyGoodsWithoutPagenation(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponse<List<GoodsResponseDto>> getMyGoodsWithoutPagenation(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseUtils.ok(goodsService.getMyGoodsWithoutPagenation(userDetails.getUser()));
     }
 
