@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static com.example.peeppo.domain.auction.enums.AuctionStatus.CANCEL;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.ONSALE;
 
 @Component
@@ -32,8 +31,7 @@ public class RatingScheduler {
             goodsListSize = goodsList.size();
 
             for (Goods goods : goodsList) {
-                if (goods.getGoodsStatus().equals(CANCEL) ||
-                        goods.getGoodsStatus().equals(ONSALE)) {
+                if (ONSALE.equals(goods.getGoodsStatus())) {
                     ratingHelper.resetGoodsAvgPrice(goods);
                     cursor = goods.getGoodsId();
                 }

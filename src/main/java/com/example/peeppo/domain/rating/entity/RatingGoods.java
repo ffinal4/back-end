@@ -16,10 +16,10 @@ public class RatingGoods {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long ratingGoodsId;
-    private Long sumRatingPrice = 0L;
-    private Double avgRatingPrice = 0D;
-    private Double nextAvgRatingPrice = 0D;
-    private Long ratingCount = 0L;
+    private Long sumRatingPrice;
+    private Double avgRatingPrice;
+    private Double nextAvgRatingPrice;
+    private Long ratingCount;
 
     @OneToOne
     @JoinColumn(name = "goods_id", nullable = false)
@@ -29,24 +29,26 @@ public class RatingGoods {
     @Version
     private Long version;
 
-    public RatingGoods(Long sumRatingPrice, Double avgRatingPrice, Double nextAvgRatingPrice, Long ratingCount, Goods goods) {
-        this.sumRatingPrice = sumRatingPrice;
-        this.avgRatingPrice = avgRatingPrice;
-        this.nextAvgRatingPrice = nextAvgRatingPrice;
-        this.ratingCount = ratingCount;
+    public RatingGoods(Goods goods) {
+        this.sumRatingPrice = 0L;
+        this.avgRatingPrice = (double) 0;
+        this.nextAvgRatingPrice = (double) 0;
+        this.ratingCount = 0L;
         this.goods = goods;
     }
 
-    public void update(Long getExpectedPrice, Goods goods){
+    public void update(Long getExpectedPrice, Goods goods) {
         this.sumRatingPrice += getExpectedPrice;
         this.ratingCount += 1;
         this.goods = goods;
 
-        if(this.ratingCount == 3){
+        if (this.ratingCount == 3) {
             this.avgRatingPrice = Math.round((sumRatingPrice / this.ratingCount) / 1000.0) * 1000.0;
         }
-        this.nextAvgRatingPrice = Math.round((sumRatingPrice / this.ratingCount) / 1000.0) * 1000.0;
 
+        if (this.ratingCount > 3) {
+            this.nextAvgRatingPrice = Math.round((sumRatingPrice / this.ratingCount) / 1000.0) * 1000.0;
+        }
     }
 
 }
