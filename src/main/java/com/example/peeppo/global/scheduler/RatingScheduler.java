@@ -1,4 +1,4 @@
-package com.example.peeppo.domain.rating.scheduler;
+package com.example.peeppo.global.scheduler;
 
 
 import com.example.peeppo.domain.goods.entity.Goods;
