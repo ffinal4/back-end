@@ -6,6 +6,5 @@ import java.util.List;
 
 public interface UserRepositoryCustom {
 
-    List<User> findTopThreeUsersByMaxRatingCount();
-    List<User> findTopFiveUsersByMaxRatingCount();
+    List<User> findTopUsersByMaxRatingCount(int limit);
 }

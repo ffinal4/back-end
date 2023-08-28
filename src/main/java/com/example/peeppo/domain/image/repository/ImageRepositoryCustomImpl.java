@@ -11,14 +11,14 @@ import java.util.List;
 public class ImageRepositoryCustomImpl implements ImageRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
-
+    private final QImage qImage;
     public ImageRepositoryCustomImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
+        this.qImage = new QImage("qImage");
     }
 
     @Override
     public List<Image> findByGoodsGoodsIdOrderByCreatedAtAsc(Long goodsId) {
-        QImage qImage = new QImage("qImage");
         return queryFactory
                 .selectFrom(qImage)
                 .where(qImage.goods.goodsId.eq(goodsId))
@@ -28,7 +28,6 @@ public class ImageRepositoryCustomImpl implements ImageRepositoryCustom {
 
     @Override
     public Image findByGoodsGoodsIdOrderByCreatedAtAscFirst(Long goodsId) {
-        QImage qImage = new QImage("qImage");
         return queryFactory
                 .selectFrom(qImage)
                 .where(qImage.goods.goodsId.eq(goodsId))

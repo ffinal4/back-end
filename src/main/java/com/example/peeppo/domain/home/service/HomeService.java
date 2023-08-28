@@ -33,7 +33,7 @@ public class HomeService {
     private final UserRepository userRepository;
     private final ImageRepository imageRepository;
 
-//    @Cacheable(value = "homeCache")
+    @Cacheable(value = "homeCache", cacheManager = "cacheManager")
     public HomeResponseDto peeppoHome(UserDetailsImpl user) {
         List<Goods> goodsList = goodsRepository.findTop8ByCreatedAt();
         List<GoodsListResponseDto> goodsListResponseDtos = new ArrayList<>();
@@ -48,7 +48,7 @@ public class HomeService {
             goodsListResponseDtos.add(goodsListResponseDto);
         }
 
-        List<RatingUserResponseDto> ratingUserListResponseDto = userRepository.findTopThreeUsersByMaxRatingCount()
+        List<RatingUserResponseDto> ratingUserListResponseDto = userRepository.findTopUsersByMaxRatingCount(3)
                 .stream()
                 .map(ratingUser -> new RatingUserResponseDto(ratingUser.getUserImg(), ratingUser.getNickname(), ratingUser.getMaxRatingCount()))
                 .collect(Collectors.toList());
