@@ -1,12 +1,17 @@
 package com.example.peeppo.domain.bid.service;
 
+import com.example.peeppo.domain.auction.dto.AuctionListResponseDto;
+import com.example.peeppo.domain.auction.dto.TestListResponseDto;
+import com.example.peeppo.domain.auction.dto.TimeRemaining;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.bid.dto.BidGoodsListRequestDto;
 import com.example.peeppo.domain.bid.dto.BidListResponseDto;
+import com.example.peeppo.domain.bid.dto.BidTradeListResponseDto;
 import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
 import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.bid.entity.Choice;
+import com.example.peeppo.domain.bid.enums.BidStatus;
 import com.example.peeppo.domain.bid.repository.BidRepository;
 import com.example.peeppo.domain.bid.repository.ChoiceBidRepository;
 import com.example.peeppo.domain.bid.repository.QueryRepository;
@@ -18,7 +23,6 @@ import com.example.peeppo.domain.notification.entity.Notification;
 import com.example.peeppo.domain.notification.repository.NotificationRepository;
 import com.example.peeppo.domain.rating.entity.RatingGoods;
 import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
-import com.example.peeppo.domain.rating.repository.ratingRepository.RatingRepository;
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
@@ -29,10 +33,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -109,8 +117,7 @@ public class BidService {
         Auction auction = getAuction(auctionId);
         Long goodsId = auction.getGoods().getGoodsId();
 
-        String goodsImg = String.valueOf(imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsId));
-
+        String goodsImg = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsId).getImageUrl();
         List<BidListResponseDto> bidList = bidPage.getContent().stream()
                 .map(Bid -> new BidListResponseDto(Bid, goodsImg))
                 .toList();
@@ -162,6 +169,52 @@ public class BidService {
         }
 
         choiceBidRepository.saveAll(bidsList);
+    }
+
+    public ResponseEntity<Page<BidTradeListResponseDto>> bidTradeList(User user, int page, int size, String sortBy, boolean isAsc,
+                                                                  BidStatus bidStatus) {
+        Pageable pageable = paging(page, size, sortBy, isAsc);
+        Page<Auction> myAuctionPage = null;
+
+//        Goods goods = auction.getGoods();
+//        TimeRemaining timeRemaining = countDownTime(auction);
+//        Long bidCount = findBidCount(auction.getAuctionId());
+//        AuctionResponseDto auctionResponseDto = new AuctionResponseDto(auction, goods, timeRemaining, bidCount);
+        if (bidStatus != null) {
+            Bid bid = bidRepository.findByUserUserIdAndBidStatus(user.getUserId(), bidStatus);
+            Long auctionId = bidRepository.findAuctionIdByBidId(bid.getBidId());
+            myAuctionPage = auctionRepository.findByAuctionId(auctionId, pageable);
+        } else {
+            Bid bid = bidRepository.findByUserUserId(user.getUserId());
+            Long auctionId = bidRepository.findAuctionIdByBidId(bid.getBidId());
+            myAuctionPage = auctionRepository.findByAuctionId(auctionId, pageable);
+        }
+
+        List<BidTradeListResponseDto> auctionResponseDtoList = myAuctionPage.stream()
+                .map(auction -> {
+                    TimeRemaining timeRemaining = countDownTime(auction);
+                    Long bidCount = findBidCount(auction.getAuctionId());
+                    Bid bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
+                    return new BidTradeListResponseDto(auction, timeRemaining, bidCount, bid);
+                })
+                .collect(Collectors.toList());
+
+        PageResponse response = new PageResponse<>(auctionResponseDtoList, pageable, myAuctionPage.getTotalElements());
+        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+    }
+
+    public Long findBidCount(Long id) {
+        return bidRepository.countByAuctionAuctionId(id);
+    }
+
+    public TimeRemaining countDownTime(Auction auction) {
+        LocalDateTime now = LocalDateTime.now();
+        long days = ChronoUnit.DAYS.between(now, auction.getAuctionEndTime());
+        long hours = ChronoUnit.HOURS.between(now, auction.getAuctionEndTime());
+        long minutes = ChronoUnit.MINUTES.between(now, auction.getAuctionEndTime());
+        long seconds = ChronoUnit.SECONDS.between(now, auction.getAuctionEndTime());
+
+        return new TimeRemaining(days, hours % 24, minutes % 60, seconds % 60);
     }
 
     private Bid getBid(Long bidId) {

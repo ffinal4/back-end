@@ -11,10 +11,9 @@ import com.example.peeppo.domain.goods.dto.GoodsListResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.home.dto.HomeResponseDto;
+import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.domain.user.dto.RatingUserResponseDto;
-import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
-import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,16 +30,18 @@ public class HomeService {
     private final AuctionRepository auctionRepository;
     private final AuctionService auctionService;
     private final UserRepository userRepository;
+    private final ImageRepository imageRepository;
 
     public HomeResponseDto peeppoHome(UserDetailsImpl user) {
         List<Goods> goodsList = goodsRepository.findTop8ByCreatedAt();
         List<GoodsListResponseDto> goodsListResponseDtos = new ArrayList<>();
-        for(Goods goods : goodsList){
+        for (Goods goods : goodsList) {
             boolean checkDibs = false;
-            if(user != null) {
+            if (user != null) {
                 checkDibs = dibsService.checkDibsGoods(user.getUser().getUserId(), goods.getGoodsId());
             }
-            GoodsListResponseDto goodsListResponseDto = new GoodsListResponseDto(goods, checkDibs);
+            String imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId()).getImageUrl();
+            GoodsListResponseDto goodsListResponseDto = new GoodsListResponseDto(goods, checkDibs, imageUrl);
             goodsListResponseDtos.add(goodsListResponseDto);
         }
 
@@ -51,13 +52,13 @@ public class HomeService {
 
         List<Auction> auctionList = auctionRepository.findTop3Auction();
         List<AuctionListResponseDto> auctionResponseDtos = new ArrayList<>();
-        for(Auction auction : auctionList){
+        for (Auction auction : auctionList) {
             TimeRemaining timeRemaining = auctionService.countDownTime(auction);
             boolean checkDibs = false;
-            if(user != null) {
-                checkDibs = dibsService.checkDibsGoods(user.getUser().getUserId(),auction.getGoods().getGoodsId());
+            if (user != null) {
+                checkDibs = dibsService.checkDibsGoods(user.getUser().getUserId(), auction.getGoods().getGoodsId());
             }
-            AuctionListResponseDto auctionResponseDto = new AuctionListResponseDto(auction, timeRemaining, auctionService.findBidCount(auction.getAuctionId()),checkDibs);
+            AuctionListResponseDto auctionResponseDto = new AuctionListResponseDto(auction, timeRemaining, auctionService.findBidCount(auction.getAuctionId()), checkDibs);
             auctionResponseDtos.add(auctionResponseDto);
         }
 

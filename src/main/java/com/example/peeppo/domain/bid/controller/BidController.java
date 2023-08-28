@@ -1,8 +1,12 @@
 package com.example.peeppo.domain.bid.controller;
 
+import com.example.peeppo.domain.auction.dto.TestListResponseDto;
+import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.bid.dto.BidGoodsListRequestDto;
 import com.example.peeppo.domain.bid.dto.BidListResponseDto;
+import com.example.peeppo.domain.bid.dto.BidTradeListResponseDto;
 import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
+import com.example.peeppo.domain.bid.enums.BidStatus;
 import com.example.peeppo.domain.bid.service.BidService;
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.global.responseDto.ApiResponse;
@@ -60,11 +64,15 @@ public class BidController {
         return ResponseUtils.ok(bidService.choiceUpdateBids(userDetails.getUser(), auctionId, choiceRequestDto));
     }
 
-    //나중에 전체 조회로 하는게 맞겠지?
-//    @GetMapping("/auction/{auctionId}/bid/mybid")
-//    public ResponseEntity<List<BidListResponseDto>> myBidList(@AuthenticationPrincipal UserDetailsImpl userDetails,
-//                                                              @PathVariable Long auctionId) {
-//
-//        return bidService.myBidList(userDetails.getUser(), auctionId);
-//    }
+    //교환 요청 페이지(입찰 경매)
+    @GetMapping("/bid/users/trade")
+    public ResponseEntity<Page<BidTradeListResponseDto>> auctionTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                          @RequestParam("page") int page,
+                                                                          @RequestParam("size") int size,
+                                                                          @RequestParam("sortBy") String sortBy,
+                                                                          @RequestParam("isAsc") boolean isAsc,
+                                                                          @RequestParam(value = "bid status", required = false) BidStatus bidStatus) {
+
+        return bidService.bidTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, bidStatus);
+    }
 }
