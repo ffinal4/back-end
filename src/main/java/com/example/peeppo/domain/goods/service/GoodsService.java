@@ -121,7 +121,8 @@ public class GoodsService {
                 goodsPage = goodsRepository.findAllByCategoryAndIsDeletedFalse(category, pageable);
                 for (Goods goods : goodsPage.getContent()) {
                     Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
-                    goodsResponseList.add(new GoodsListResponseDto(goods, image.getImageUrl()));
+                    Double AvgRatingPrice = ratingGoodsRepository.findByGoodsGoodsId(goods.getGoodsId()).getAvgRatingPrice();
+                    goodsResponseList.add(new GoodsListResponseDto(goods, image.getImageUrl(), AvgRatingPrice));
                 }
                 return new PageResponse<>(goodsResponseList, pageable, goodsPage.getTotalElements());
 
