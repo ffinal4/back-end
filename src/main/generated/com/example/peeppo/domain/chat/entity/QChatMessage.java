@@ -7,6 +7,7 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
+import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
@@ -17,13 +18,15 @@ public class QChatMessage extends EntityPathBase<ChatMessage> {
 
     private static final long serialVersionUID = 1874023502L;
 
+    private static final PathInits INITS = PathInits.DIRECT2;
+
     public static final QChatMessage chatMessage = new QChatMessage("chatMessage");
+
+    public final QChatRoom chatRoom;
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
     public final StringPath message = createString("message");
-
-    public final StringPath roomId = createString("roomId");
 
     public final StringPath sender = createString("sender");
 
@@ -32,15 +35,24 @@ public class QChatMessage extends EntityPathBase<ChatMessage> {
     public final EnumPath<ChatMessage.MessageType> type = createEnum("type", ChatMessage.MessageType.class);
 
     public QChatMessage(String variable) {
-        super(ChatMessage.class, forVariable(variable));
+        this(ChatMessage.class, forVariable(variable), INITS);
     }
 
     public QChatMessage(Path<? extends ChatMessage> path) {
-        super(path.getType(), path.getMetadata());
+        this(path.getType(), path.getMetadata(), PathInits.getFor(path.getMetadata(), INITS));
     }
 
     public QChatMessage(PathMetadata metadata) {
-        super(ChatMessage.class, metadata);
+        this(metadata, PathInits.getFor(metadata, INITS));
+    }
+
+    public QChatMessage(PathMetadata metadata, PathInits inits) {
+        this(ChatMessage.class, metadata, inits);
+    }
+
+    public QChatMessage(Class<? extends ChatMessage> type, PathMetadata metadata, PathInits inits) {
+        super(type, metadata, inits);
+        this.chatRoom = inits.isInitialized("chatRoom") ? new QChatRoom(forProperty("chatRoom"), inits.get("chatRoom")) : null;
     }
 
 }

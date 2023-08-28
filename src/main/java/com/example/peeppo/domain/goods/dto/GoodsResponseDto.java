@@ -4,8 +4,6 @@ import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.entity.WantedGoods;
 import com.example.peeppo.domain.goods.enums.Category;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
-import com.example.peeppo.domain.image.entity.Image;
-import com.example.peeppo.domain.user.entity.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -35,7 +33,6 @@ public class GoodsResponseDto {
     private WantedGoods wantedGoods;
 
 
-
     public GoodsResponseDto(Goods goods, List<String> images, WantedGoods wantedGoods) {
         this.goodsId = goods.getGoodsId();
         this.userId = goods.getUser().getUserId();
@@ -55,7 +52,7 @@ public class GoodsResponseDto {
         this.ratingCheck = goods.getRatingCheck();
     }
 
-    public GoodsResponseDto(Goods goods) {
+    public GoodsResponseDto(Goods goods, String Img) {
         this.goodsId = goods.getGoodsId();
         this.userId = goods.getUser().getUserId();
         this.title = goods.getTitle();
@@ -65,7 +62,7 @@ public class GoodsResponseDto {
         this.goodsCondition = goods.getGoodsCondition();
         this.tradeType = goods.getTradeType();
         this.createdAt = goods.getCreatedAt();
-        this.images = goods.getImage().stream().map(Image::getImageUrl).toList();
+//        this.images = Img;
         this.modifiedAt = goods.getModifiedAt();
         this.wantedGoods = goods.getWantedGoods();
         this.nickname = goods.getUser().getNickname();
@@ -105,7 +102,7 @@ public class GoodsResponseDto {
         this.tradeType = goods.getTradeType();
         this.createdAt = goods.getCreatedAt();
         this.modifiedAt = goods.getModifiedAt();
-        this.images =  imageUrls;
+        this.images = imageUrls;
         this.wantedGoods = wantedGoods;
         this.nickname = goods.getUser().getNickname();
         this.checkSameUser = checkSameUser;
@@ -125,7 +122,7 @@ public class GoodsResponseDto {
         this.tradeType = goods.getTradeType();
         this.createdAt = goods.getCreatedAt();
         this.modifiedAt = goods.getModifiedAt();
-        this.images =  imageUrls;
+        this.images = imageUrls;
         this.wantedGoods = wantedGoods;
         this.nickname = goods.getUser().getNickname();
         this.ratingCheck = goods.getRatingCheck();

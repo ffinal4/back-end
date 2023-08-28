@@ -2,15 +2,19 @@ package com.example.peeppo.domain.auction.service;
 
 import com.example.peeppo.domain.auction.dto.*;
 import com.example.peeppo.domain.auction.entity.Auction;
+import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.bid.entity.Bid;
+import com.example.peeppo.domain.bid.enums.BidStatus;
 import com.example.peeppo.domain.dibs.repository.DibsRepository;
 import com.example.peeppo.domain.dibs.service.DibsService;
+import com.example.peeppo.domain.goods.dto.GoodsSingleResponseDto;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.bid.repository.BidRepository;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
+import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.domain.notification.entity.Notification;
 import com.example.peeppo.domain.notification.repository.NotificationRepository;
 import com.example.peeppo.domain.rating.entity.RatingGoods;
@@ -35,6 +39,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.example.peeppo.domain.auction.enums.AuctionStatus.CANCEL;
 import static com.example.peeppo.domain.auction.enums.AuctionStatus.REQUEST;
@@ -56,6 +61,7 @@ public class AuctionService {
     private final RatingGoodsRepository ratingGoodsRepository;
     private final DibsService dibsService;
     private final NotificationRepository notificationRepository;
+    private final ImageRepository imageRepository;
 
     @Transactional
     public AuctionResponseDto createAuction(Long goodsId, AuctionRequestDto auctionRequestDto, User user) {
@@ -67,20 +73,21 @@ public class AuctionService {
         userRepository.save(user);
 
         Goods getGoods = findGoodsId(goodsId);
-        if(!(getGoods.getGoodsStatus()==ONSALE)){
+        if (!(getGoods.getGoodsStatus() == ONSALE)) {
             new IllegalArgumentException("해당 물건으로는 경매를 등록할 수 없습니다");
         }
-        if(!(getGoods.getIsDeleted())){
+        if (!(getGoods.getIsDeleted())) {
             new IllegalArgumentException("해당 물건은 삭제된 물건입니다.");
         }
 
         RatingGoods ratingGoods = ratingGoodsRepository.findByGoodsGoodsId(goodsId);
 
-        if(ratingGoods.getRatingCount() < 3){
+        if (ratingGoods.getRatingCount() < 3) {
             new IllegalArgumentException("해당 물건은 3회 이상의 평가가 끝나지 않은 상태입니다.");
         }
 
-        GoodsResponseDto goodsResponseDto = new GoodsResponseDto(getGoods);
+        String imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsId).getImageUrl();
+        GoodsSingleResponseDto goodsResponseDto = new GoodsSingleResponseDto(getGoods, imageUrl);
         LocalDateTime auctionEndTime = calAuctionEndTime(auctionRequestDto.getEndTime()); // 마감기한 계산
         log.info("{}", auctionEndTime);
         Auction auction = new Auction(getGoods, auctionEndTime, user, ratingGoods, auctionRequestDto.getLowPrice()); // 경매와 마감기한 생성
@@ -146,7 +153,7 @@ public class AuctionService {
         for (Auction auction : auctionPage) {
             TimeRemaining timeRemaining = countDownTime(auction);
             boolean checkDibs = false;
-            if(userDetails != null){
+            if (userDetails != null) {
                 checkDibs = dibsService.checkDibsGoods(userDetails.getUser().getUserId(), auction.getGoods().getGoodsId());
             }
             AuctionListResponseDto auctionListResponseDto = new AuctionListResponseDto(auction, timeRemaining, findBidCount(auction.getAuctionId()), checkDibs);
@@ -166,10 +173,11 @@ public class AuctionService {
     public AuctionResponseDto findAuctionById(Long auctionId, User user) {
         Auction auction = findAuctionId(auctionId);
         boolean checkSameUser = true;
-        if(auction.getUser().getUserId() != user.getUserId()){
+        if (auction.getUser().getUserId() != user.getUserId()) {
             checkSameUser = false;
         }
-        return new AuctionResponseDto(auction, auction.getGoods(), countDownTime(auction), findBidCount(auctionId), checkSameUser);
+        String imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(auction.getGoods().getGoodsId()).getImageUrl();
+        return new AuctionResponseDto(auction, auction.getGoods(), countDownTime(auction), findBidCount(auctionId), checkSameUser, imageUrl);
     }
 
     // 경매 찾아서 Auction 리턴
@@ -243,23 +251,27 @@ public class AuctionService {
         }
     }
 
-    public ResponseEntity<Page<TestListResponseDto>> auctionTradeList(User user, int page, int size, String sortBy, boolean isAsc) {
+    public ResponseEntity<Page<TestListResponseDto>> auctionTradeList(User user, int page, int size, String sortBy, boolean isAsc,
+                                                                      AuctionStatus auctionStatus) {
         Pageable pageable = paging(page, size, sortBy, isAsc);
-        Page<Auction> myAuctionPage = auctionRepository.findByUserUserId(user.getUserId(), pageable);
+        Page<Auction> myAuctionPage;
 
-        List<TestListResponseDto> auctionResponseDtoList = new ArrayList<>();
-
-        for (Auction auction : myAuctionPage) {
-
-            TimeRemaining timeRemaining = countDownTime(auction);
-
-            TestListResponseDto testListResponseDto = new TestListResponseDto(auction, timeRemaining, findBidCount(auction.getAuctionId()));
-            auctionResponseDtoList.add(testListResponseDto);
+        if (auctionStatus != null) {
+            myAuctionPage = auctionRepository.findByUserUserIdAndAuctionStatus(user.getUserId(), pageable, auctionStatus);
+        } else {
+            myAuctionPage = auctionRepository.findByUserUserId(user.getUserId(), pageable);
         }
+
+        List<TestListResponseDto> auctionResponseDtoList = myAuctionPage.stream()
+                .map(auction -> {
+                    TimeRemaining timeRemaining = countDownTime(auction);
+                    Long bidCount = findBidCount(auction.getAuctionId());
+                    return new TestListResponseDto(auction, timeRemaining, bidCount);
+                })
+                .collect(Collectors.toList());
 
         PageResponse response = new PageResponse<>(auctionResponseDtoList, pageable, myAuctionPage.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-
     }
 
     public void checkGoodsUsername(Long id, User user) {
