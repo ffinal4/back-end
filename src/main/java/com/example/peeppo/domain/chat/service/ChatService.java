@@ -184,7 +184,6 @@ public class ChatService {
         chatRoomRepository.delete(chatRoom);
     }
 
-
     public void sendChatMessage(ChatMessage chatMessage) {
         if (ChatMessage.MessageType.ENTER.equals(chatMessage.getType())) {
             chatMessage.sendMessage("물건 거래가 시작되었습니다");
@@ -196,3 +195,5 @@ public class ChatService {
         redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
     }
 }
+
+
