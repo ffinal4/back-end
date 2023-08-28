@@ -66,8 +66,7 @@ public class BidService {
                 !auction.getUser().getUserId().equals(user.getUserId())) {
                 for (Long goodsId : bidGoodsListRequestDto.getGoodsId()) {
                     Goods goods = getGoods(goodsId);
-                    String goodsImg = String.valueOf(imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsId));
-
+                    String goodsImg = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsId).getImageUrl();
                     if (goods.getIsDeleted() && !goods.getUser().getUserId().equals(user.getUserId())) {
                         System.out.println(" ");
                         throw new IllegalAccessException();

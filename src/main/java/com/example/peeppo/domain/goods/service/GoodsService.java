@@ -287,7 +287,8 @@ public class GoodsService {
                     .stream()
                     .map(Image::getImageUrl)
                     .collect(Collectors.toList());
-            goodsResponseDtoList.add(new GoodsResponseDto(goods, imageUrls));
+            RatingGoods ratingGoods = ratingGoodsRepository.findByGoodsGoodsId(goods.getGoodsId());
+            goodsResponseDtoList.add(new GoodsResponseDto(goods, imageUrls, ratingGoods.getAvgRatingPrice()));
         }
         return goodsResponseDtoList;
     }
