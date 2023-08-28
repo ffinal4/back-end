@@ -1,9 +1,6 @@
 package com.example.peeppo.domain.goods.controller;
 
-import com.example.peeppo.domain.auction.dto.TestListResponseDto;
-import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.goods.dto.*;
-
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.service.GoodsService;
 import com.example.peeppo.domain.user.dto.ResponseDto;
@@ -42,8 +39,9 @@ public class GoodsController {
                                                @RequestParam("size") int size,
                                                @RequestParam("sortBy") String sortBy,
                                                @RequestParam("isAsc") boolean isAsc,
+                                               @RequestParam(value = "category", required = false) String category,
                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        return goodsService.allGoods(page - 1, size, sortBy, isAsc, userDetails);
+        return goodsService.allGoods(page - 1, size, sortBy, isAsc, category, userDetails);
     }
 
     // 게시물 상세조회
