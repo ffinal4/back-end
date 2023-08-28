@@ -50,7 +50,7 @@ public class HomeService {
             goodsListResponseDtos.add(goodsListResponseDto);
         }
 
-        List<RatingUserResponseDto> ratingUserListResponseDto = userRepository.findTopThreeUsersByMaxRatingCount()
+        List<RatingUserResponseDto> ratingUserListResponseDto = userRepository.findTopUsersByMaxRatingCount(3)
                 .stream()
                 .map(ratingUser -> new RatingUserResponseDto(ratingUser.getUserImg(), ratingUser.getNickname(), ratingUser.getMaxRatingCount()))
                 .collect(Collectors.toList());
