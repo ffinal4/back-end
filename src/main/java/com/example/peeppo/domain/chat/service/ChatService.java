@@ -29,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.example.peeppo.global.security.jwt.JwtUtil.BEARER_PREFIX;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -162,12 +164,13 @@ public class ChatService {
         String dTime = formatter.format(systemTime);
 
         ChatRoom chatRoom = findRoomById(roomId);
-        String email = jwtUtil.getUserMail(token);
+
+        String authToken = token.substring(BEARER_PREFIX.length());
+        String email = jwtUtil.getUserMail(authToken);
         User user = userRepository.findByEmail(email).orElseThrow(()-> new IllegalArgumentException("일치하는 사용자가 없습니다"));
         String username = user.getNickname();
 
         ChatMessage chatMessage = new ChatMessage(chatMessageRequestDto, chatRoom, dTime, user);
-       // ChatMessage chatMessage = new ChatMessage(chatMessageRequestDto, chatRoom, dTime);
 
         chatMessageRepository.save(chatMessage);
         System.out.println("전송 요청");

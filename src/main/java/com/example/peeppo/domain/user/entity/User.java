@@ -46,11 +46,6 @@ public class User{
     @Enumerated(value = EnumType.STRING)
     private UserRoleEnum role;
 
-    @OneToMany(mappedBy = "buyer")
-    private List<UserChatRoomRelation> buyerRelation;
-
-    @OneToMany(mappedBy = "seller")
-    private List<UserChatRoomRelation> sellerRelation;
 
     @Column
     private Long maxRatingCount = 0L;

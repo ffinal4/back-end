@@ -15,6 +15,7 @@ import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
@@ -29,7 +30,6 @@ public class StompHandler implements ChannelInterceptor {
     private final ChatService chatService;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
-
     private static final String BEARER_PREFIX = "Bearer ";
 
     @Override
@@ -57,16 +57,16 @@ public class StompHandler implements ChannelInterceptor {
             System.out.println("입장 요청, 유저정보 셋팅 요청");
             chatService.setUserEnterInfo(sessionId, roomId);
 
-            String authorizationHeader = String.valueOf(accessor.getFirstNativeHeader("AccessToken"));
+
+            System.out.println("입장 메세지 발송 요청 진입");
+           // String token = Optional.ofNullable(accessor.getFirstNativeHeader("AccessToken")).orElse("UnknownUser");
+            String authorizationHeader = accessor.getFirstNativeHeader("AccessToken");
             System.out.println(authorizationHeader);
             if(authorizationHeader == null || authorizationHeader.equals("null")){
                 throw new MessageDeliveryException("메세지 예외");
             }
             String token = authorizationHeader.substring(BEARER_PREFIX.length());
-
-            System.out.println("입장 메세지 발송 요청 진입");
-           // String token = Optional.ofNullable(accessor.getFirstNativeHeader("AccessToken")).orElse("UnknownUser");
-            String email = jwtUtil.getUserMail(authorizationHeader);
+            String email = jwtUtil.getUserMail(token);
             User user = userRepository.findByEmail(email).orElse(null);
             ChatRoom chatRoom = chatService.findRoomById(roomId);
             chatService.sendChatMessage(ChatMessage.builder().type(ChatMessage.MessageType.ENTER).chatRoom(chatRoom).userId(user.getUserId()).build());

@@ -7,7 +7,6 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
-import com.querydsl.core.types.dsl.PathInits;
 
 
 /**
@@ -19,8 +18,6 @@ public class QUser extends EntityPathBase<User> {
     private static final long serialVersionUID = 446756319L;
 
     public static final QUser user = new QUser("user");
-
-    public final ListPath<com.example.peeppo.domain.chat.entity.UserChatRoomRelation, com.example.peeppo.domain.chat.entity.QUserChatRoomRelation> buyerRelation = this.<com.example.peeppo.domain.chat.entity.UserChatRoomRelation, com.example.peeppo.domain.chat.entity.QUserChatRoomRelation>createList("buyerRelation", com.example.peeppo.domain.chat.entity.UserChatRoomRelation.class, com.example.peeppo.domain.chat.entity.QUserChatRoomRelation.class, PathInits.DIRECT2);
 
     public final NumberPath<Long> currentRatingCount = createNumber("currentRatingCount", Long.class);
 
@@ -35,8 +32,6 @@ public class QUser extends EntityPathBase<User> {
     public final StringPath password = createString("password");
 
     public final EnumPath<UserRoleEnum> role = createEnum("role", UserRoleEnum.class);
-
-    public final ListPath<com.example.peeppo.domain.chat.entity.UserChatRoomRelation, com.example.peeppo.domain.chat.entity.QUserChatRoomRelation> sellerRelation = this.<com.example.peeppo.domain.chat.entity.UserChatRoomRelation, com.example.peeppo.domain.chat.entity.QUserChatRoomRelation>createList("sellerRelation", com.example.peeppo.domain.chat.entity.UserChatRoomRelation.class, com.example.peeppo.domain.chat.entity.QUserChatRoomRelation.class, PathInits.DIRECT2);
 
     public final NumberPath<Long> totalPoint = createNumber("totalPoint", Long.class);
 
