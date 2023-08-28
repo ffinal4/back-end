@@ -4,10 +4,11 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.example.peeppo.domain.dibs.entity.Dibs;
 import com.example.peeppo.domain.dibs.repository.DibsRepository;
 import com.example.peeppo.domain.dibs.service.DibsService;
-import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.entity.WantedGoods;
+import com.example.peeppo.domain.goods.enums.Category;
+import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.goods.repository.WantedGoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
@@ -25,9 +26,10 @@ import com.example.peeppo.global.security.UserDetailsImpl;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,6 +42,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class GoodsService {
     private final GoodsRepository goodsRepository;
@@ -55,7 +58,6 @@ public class GoodsService {
     private final DibsService dibsService;
 
     private final DibsRepository dibsRepository;
-    private final RatingGoodsRepository ratingGoodsRepository;
     private static final String RECENT_GOODS = "goods";
     private static final int MAX_RECENT_GOODS = 4;
     //private List<Long> goodsRecent = new ArrayList<>();
@@ -66,7 +68,7 @@ public class GoodsService {
                                                      List<MultipartFile> images,
                                                      WantedRequestDto wantedRequestDto,
                                                      User user) {
-        if(goodsRequestDto.getSellerPrice() == null && goodsRequestDto.getRatingCheck() == true){
+        if (goodsRequestDto.getSellerPrice() == null && goodsRequestDto.getRatingCheck()) {
             throw new IllegalArgumentException("레이팅을 원하시면 가격을 입력해주세요.");
         }
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
@@ -83,53 +85,66 @@ public class GoodsService {
                 .map(Image::getImageUrl)
                 .collect(Collectors.toList());
 
-//        ratingHelper.createRating(sellerPriceRequestDto.getSellerPrice(), goods, image);
-
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods), null);
     }
 
-    public Page<GoodsListResponseDto> allGoods(int page, int size, String sortBy, boolean isAsc, UserDetailsImpl userDetails) {
-        if (userDetails == null) { // 비로그인시
-            return allGoodsEveryone(page, size, sortBy, isAsc);
-        }
-        User user = userDetails.getUser();
-
+    public Page<GoodsListResponseDto> allGoods(int page, int size, String sortBy, boolean isAsc, String categoryStr, UserDetailsImpl userDetails) {
         Pageable pageable = paging(page, size, sortBy, isAsc);
-        Page<Goods> goodsPage = goodsRepository.findAllByIsDeletedFalse(pageable);
-        List<GoodsListResponseDto> goodsResponseList = new ArrayList<>();
 
-        for (Goods goods : goodsPage.getContent()) {
-            boolean checkSameUser = Objects.equals(goods.getUser().getUserId(), userDetails.getUser().getUserId());
-            Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
-            boolean checkDibs = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goods.getGoodsId())
-                    .isPresent();
-            goodsResponseList.add(new GoodsListResponseDto(goods, image.getImageUrl(), checkDibs, checkSameUser));
+        if (userDetails == null) { // 비로그인시
+            return allGoodsEveryone(pageable, categoryStr);
         }
 
-        return new PageResponse<>(goodsResponseList, pageable, goodsPage.getTotalElements());
+        User user = userDetails.getUser();
+        Page<Goods> goodsPage;
+        if (categoryStr != null) {
+            try {
+                Category category = Category.valueOf(categoryStr);
+                goodsPage = goodsRepository.findAllByCategoryAndIsDeletedFalse(category, pageable);
+                return allGoods(goodsPage, pageable, user);
+            } catch (IllegalArgumentException e) {
+                log.error("잘못된 category 값입니다.");
+                throw new IllegalArgumentException("올바른 category 값을 입력해주세요.", e);
+            }
+        } else {
+            goodsPage = goodsRepository.findAllByIsDeletedFalse(pageable);
+            return allGoods(goodsPage, pageable, user);
+        }
     }
 
-    public Page<GoodsListResponseDto> allGoodsEveryone(int page, int size, String sortBy, boolean isAsc) {
-
-        Pageable pageable = paging(page, size, sortBy, isAsc);
-        Page<Goods> goodsPage = goodsRepository.findAllByIsDeletedFalse(pageable);
+    public Page<GoodsListResponseDto> allGoodsEveryone(Pageable pageable, String categoryStr) {
         List<GoodsListResponseDto> goodsResponseList = new ArrayList<>();
+        Page<Goods> goodsPage;
+        if (categoryStr != null) {
+            try {
+                Category category = Category.valueOf(categoryStr);
+                goodsPage = goodsRepository.findAllByCategoryAndIsDeletedFalse(category, pageable);
+                for (Goods goods : goodsPage.getContent()) {
+                    Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
+                    goodsResponseList.add(new GoodsListResponseDto(goods, image.getImageUrl()));
+                }
+                return new PageResponse<>(goodsResponseList, pageable, goodsPage.getTotalElements());
 
-        for (Goods goods : goodsPage.getContent()) {
-            Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
-            goodsResponseList.add(new GoodsListResponseDto(goods, image.getImageUrl()));
+            } catch (IllegalArgumentException e) {
+                log.error("올바른 category 값을 입력해주세요.");
+                throw new IllegalArgumentException("올바른 category 값을 입력해주세요.", e);
+            }
+        } else {
+            goodsPage = goodsRepository.findAllByIsDeletedFalse(pageable);
+
+
+            for (Goods goods : goodsPage.getContent()) {
+                Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
+                goodsResponseList.add(new GoodsListResponseDto(goods, image.getImageUrl()));
+            }
+
+            return new PageResponse<>(goodsResponseList, pageable, goodsPage.getTotalElements());
         }
-
-        return new PageResponse<>(goodsResponseList, pageable, goodsPage.getTotalElements());
     }
 
 
     public ApiResponse<GoodsResponseDto> getGoods(Long goodsId, User user) {
         Goods goods = findGoods(goodsId);
-        boolean checkSameUser = true;
-        if (goods.getUser().getUserId() != user.getUserId()) {
-            checkSameUser = false;
-        }
         boolean checkSameUser = goods.getUser().getUserId() == user.getUserId();
         WantedGoods wantedGoods = findWantedGoods(goodsId);
         List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(goodsId)
@@ -140,41 +155,41 @@ public class GoodsService {
         if (goodsRecent.size() >= MAX_RECENT_GOODS) {
             goodsRecent.remove(0);
         }
-       // goodsRecent.add(Long.toString(goods.getGoodsId())); // 조회시에 리스트에 추가 !
+        // goodsRecent.add(Long.toString(goods.getGoodsId())); // 조회시에 리스트에 추가 !
         Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goodsId);
         boolean checkDibs = dibsGoods.isPresent();
-      
+
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods, checkSameUser, checkDibs), null);
     }
-
-    public User findUserId(Long userId) {
-        return userRepository.findById(userId).orElse(null);
-    }
-
 
     public ApiResponse<PocketResponseDto> getMyGoods(int page,
                                                      int size,
                                                      String sortBy,
                                                      boolean isAsc,
+                                                     String goodsStatusStr,
                                                      Long userId) {
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
-        User user = findUserId(userId);
-        Page<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalse(user, pageable);
-
-        List<PocketListResponseDto> myGoods = goodsList.stream()
-                .map(goods -> {
-                    long ratingPrice = (long) ratingHelper.getAvgPriceByGoodsId(goods.getGoodsId());
-                    Image firstImage = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
-                    return new PocketListResponseDto(goods, firstImage.getImageUrl(), ratingPrice);
-                }).collect(Collectors.toList());
-
-        return new ApiResponse<>(true, new PocketResponseDto(user,
-                new PageImpl<>(myGoods, pageable, goodsList.getTotalElements())), null);
+        User user = findUser(userId);
+        GoodsStatus goodsStatus;
+        if (goodsStatusStr != null) {
+            try {
+                goodsStatus = GoodsStatus.valueOf(goodsStatusStr);
+                Page<Goods> goodsList = goodsRepository.findAllByGoodsStatusAndIsDeletedFalse(goodsStatus, pageable);
+                return getMyGoods(goodsList, user, pageable);
+            } catch (IllegalArgumentException e) {
+                log.info("올바르지 않은 goodsStatus 입니다. {}", goodsStatusStr);
+                throw new IllegalArgumentException("올바르지 않은 goodsStatus 입니다");
+            }
+        } else {
+            Page<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalse(user, pageable);
+            return getMyGoods(goodsList, user, pageable);
+        }
     }
 
     @Transactional
-    public ApiResponse<GoodsResponseDto> goodsUpdate(Long goodsId, GoodsRequestDto goodsRequestDto, List<MultipartFile> images, WantedRequestDto wantedRequestDto) {
+    public ApiResponse<GoodsResponseDto> goodsUpdate(Long goodsId, GoodsRequestDto
+            goodsRequestDto, List<MultipartFile> images, WantedRequestDto wantedRequestDto) {
         Goods goods = findGoods(goodsId);
         WantedGoods wantedGoods = findWantedGoods(goodsId);
 
@@ -210,31 +225,6 @@ public class GoodsService {
         return new ApiResponse<>(true, new DeleteResponseDto("삭제되었습니다"), null);
     }
 
-    public Goods findGoods(Long goodsId) {
-        Goods goods = goodsRepository.findById(goodsId).orElseThrow(() ->
-                new NullPointerException("해당 게시글은 존재하지 않습니다."));
-        if (goods.getIsDeleted()) {
-            throw new IllegalStateException("삭제된 게시글입니다.");
-        }
-        return goods;
-    }
-
-    public WantedGoods findWantedGoods(Long wantedId) {
-        WantedGoods wantedGoods = wantedGoodsRepository.findById(wantedId).orElseThrow(() ->
-                new NullPointerException("해당 게시글은 존재하지 않습니다."));
-        return wantedGoods;
-    }
-
-
-    private Pageable paging(int page, int size, String sortBy, boolean isAsc) {
-        // 정렬
-        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
-        Sort sort = Sort.by(direction, sortBy);
-
-        // pageable 생성
-        return PageRequest.of(page, size, sort);
-    }
-
 
     public List<GoodsRecentDto> recentGoods(HttpServletResponse response) {
         List<GoodsRecentDto> goodsRecentDtos = new ArrayList<>();
@@ -253,10 +243,12 @@ public class GoodsService {
     }
 
     public List<GoodsSingleResponseDto> getMyGoodsWithoutPagenation(User user) {
-        return getGoodsResponseDtos(user);
+        return null;
+        //        return getGoodsResponseDtos(user);
     }
 
-    public ApiResponse<UrPocketResponseDto> getPocket(String nickname, UserDetailsImpl userDetails, int page, int size, String sortBy, boolean isAsc) {
+    public ApiResponse<UrPocketResponseDto> getPocket(String nickname, UserDetailsImpl userDetails, int page,
+                                                      int size, String sortBy, boolean isAsc) {
         User user = userRepository.findUserByNickname(nickname);
         if (userDetails != null) { // 로그인 된 경우다 !!
             if (user.getUserId() == userDetails.getUser().getUserId()) {
@@ -288,18 +280,18 @@ public class GoodsService {
 //        return getGoodsResponseDtos(user);
     }
 
-    private List<GoodsSingleResponseDto> getGoodsResponseDtos(User user) {
-        List<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalseAndGoodsStatus(user, GoodsStatus.ONSALE);
-        List<GoodsResponseDto> goodsResponseDtoList = new ArrayList<>();
-            for(Goods goods : goodsList){
-                List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(goods.getGoodsId())
-                        .stream()
-                        .map(Image::getImageUrl)
-                        .collect(Collectors.toList());
-                goodsResponseDtoList.add(new GoodsResponseDto(goods, imageUrls));
-            }
-        return goodsResponseDtoList;
-    }
+//    private List<GoodsSingleResponseDto> getGoodsResponseDtos(User user) {
+//        List<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalseAndGoodsStatus(user, GoodsStatus.ONSALE);
+//        List<GoodsResponseDto> goodsResponseDtoList = new ArrayList<>();
+//            for(Goods goods : goodsList){
+//                List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(goods.getGoodsId())
+//                        .stream()
+//                        .map(Image::getImageUrl)
+//                        .collect(Collectors.toList());
+//                goodsResponseDtoList.add(new GoodsResponseDto(goods, imageUrls));
+//            }
+//        return goodsResponseDtoList;
+//    }
 
     public ApiResponse<List<GoodsListResponseDto>> searchGoods(String keyword) {
         List<Goods> searchList = goodsRepository.findByTitleContaining(keyword);
@@ -326,7 +318,11 @@ public class GoodsService {
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods), null);
     }
 
-    public ResponseEntity<Page<GoodsListResponseDto>> goodsTradeList(User user, int page, int size, String sortBy, boolean isAsc,
+    public ResponseEntity<Page<GoodsListResponseDto>> goodsTradeList(User user,
+                                                                     int page,
+                                                                     int size,
+                                                                     String sortBy,
+                                                                     boolean isAsc,
                                                                      GoodsStatus goodsStatus) {
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Goods> myGoodsPage;
@@ -369,5 +365,62 @@ public class GoodsService {
         urGoods.changeStatus(GoodsStatus.REQUESTED);
 
         return new ResponseDto("교환신청이 완료되었습니다.", HttpStatus.OK.value(), "OK");
+    }
+
+
+    public Page<GoodsListResponseDto> allGoods(Page<Goods> goodsPage, Pageable pageable, User user) {
+
+        List<GoodsListResponseDto> goodsResponseList = new ArrayList<>();
+
+        for (Goods goods : goodsPage.getContent()) {
+            boolean checkSameUser = Objects.equals(goods.getUser().getUserId(), user.getUserId());
+            Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
+            boolean checkDibs = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goods.getGoodsId())
+                    .isPresent();
+            goodsResponseList.add(new GoodsListResponseDto(goods, image.getImageUrl(), checkDibs, checkSameUser));
+        }
+        return new PageResponse<>(goodsResponseList, pageable, goodsPage.getTotalElements());
+    }
+
+    private ApiResponse<PocketResponseDto> getMyGoods(Page<Goods> goodsList, User user, Pageable pageable) {
+        List<PocketListResponseDto> myGoods = goodsList.stream()
+                .map(goods -> {
+                    long ratingPrice = (long) ratingHelper.getAvgPriceByGoodsId(goods.getGoodsId());
+                    Image firstImage = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
+                    return new PocketListResponseDto(goods, firstImage.getImageUrl(), ratingPrice);
+                }).collect(Collectors.toList());
+
+        return new ApiResponse<>(true, new PocketResponseDto(user,
+                new PageImpl<>(myGoods, pageable, goodsList.getTotalElements())), null);
+    }
+
+    public Goods findGoods(Long goodsId) {
+        Goods goods = goodsRepository.findById(goodsId).orElseThrow(() ->
+                new NullPointerException("해당 게시글은 존재하지 않습니다."));
+        if (goods.getIsDeleted()) {
+            throw new IllegalStateException("삭제된 게시글입니다.");
+        }
+        return goods;
+    }
+
+    public WantedGoods findWantedGoods(Long wantedId) {
+        WantedGoods wantedGoods = wantedGoodsRepository.findById(wantedId).orElseThrow(() ->
+                new NullPointerException("해당 게시글은 존재하지 않습니다."));
+        return wantedGoods;
+    }
+
+    public User findUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
+                new IllegalArgumentException("존재하지 않는 유저입니다."));
+    }
+
+
+    private Pageable paging(int page, int size, String sortBy, boolean isAsc) {
+        // 정렬
+        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, sortBy);
+
+        // pageable 생성
+        return PageRequest.of(page, size, sort);
     }
 }
