@@ -25,7 +25,7 @@ public class GoodsController {
     private final GoodsService goodsService;
 
     @PostMapping
-    public ApiResponse<GoodsResponseDto> goodsCreate(@RequestPart(value = "data") GoodsRequestDto goodsRequestDto,
+    public ApiResponse<MsgResponseDto> goodsCreate(@RequestPart(value = "data") GoodsRequestDto goodsRequestDto,
                                                      @RequestPart(value = "images") List<MultipartFile> images,
                                                      @RequestPart(value = "wanted") WantedRequestDto wantedRequestDto,
                                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
