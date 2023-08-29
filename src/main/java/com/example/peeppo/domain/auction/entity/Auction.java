@@ -34,6 +34,7 @@ public class Auction extends Timestamped {
     @Column
     private double lowPrice;
 
+
     @Enumerated(EnumType.STRING)
     private AuctionStatus auctionStatus;
 
