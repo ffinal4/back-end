@@ -1,4 +1,4 @@
-package com.example.peeppo.domain.image.home.service;
+package com.example.peeppo.domain.home.service;
 
 
 import com.example.peeppo.domain.auction.dto.AuctionListResponseDto;

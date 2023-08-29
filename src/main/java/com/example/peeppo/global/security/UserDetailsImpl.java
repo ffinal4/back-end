@@ -20,6 +20,7 @@ public class UserDetailsImpl implements UserDetails {
 
     private final User user;
 
+
     public UserDetailsImpl(User user) {
         this.user = user;
     }
@@ -52,7 +53,6 @@ public class UserDetailsImpl implements UserDetails {
     }
 
     @Override
-
     public boolean isAccountNonExpired() {
         return true;
     }

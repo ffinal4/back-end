@@ -3,10 +3,11 @@ package com.example.peeppo.domain.goods.dto;
 import com.example.peeppo.domain.goods.enums.Category;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Getter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class GoodsRequestDto {

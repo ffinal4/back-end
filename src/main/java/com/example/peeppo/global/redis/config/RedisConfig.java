@@ -1,7 +1,11 @@
 package com.example.peeppo.global.redis.config;
 
-import com.example.peeppo.domain.chat.dto.ChatRoomResponseDto;
 import com.example.peeppo.domain.chat.entity.ChatRoom;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -36,32 +40,36 @@ public class RedisConfig {
         return lettuceConnectionFactory;
     }
 
-
-//    @Bean
-//    public RedisTemplate<?, ?> redisTemplate() {
-//        RedisTemplate<?, ?> redisTemplate = new RedisTemplate<>();
-//        redisTemplate.setConnectionFactory(redisConnectionFactory());
-//        redisTemplate.setKeySerializer(new StringRedisSerializer());
-//        redisTemplate.setValueSerializer(new StringRedisSerializer());
-//
-//        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class)); //Json포맷 형식으로 메시지를 교환하기 위해
-//        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-//        redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(String.class)); //Json포맷 형식으로 메시지를 교환하기 위해
-//
-//        //* redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class)); //Json포맷 형식으로 메시지를 교환하기 위해
-//        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class)); //Json포맷 형식으로 메시지를 교환하기 위해*//*
-//
-//        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-//        redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class));
-//
-//
-//        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoomResponseDto.class));
-//        redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoomResponseDto.class));
-//        redisTemplate.afterPropertiesSet();
-//
-//        return redisTemplate;
-//    }
     @Primary
+    @Bean
+    public RedisTemplate<?, ?> redisTemplate() {
+        RedisTemplate<?, ?> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory());
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new StringRedisSerializer());
+
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class)); //Json포맷 형식으로 메시지를 교환하기 위해
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(String.class)); //Json포맷 형식으로 메시지를 교환하기 위해
+
+        //* redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class)); //Json포맷 형식으로 메시지를 교환하기 위해
+        // redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class)); //Json포맷 형식으로 메시지를 교환하기 위해*//*
+
+
+        redisTemplate.setHashValueSerializer(new StringRedisSerializer());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
+        //redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class));
+        //redisTemplate.setHashKeySerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class));
+
+
+        //  redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoomResponseDto.class));
+        // redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoomResponseDto.class));
+        redisTemplate.afterPropertiesSet();
+
+        return redisTemplate;
+    }
+
+/*    @Primary
     @Bean
     public RedisTemplate<?, ?> redisTemplate() {
         RedisTemplate<?, ?> redisTemplate = new RedisTemplate<>();
@@ -77,8 +85,7 @@ public class RedisConfig {
         redisTemplate.afterPropertiesSet();
 
         return redisTemplate;
-    }
-
+    }*/
     @Bean
     //redismessageListenercontainer 는 Redis channel(Topic)으로 부터 메시지를 받고,
     //주입된 리스너들에게 비동기적으로 dispatch하는 역할을 수행하는 컨테이너이다

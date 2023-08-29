@@ -8,8 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,7 +21,7 @@ public class ChatRoomResponseDto {
     public ChatRoomResponseDto(ChatRoom chatRoom, User user) {
         this.id = chatRoom.getId();
         this.roomId = chatRoom.getRoomId();
-       this.nickname = user.getNickname();
+        this.nickname = user.getNickname();
         this.userimageUrl = user.getUserImg();
         this.imageUrl = chatRoom.getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
     }
@@ -36,7 +34,6 @@ public class ChatRoomResponseDto {
         this.userimageUrl = userChatRoom.getChatRoom().getGoods().getUser().getUserImg();
 
     }
-
 
 
 }

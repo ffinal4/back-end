@@ -18,12 +18,13 @@ public class UserRepositoryCustomImpl extends QuerydslRepositorySupport implemen
     }
 
     @Override
-    public List<User> findTopFiveUsersByMaxRatingCount() {
+    public List<User> findTopUsersByMaxRatingCount(int limit) {
         return queryFactory
                 .selectFrom(user)
                 .where(user.maxRatingCount.gt(0))
                 .orderBy(user.maxRatingCount.desc())
-                .limit(5)
+                .limit(limit)
                 .fetch();
     }
+
 }

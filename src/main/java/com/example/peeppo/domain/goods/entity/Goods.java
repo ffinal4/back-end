@@ -71,7 +71,6 @@ public class Goods extends Timestamped {
         this.tradeType = requestDto.getTradeType();
         this.category = requestDto.getCategory();
         this.wantedGoods = wantedGoods;
-
     }
 
     public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods, User user, GoodsStatus goodsStatus) {
@@ -82,13 +81,13 @@ public class Goods extends Timestamped {
         this.tradeType = requestDto.getTradeType();
         this.category = requestDto.getCategory();
         this.ratingCheck = requestDto.getRatingCheck();
-        if(ratingCheck == false){
+        if(!ratingCheck){
             sellerPrice = 0L;
-        } else if(ratingCheck == true && requestDto.getSellerPrice() != null) {
+        } else if(null != requestDto.getSellerPrice()) {
             this.sellerPrice = requestDto.getSellerPrice();
         }
         else{
-            new IllegalArgumentException("올바르지 않은 값입니다.");
+            throw new IllegalArgumentException("올바르지 않은 값입니다.");
         }
         this.wantedGoods = wantedGoods;
         this.goodsStatus = goodsStatus;
@@ -100,13 +99,18 @@ public class Goods extends Timestamped {
         this.content = requestDto.getContent();
         this.location = requestDto.getLocation();
     }
-
     public void delete(){
         this.isDeleted = true;
     }
 
     public void changeStatus(GoodsStatus goodsStatus) {
         this.goodsStatus = goodsStatus;
+    }
+
+    public Goods(String title, String content, String location) {
+        this.title = title;
+        this.content = content;
+        this.location = location;
     }
 }
 

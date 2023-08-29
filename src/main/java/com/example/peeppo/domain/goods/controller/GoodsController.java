@@ -1,14 +1,17 @@
 package com.example.peeppo.domain.goods.controller;
 
 import com.example.peeppo.domain.goods.dto.*;
-
+import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.service.GoodsService;
+import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import com.example.peeppo.global.utils.ResponseUtils;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,16 +40,17 @@ public class GoodsController {
                                                @RequestParam("size") int size,
                                                @RequestParam("sortBy") String sortBy,
                                                @RequestParam("isAsc") boolean isAsc,
+                                               @RequestParam(value = "category", required = false) String category,
                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
-            return goodsService.allGoods(page -1, size, sortBy, isAsc, userDetails);
+        return goodsService.allGoods(page - 1, size, sortBy, isAsc, category, userDetails);
     }
 
     // 게시물 상세조회
     @GetMapping("/{goodsId}")
     public ApiResponse<GoodsResponseDto> getGoods(@PathVariable Long goodsId,
                                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        if(userDetails != null){
-           return goodsService.getGoods(goodsId, userDetails.getUser());
+        if (userDetails != null) {
+            return goodsService.getGoods(goodsId, userDetails.getUser());
         }
         return goodsService.getGoodsEveryone(goodsId);
     }
@@ -56,23 +60,24 @@ public class GoodsController {
                                                      @RequestParam("size") int size,
                                                      @RequestParam("sortBy") String sortBy,
                                                      @RequestParam("isAsc") boolean isAsc,
-                                                     @AuthenticationPrincipal UserDetailsImpl userDetails){
+                                                     @RequestParam(value = "goodsStatus", required = false) String goodsStatus,
+                                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        return goodsService.getMyGoods(page - 1, size, sortBy, isAsc, userDetails.getUser().getUserId());
+        return goodsService.getMyGoods(page - 1, size, sortBy, isAsc, goodsStatus, userDetails.getUser().getUserId());
     }
 
     @GetMapping("/mypocket")
-    public ApiResponse<List<GoodsResponseDto>> getMyGoodsWithoutPagenation(@AuthenticationPrincipal UserDetailsImpl userDetails){
+    public ApiResponse<List<GoodsResponseDto>> getMyGoodsWithoutPagenation(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseUtils.ok(goodsService.getMyGoodsWithoutPagenation(userDetails.getUser()));
     }
 
     @GetMapping("/pocket/{nickname}")
     public ApiResponse<UrPocketResponseDto> getPocket(@PathVariable String nickname,
-                                                         @RequestParam("page") int page,
-                                                         @RequestParam("size") int size,
-                                                         @RequestParam("sortBy") String sortBy,
-                                                         @RequestParam("isAsc") boolean isAsc,
-                                                         @AuthenticationPrincipal UserDetailsImpl userDetails) {
+                                                      @RequestParam("page") int page,
+                                                      @RequestParam("size") int size,
+                                                      @RequestParam("sortBy") String sortBy,
+                                                      @RequestParam("isAsc") boolean isAsc,
+                                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return goodsService.getPocket(nickname, userDetails, page - 1, size, sortBy, isAsc);
     }
 
@@ -98,8 +103,28 @@ public class GoodsController {
 
 
     @GetMapping("/search")
-    public ApiResponse<List<GoodsListResponseDto>> searchGoods(@RequestParam("keyword") String keyword){
+    public ApiResponse<List<GoodsListResponseDto>> searchGoods(@RequestParam("keyword") String keyword) {
         return goodsService.searchGoods(keyword);
+    }
+
+    @GetMapping("/users/trade")
+    public ResponseEntity<Page<GoodsListResponseDto>> goodsTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                     @RequestParam("page") int page,
+                                                                     @RequestParam("size") int size,
+                                                                     @RequestParam("sortBy") String sortBy,
+                                                                     @RequestParam("isAsc") boolean isAsc,
+                                                                     @RequestParam(value = "status", required = false) GoodsStatus goodsStatus) {
+
+        return goodsService.goodsTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, goodsStatus);
+    }
+
+    //교환신청
+    @PostMapping("/users/{goodsId}/request")
+    public ApiResponse<ResponseDto> goodsRequest(@PathVariable Long goodsId,
+                                                 @AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                 @Valid @RequestBody GoodsRequestRequestDto goodsRequestRequestDto) {
+
+        return ResponseUtils.ok(goodsService.goodsRequest(userDetails.getUser(), goodsRequestRequestDto, goodsId));
     }
 }
 

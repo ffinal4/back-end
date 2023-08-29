@@ -1,6 +1,5 @@
 package com.example.peeppo.domain.user.service;
 
-import com.example.peeppo.domain.auction.dto.AuctionResponseDto;
 import com.example.peeppo.domain.image.service.UploadService;
 import com.example.peeppo.domain.user.dto.*;
 import com.example.peeppo.domain.user.entity.User;
@@ -8,22 +7,18 @@ import com.example.peeppo.domain.user.entity.UserRoleEnum;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.jwt.JwtUtil;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
 import static org.springframework.http.HttpStatus.OK;
@@ -100,19 +95,21 @@ public class UserService {
         return new MyPageResponseDto(user);
     }
 
+    @Transactional
     public ApiResponse<ResponseDto> updateMyPage(MyPageRequestDto myPageRequestDto, MultipartFile multipartFile, User user) throws IOException {
 
         String encodedPassword = passwordEncoder.encode(myPageRequestDto.getPassword());
         if (!passwordEncoder.matches(myPageRequestDto.getOriginPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        } else {
-            String updateUserImg = uploadService.upload(multipartFile);
-            user.upload(myPageRequestDto, updateUserImg, encodedPassword);
-
-            userRepository.save(user);
-
-            return new ApiResponse<>(true, new ResponseDto("개인정보가 수정되었습니다.", HttpStatus.OK.value(), "OK"), null);
         }
+
+        String updateUserImg = uploadService.upload(multipartFile);
+        user.upload(myPageRequestDto, updateUserImg, encodedPassword);
+
+        userRepository.save(user);
+
+        return new ApiResponse<>(true, new ResponseDto("개인정보가 수정되었습니다.", HttpStatus.OK.value(), "OK"), null);
+
     }
 
     public ResponseDto deleteMyPage(Long userId) {
