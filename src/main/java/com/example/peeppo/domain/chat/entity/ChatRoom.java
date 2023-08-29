@@ -35,7 +35,6 @@ public class ChatRoom extends Timestamped implements Serializable {
     @JoinColumn(name = "goods_id", nullable = false)
     private Goods goods;
 
-
     public ChatRoom(Goods goods, String roomId) {
         this.goods = goods;
         this.roomId = roomId;

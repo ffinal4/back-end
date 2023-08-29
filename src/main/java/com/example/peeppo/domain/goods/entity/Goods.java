@@ -52,17 +52,14 @@ public class Goods extends Timestamped {
     @JoinColumn(name = "auction_id")
     private Auction auction;
 
-    @OneToMany(mappedBy = "goods")
+    @OneToMany(mappedBy = "goods", fetch = FetchType.EAGER)
     private List<Image> image;
 
     @Enumerated(EnumType.STRING)
     private GoodsStatus goodsStatus;
 
-    @OneToMany(mappedBy = "goods")
+    @OneToMany(mappedBy = "goods", fetch = FetchType.EAGER)
     private List<Dibs> dibs;
-
-    @OneToMany(mappedBy = "goods")
-    private List<ChatRoom> chatRooms;
 
 
 

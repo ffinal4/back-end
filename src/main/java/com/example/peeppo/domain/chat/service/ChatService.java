@@ -73,11 +73,11 @@ public class ChatService {
         User enterUser = userRepository.findById(user.getUserId()).orElseThrow(()->new IllegalArgumentException("해당하는 사용자는 없습니다"));
         ChatRoom chatRoom = new ChatRoom(goods, randomId);
         chatRoomRepository.save(chatRoom);
-       hashOpsChatRoom.put(CHAT_ROOMS, randomId, new ChatRoomResponseDto(chatRoom, user));
-        UserChatRoomRelation userChatRoomRelation = new UserChatRoomRelation(user, chatRoom, goods);
+        hashOpsChatRoom.put(CHAT_ROOMS, randomId, new ChatRoomResponseDto(chatRoom, enterUser));
+        UserChatRoomRelation userChatRoomRelation = new UserChatRoomRelation(enterUser, chatRoom, goods);
         userChatRoomRelationRepository.save(userChatRoomRelation);
        System.out.println(hashOpsChatRoom.get(CHAT_ROOMS, randomId));
-       return new ChatRoomResponseDto(chatRoom, user);
+       return new ChatRoomResponseDto(chatRoom, enterUser);
     }
     //채팅방 아이디는 랜덤 !
 
@@ -157,6 +157,7 @@ public class ChatService {
         return chatMessageResponseDtos;
     }
 
+    @Transactional
     public void saveMessage(String roomId ,ChatMessageRequestDto chatMessageRequestDto, String token){
         System.out.println("메세지 발송 단계 진입");
         long systemTime = System.currentTimeMillis();
