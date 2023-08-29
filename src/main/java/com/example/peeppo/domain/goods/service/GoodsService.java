@@ -64,7 +64,7 @@ public class GoodsService {
     private List<String> goodsRecent = new ArrayList<>();
 
     @Transactional
-    public ApiResponse<GoodsResponseDto> goodsCreate(GoodsRequestDto goodsRequestDto,
+    public ApiResponse<MsgResponseDto> goodsCreate(GoodsRequestDto goodsRequestDto,
                                                      List<MultipartFile> images,
                                                      WantedRequestDto wantedRequestDto,
                                                      User user) {
@@ -78,14 +78,7 @@ public class GoodsService {
         goodsRepository.save(goods);
         ratingGoodsRepository.save(ratingGoods);
         wantedGoodsRepository.save(wantedGoods);
-
-        List<String> imageUrls = imageHelper
-                .saveImagesToS3AndRepository(images, amazonS3, bucket, goods)
-                .stream()
-                .map(Image::getImageUrl)
-                .collect(Collectors.toList());
-
-        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods), null);
+        return new ApiResponse<>(true, new MsgResponseDto("게시글이 등록되었습니다."), null);
     }
 
     public Page<GoodsListResponseDto> allGoods(int page, int size, String sortBy, boolean isAsc, String categoryStr, UserDetailsImpl userDetails) {
@@ -159,8 +152,8 @@ public class GoodsService {
         // goodsRecent.add(Long.toString(goods.getGoodsId())); // 조회시에 리스트에 추가 !
         Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goodsId);
         boolean checkDibs = dibsGoods.isPresent();
-
-        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods, checkSameUser, checkDibs), null);
+        Long dibsCount = dibsRepository.countByGoodsGoodsId(goodsId);
+        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods, checkSameUser, checkDibs, dibsCount), null);
     }
 
     public ApiResponse<PocketResponseDto> getMyGoods(int page,

@@ -15,6 +15,7 @@ import java.util.List;
 public class GoodsResponseDto {
     private Long goodsId;
     private Long userId;
+    private Long dibsCount;
     private Long sellerPrice;
     private String title;
     private String content;
@@ -91,7 +92,7 @@ public class GoodsResponseDto {
     }
 
 
-    public GoodsResponseDto(Goods goods, List<String> imageUrls, WantedGoods wantedGoods, boolean checkSameUser, boolean checkDibs) {
+    public GoodsResponseDto(Goods goods, List<String> imageUrls, WantedGoods wantedGoods, boolean checkSameUser, boolean checkDibs, Long dibsCount) {
         this.goodsId = goods.getGoodsId();
         this.userId = goods.getUser().getUserId();
         this.title = goods.getTitle();
@@ -109,6 +110,7 @@ public class GoodsResponseDto {
         this.checkDibs = checkDibs;
         this.sellerPrice = goods.getSellerPrice();
         this.ratingCheck = goods.getRatingCheck();
+        this.dibsCount = dibsCount;
     }
 
     public GoodsResponseDto(Goods goods, List<String> imageUrls, WantedGoods wantedGoods, boolean checkSameUser) {
