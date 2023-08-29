@@ -1,5 +1,6 @@
 package com.example.peeppo.global.redis.config;
 
+import com.example.peeppo.domain.chat.dto.ChatRoomResponseDto;
 import com.example.peeppo.domain.chat.entity.ChatRoom;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -62,8 +63,8 @@ public class RedisConfig {
         //redisTemplate.setHashKeySerializer(new Jackson2JsonRedisSerializer<>(ChatRoom.class));
 
 
-        //  redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoomResponseDto.class));
-        // redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoomResponseDto.class));
+          redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoomResponseDto.class));
+         redisTemplate.setHashValueSerializer(new Jackson2JsonRedisSerializer<>(ChatRoomResponseDto.class));
         redisTemplate.afterPropertiesSet();
 
         return redisTemplate;

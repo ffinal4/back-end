@@ -134,8 +134,14 @@ public class ChatService {
         List<ChatRoomResponseDto> chatRoomResponseDto = new ArrayList<>();
         for(UserChatRoomRelation userChatRoom : userChatRoomRelation){
             //userChatRoom.getChatRoom().getGoods().get
-            ChatRoomResponseDto chatRoomResponseDto1 = new ChatRoomResponseDto(userChatRoom);
-            chatRoomResponseDto.add(chatRoomResponseDto1);
+            if(user.getUserId() == userChatRoom.getBuyer().getUserId()) {
+                ChatRoomResponseDto chatRoomResponseDto1 = new ChatRoomResponseDto(userChatRoom, userChatRoom.getSeller());
+                chatRoomResponseDto.add(chatRoomResponseDto1);
+            }
+            if(user.getUserId() == userChatRoom.getSeller().getUserId()){
+                ChatRoomResponseDto chatRoomResponseDto1 = new ChatRoomResponseDto(userChatRoom, userChatRoom.getBuyer());
+                chatRoomResponseDto.add(chatRoomResponseDto1);
+            }
         }
         return chatRoomResponseDto;
     }
@@ -151,7 +157,8 @@ public class ChatService {
         List<ChatMessage> chatMessageList = chatMessageRepository.findAllByChatRoomId(chatRoom.getId());
         List<ChatMessageResponseDto> chatMessageResponseDtos = new ArrayList<>();
         for(ChatMessage chatMessage : chatMessageList){
-            ChatMessageResponseDto chatMessageResponseDto = new ChatMessageResponseDto(chatMessage);
+            User messageUser = userRepository.findById(chatMessage.getSenderId()).orElse(null);
+            ChatMessageResponseDto chatMessageResponseDto = new ChatMessageResponseDto(chatMessage, messageUser);
             chatMessageResponseDtos.add(chatMessageResponseDto);
         }
         return chatMessageResponseDtos;

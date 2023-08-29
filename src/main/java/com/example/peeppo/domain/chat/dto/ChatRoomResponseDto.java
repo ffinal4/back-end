@@ -26,14 +26,13 @@ public class ChatRoomResponseDto {
         this.imageUrl = chatRoom.getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
     }
 
-    public ChatRoomResponseDto(UserChatRoomRelation userChatRoom) {
+    public ChatRoomResponseDto(UserChatRoomRelation userChatRoom, User user) {
         this.id = userChatRoom.getId();
         this.roomId = userChatRoom.getChatRoom().getRoomId();
         this.imageUrl = userChatRoom.getChatRoom().getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
-        this.nickname = userChatRoom.getChatRoom().getGoods().getUser().getNickname();
-        this.userimageUrl = userChatRoom.getChatRoom().getGoods().getUser().getUserImg();
+        this.nickname = user.getNickname();
+        this.userimageUrl = user.getUserImg();
 
     }
-
 
 }

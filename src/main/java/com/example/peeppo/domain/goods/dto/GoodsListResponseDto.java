@@ -75,4 +75,5 @@ public class GoodsListResponseDto {
         this.goodsStatus = goods.getGoodsStatus();
         this.checkSameUser = checkSameUser;
     }
+
 }

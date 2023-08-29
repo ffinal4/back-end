@@ -46,7 +46,6 @@ public class ChatMessage {
         this.message = chatMessageRequestDto.getMessage();
         this.time = dTime;
     }
-
     @Builder
     public ChatMessage(MessageType type, ChatRoom chatRoom, Long userId,String message, String createdAt) {
         this.type = type;
