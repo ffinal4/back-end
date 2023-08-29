@@ -26,6 +26,7 @@ public class AuctionResponseDto {
     private TimeRemaining leftTime;
     private boolean checkSameUser;
     private AuctionStatus auctionStatus;
+    private Double lowPrice;
 
     public AuctionResponseDto(Auction auction, GoodsResponseDto goodsResponseDto, User user, TimeRemaining countDownTime) {
         this.auctionId = auction.getAuctionId();
@@ -61,6 +62,7 @@ public class AuctionResponseDto {
         this.bidCount = bidCount;
         this.checkSameUser = checkSameUser;
         this.auctionStatus = auction.getAuctionStatus();
+        this.lowPrice = auction.getLowPrice();
     }
 }
 
