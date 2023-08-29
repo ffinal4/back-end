@@ -5,7 +5,6 @@ import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.dto.GoodsSingleResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
-import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.user.entity.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,7 +38,7 @@ public class AuctionResponseDto {
         this.auctionStatus = auction.getAuctionStatus();
     }
 
-    public AuctionResponseDto(Auction auction, Goods goods, TimeRemaining countDownTime, Long bidCount, String image) {
+    public AuctionResponseDto(Auction auction, Goods goods, TimeRemaining countDownTime, Long bidCount, boolean checkSameUser, String image) {
         this.auctionId = auction.getAuctionId();
         this.deleteStatus = auction.getIsDeleted();
         this.goodsResponseDto = new GoodsResponseDto(goods, image);
@@ -49,6 +48,7 @@ public class AuctionResponseDto {
         this.leftTime = countDownTime;
         this.bidCount = bidCount;
         this.auctionStatus = auction.getAuctionStatus();
+        this.checkSameUser = checkSameUser;
     }
 
     public AuctionResponseDto(Auction auction, Goods goods, TimeRemaining countDownTime, Long bidCount, boolean checkSameUser, List<String> image) {

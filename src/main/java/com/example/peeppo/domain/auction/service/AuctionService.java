@@ -5,16 +5,14 @@ import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.bid.entity.Bid;
-import com.example.peeppo.domain.bid.enums.BidStatus;
-import com.example.peeppo.domain.dibs.repository.DibsRepository;
-import com.example.peeppo.domain.dibs.service.DibsService;
-import com.example.peeppo.domain.goods.dto.GoodsSingleResponseDto;
-import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.bid.repository.BidRepository;
+import com.example.peeppo.domain.dibs.service.DibsService;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
-import com.example.peeppo.domain.goods.entity.Goods;
-import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
+import com.example.peeppo.domain.goods.entity.Goods;
+import com.example.peeppo.domain.goods.enums.Category;
+import com.example.peeppo.domain.goods.enums.GoodsStatus;
+import com.example.peeppo.domain.goods.repository.GoodsRepository;
 import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.domain.notification.entity.Notification;
 import com.example.peeppo.domain.notification.repository.NotificationRepository;
@@ -134,40 +132,23 @@ public class AuctionService {
         return new TimeRemaining(days, hours % 24, minutes % 60, seconds % 60);
     }
 
-    // 물품 찾아서 Goods 리턴
-    public Goods findGoodsId(Long goodsId) {
-        return goodsRepository.findById(goodsId).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당하는 물품은 존재하지 않습니다"));
-    }
-
-    // 경매 입찰 수
-    public Long findBidCount(Long id) {
-        return bidRepository.countByAuctionAuctionId(id);
-    }
-
     // 경매 전체 조회
-    public Page<AuctionListResponseDto> findAllAuction(int i, int size, String sortBy, boolean isAsc, UserDetailsImpl userDetails) {
-
+    public Page<AuctionListResponseDto> findAllAuction(int i, int size, String sortBy, boolean isAsc, String categoryStr, UserDetailsImpl userDetails) {
         Pageable pageable = paging(i, size, sortBy, isAsc);
-        Page<Auction> auctionPage = auctionRepository.findAll(pageable);
-        List<AuctionListResponseDto> auctionResponseDtoList = new ArrayList<>();
-
-        for (Auction auction : auctionPage) {
-            TimeRemaining timeRemaining = countDownTime(auction);
-            boolean checkDibs = false;
-            if (userDetails != null) {
-                checkDibs = dibsService.checkDibsGoods(userDetails.getUser().getUserId(), auction.getGoods().getGoodsId());
+        Page<Auction> auctionPage;
+        if (categoryStr != null) {
+            try {
+                Category category = Category.valueOf(categoryStr);
+                auctionPage = auctionRepository.findByGoodsCategory(category, pageable);
+                return findAllAuction(auctionPage, pageable, userDetails);
+            } catch (IllegalArgumentException e) {
+                log.error("올바르지 않은 카테고리입니다.");
+                throw new IllegalArgumentException("올바르지 않은 카테고리입니다.");
             }
-            AuctionListResponseDto auctionListResponseDto = new AuctionListResponseDto(auction, timeRemaining, findBidCount(auction.getAuctionId()), checkDibs);
-            auctionResponseDtoList.add(auctionListResponseDto);
+        } else {
+            auctionPage = auctionRepository.findAll(pageable);
+            return findAllAuction(auctionPage, pageable, userDetails);
         }
-        return new PageResponse<>(auctionResponseDtoList, pageable, auctionPage.getTotalElements());
-    }
-
-    private Pageable paging(int page, int size, String sortBy, boolean isAsc) {
-        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
-        Sort sort = Sort.by(direction, sortBy);
-
-        return PageRequest.of(page, size, sort);
     }
 
     // 경매 상세 조회
@@ -177,17 +158,9 @@ public class AuctionService {
         if (auction.getUser().getUserId() != user.getUserId()) {
             checkSameUser = false;
         }
-        List<String> imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(auction.getGoods().getGoodsId()).stream().map(Image::getImageUrl).collect(Collectors.toList());
+        List<String> imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(auction.getGoods().getGoodsId())
+                .stream().map(Image::getImageUrl).collect(Collectors.toList());
         return new AuctionResponseDto(auction, auction.getGoods(), countDownTime(auction), findBidCount(auctionId), checkSameUser, imageUrl);
-    }
-
-    // 경매 찾아서 Auction 리턴
-    public Auction findAuctionId(Long auctionId) {
-        return auctionRepository.findById(auctionId).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당하는 물품은 존재하지 않습니다"));
-    }
-
-    public Bid findBidId(Long bidId) {
-        return bidRepository.findById(bidId).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당하는 입찰 물품은 존재하지 않습니다"));
     }
 
     // 경매 삭제 (경매 입찰 취소)
@@ -244,14 +217,6 @@ public class AuctionService {
         auction.changeDeleteStatus(true);
     }
 
-    // 경매 등록한 유저가 맞는지 확인
-    public void checkUsername(Long id, User user) {
-        Auction auction = findAuctionId(id);
-        if (!(auction.getUser().getUserId().equals(user.getUserId()))) {
-            throw new IllegalArgumentException("경매 취소는 작성자만 삭제가 가능합니다");
-        }
-    }
-
     public ResponseEntity<Page<TestListResponseDto>> auctionTradeList(User user, int page, int size, String sortBy, boolean isAsc,
                                                                       AuctionStatus auctionStatus) {
         Pageable pageable = paging(page, size, sortBy, isAsc);
@@ -275,11 +240,61 @@ public class AuctionService {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
+    public Page<AuctionListResponseDto> findAllAuction(Page<Auction> auctionPage, Pageable pageable, UserDetailsImpl userDetails) {
+        List<AuctionListResponseDto> auctionResponseDtoList = new ArrayList<>();
+        for (Auction auction : auctionPage) {
+            TimeRemaining timeRemaining = countDownTime(auction);
+            boolean checkDibs = false;
+            if (null != userDetails) {
+                checkDibs = dibsService.checkDibsGoods(userDetails.getUser().getUserId(), auction.getGoods().getGoodsId());
+            }
+            AuctionListResponseDto auctionListResponseDto = new AuctionListResponseDto(auction, timeRemaining, findBidCount(auction.getAuctionId()), checkDibs);
+            auctionResponseDtoList.add(auctionListResponseDto);
+        }
+        return new PageResponse<>(auctionResponseDtoList, pageable, auctionPage.getTotalElements());
+    }
+
+    // 물품 찾아서 Goods 리턴
+    public Goods findGoodsId(Long goodsId) {
+        return goodsRepository.findById(goodsId).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당하는 물품은 존재하지 않습니다"));
+    }
+
+    // 경매 입찰 수
+    public Long findBidCount(Long id) {
+        return bidRepository.countByAuctionAuctionId(id);
+    }
+
+
+    // 경매 찾아서 Auction 리턴
+    public Auction findAuctionId(Long auctionId) {
+        return auctionRepository.findById(auctionId).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당하는 물품은 존재하지 않습니다"));
+    }
+
+    public Bid findBidId(Long bidId) {
+        return bidRepository.findById(bidId).orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "해당하는 입찰 물품은 존재하지 않습니다"));
+    }
+
+    // 경매 등록한 유저가 맞는지 확인
+    public void checkUsername(Long id, User user) {
+        Auction auction = findAuctionId(id);
+        if (!(auction.getUser().getUserId().equals(user.getUserId()))) {
+            throw new IllegalArgumentException("경매 취소는 작성자만 삭제가 가능합니다");
+        }
+    }
+
     public void checkGoodsUsername(Long id, User user) {
         Goods goods = findGoodsId(id);
         if (!(goods.getUser().getUserId().equals(user.getUserId()))) {
             throw new IllegalArgumentException("경매 생성은 물품 작성자만 가능합니다");
         }
     }
+
+    private Pageable paging(int page, int size, String sortBy, boolean isAsc) {
+        Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Sort sort = Sort.by(direction, sortBy);
+
+        return PageRequest.of(page, size, sort);
+    }
+
 
 }

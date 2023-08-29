@@ -2,6 +2,7 @@ package com.example.peeppo.domain.auction.repository;
 
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
+import com.example.peeppo.domain.goods.enums.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,7 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface AuctionRepository extends JpaRepository<Auction, Long> {
+public interface AuctionRepository extends JpaRepository<Auction, Long>, AuctionRepositoryCustom {
     Page<Auction> findByUserUserIdAndAuctionStatus(Long userId, Pageable pageable, AuctionStatus auctionStatus);
 
 
@@ -19,4 +20,6 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
     Page<Auction> findByUserUserId(Long userId, Pageable pageable);
 
     Page<Auction> findByAuctionId(Long auctionId, Pageable pageable);
+
+    Page<Auction> findByGoodsCategory(Category category, Pageable pageable);
 }
