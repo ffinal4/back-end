@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -22,4 +23,10 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
     Page<Auction> findByAuctionId(Long auctionId, Pageable pageable);
 
     Page<Auction> findByGoodsCategory(Category category, Pageable pageable);
+
+    Page<Auction> findByUserUserIdAndAuctionStatusIsNotNull(Long userId, Pageable pageable);
+
+
+    @Query(value = "SELECT a.* FROM auction a WHERE a.auction_Status = auction_Status ORDER BY a.auction_end_time LIMIT 20", nativeQuery = true)
+    List<Auction> findTop20ByAuctionStatus(AuctionStatus auctionStatus);
 }

@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface BidRepository extends JpaRepository<Bid, Long> {
-    Page<Bid> findAllByAuctionAuctionId(Long auctionId, Pageable pageable);
+    List<Bid> findAllByAuctionAuctionId(Long auctionId);
     Long countByAuctionAuctionId(Long auctionId);
     List<Bid> findBidByAuctionAuctionId(Long auctionId);
 
@@ -32,4 +32,6 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
     Long findAuctionIdByBidId(Long bidId);
 
     Bid findByAuctionAuctionIdAndUserUserId(Long auctionId, Long userId);
+
+    Bid findByUserUserIdAndBidStatusIsNotNull(Long userId);
 }

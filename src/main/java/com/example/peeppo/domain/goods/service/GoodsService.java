@@ -345,7 +345,7 @@ public class GoodsService {
         if (requestedStatus != null) {
             myGoodsPage = goodsRepository.findByUserUserIdAndRequestedStatus(user.getUserId(), pageable, requestedStatus);
         } else {
-            myGoodsPage = goodsRepository.findByUserUserId(user.getUserId(), pageable);
+            myGoodsPage = goodsRepository.findByUserUserIdAndRequestedStatusIsNotNull(user.getUserId(), pageable);
         }
 
         List<GoodsResponseListDto> goodsListResponseDtos = new ArrayList<>();
@@ -353,19 +353,26 @@ public class GoodsService {
         for (Goods goods : myGoodsPage) {
             List<RequestGoods> requestGoodsList = new ArrayList<>();
 
+            if(goods.getRequestedStatus() == null){
+                continue;
+            }
             if (goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)) {
                 requestGoodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.REQUEST);
-            } else if (goods.getRequestedStatus().equals(RequestedStatus.TRADING)) {
+            }
+            if (goods.getRequestedStatus().equals(RequestedStatus.TRADING)) {
                 requestGoodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.TRADING);
-            } else if (goods.getRequestedStatus().equals(RequestedStatus.DONE)) {
+            }
+            if (goods.getRequestedStatus().equals(RequestedStatus.DONE)) {
                 requestGoodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.DONE);
-            } else if (goods.getRequestedStatus().equals(RequestedStatus.CANCEL)) {
+            }
+            if (goods.getRequestedStatus().equals(RequestedStatus.CANCEL)) {
                 requestGoodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.CANCEL);
             }
 
             for (RequestGoods requestGoods : requestGoodsList) {
                 Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
-                GoodsResponseListDto goodsListResponseDto = new GoodsResponseListDto(goods, image.getImageUrl(), requestGoods);
+                Image imageRequest = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(requestGoods.getGoods().getGoodsId());
+                GoodsResponseListDto goodsListResponseDto = new GoodsResponseListDto(goods, image.getImageUrl(), requestGoods, imageRequest.getImageUrl());
                 goodsListResponseDtos.add(goodsListResponseDto);
             }
         }
@@ -427,10 +434,9 @@ public class GoodsService {
             Goods goods = goodsRepository.findById(goodsId).orElseThrow(
                     () -> new IllegalArgumentException("존재하지 않는 goodsId 입니다."));
 
-            if (!goods.getUser().getUserId().equals(user.getUserId())) {
-                if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE) ||
-                        goods.getGoodsStatus().equals(GoodsStatus.REQUESTED)) {
-                    new RequestGoods(urGoodsId, user, goods, RequestStatus.REQUEST);
+            if (!urGoodsId.equals(goods.getGoodsId())) {
+                if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {// ||goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)
+                    new RequestGoods(urGoods, user, goods, RequestStatus.REQUEST);
                 } else {
                     throw new IllegalArgumentException("해당 물품은 다른 곳에 사용되거나 판매중 상태가 아닙니다.");
                 }

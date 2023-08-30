@@ -55,7 +55,7 @@ public class AuctionController {
     }
 
     @GetMapping("/{auctionId}")
-    public ApiResponse<AuctionResponseDto> getAuction(@PathVariable("auctionId") Long auctionId,
+    public ApiResponse<GetAuctionResponseDto> getAuction(@PathVariable("auctionId") Long auctionId,
                                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseUtils.ok(auctionService.findAuctionById(auctionId, userDetails.getUser()));
     }

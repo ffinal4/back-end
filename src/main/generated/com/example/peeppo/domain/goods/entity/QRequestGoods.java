@@ -36,7 +36,7 @@ public class QRequestGoods extends EntityPathBase<RequestGoods> {
 
     public final EnumPath<com.example.peeppo.domain.goods.enums.RequestStatus> requestStatus = createEnum("requestStatus", com.example.peeppo.domain.goods.enums.RequestStatus.class);
 
-    public final NumberPath<Long> sellerId = createNumber("sellerId", Long.class);
+    public final QGoods seller;
 
     public final com.example.peeppo.domain.user.entity.QUser user;
 
@@ -59,6 +59,7 @@ public class QRequestGoods extends EntityPathBase<RequestGoods> {
     public QRequestGoods(Class<? extends RequestGoods> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
         this.goods = inits.isInitialized("goods") ? new QGoods(forProperty("goods"), inits.get("goods")) : null;
+        this.seller = inits.isInitialized("seller") ? new QGoods(forProperty("seller"), inits.get("seller")) : null;
         this.user = inits.isInitialized("user") ? new com.example.peeppo.domain.user.entity.QUser(forProperty("user")) : null;
     }
 

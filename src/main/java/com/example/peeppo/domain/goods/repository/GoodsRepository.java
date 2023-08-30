@@ -72,4 +72,6 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
     Page<Goods> findAllByGoodsStatusAndIsDeletedFalse(GoodsStatus goodsStatus, Pageable Pageable);
 
     Page<Goods> findByUserUserIdAndRequestedStatus(Long userId, Pageable pageable, RequestedStatus requestedStatus);
+
+    Page<Goods> findByUserUserIdAndRequestedStatusIsNotNull(Long userId, Pageable pageable);
 }
