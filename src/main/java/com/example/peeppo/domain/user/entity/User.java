@@ -83,6 +83,10 @@ public class User {
         this.totalPoint += userPoint;
     }
 
+    public void deleteImg(){
+        this.userImg = null;
+    }
+
     public void totalPointInit(){
         this.totalPoint = 0L;
     }

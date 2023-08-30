@@ -38,4 +38,7 @@ public class GoodsResponseListDto {
         this.createdAt = requestGoods.getCreatedAt();
         this.modifiedAt = requestGoods.getModifiedAt();
     }
+
+    public GoodsResponseListDto(RequestGoods requestGoods, String imageUrl) {
+    }
 }
