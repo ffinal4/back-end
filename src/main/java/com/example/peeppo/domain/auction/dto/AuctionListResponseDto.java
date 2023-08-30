@@ -45,22 +45,4 @@ public class AuctionListResponseDto {
         this.auctionStatus = auction.getAuctionStatus();
         this.checkDibs = checkDibs;
     }
-
-
-    public AuctionListResponseDto(Auction auction, TimeRemaining timeRemaining, Long bidCount, boolean checkDibs) {
-        this.auctionId = auction.getAuctionId();
-        this.deleteStatus = auction.getIsDeleted();
-        this.nickname = auction.getUser().getNickname();
-        this.auctionEndTime = auction.getAuctionEndTime();
-        this.createdAt = auction.getCreatedAt();
-        this.modifiedAt = auction.getModifiedAt();
-        this.bidCount = bidCount;
-        this.goodsId = auction.getGoods().getGoodsId();
-        this.location = auction.getGoods().getLocation();
-        this.title = auction.getGoods().getTitle();
-        this.content = auction.getGoods().getContent();
-        this.image = auction.getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
-        this.timeRemaining = timeRemaining;
-        this.checkDibs = checkDibs;
-    }
 }

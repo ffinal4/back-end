@@ -294,7 +294,8 @@ public class AuctionService {
             if (null != userDetails) {
                 checkDibs = dibsService.checkDibsGoods(userDetails.getUser().getUserId(), auction.getGoods().getGoodsId());
             }
-            AuctionListResponseDto auctionListResponseDto = new AuctionListResponseDto(auction, timeRemaining, findBidCount(auction.getAuctionId()), checkDibs);
+            String imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(auction.getGoods().getGoodsId()).getImageUrl();
+            AuctionListResponseDto auctionListResponseDto = new AuctionListResponseDto(auction, imageUrl, timeRemaining, findBidCount(auction.getAuctionId()), checkDibs);
             auctionResponseDtoList.add(auctionListResponseDto);
         }
         return new PageResponse<>(auctionResponseDtoList, pageable, auctionPage.getTotalElements());

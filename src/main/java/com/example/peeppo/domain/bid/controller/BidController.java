@@ -72,5 +72,6 @@ public class BidController {
                                                                           @RequestParam(value = "bid status", required = false) BidStatus bidStatus) {
 
         return bidService.bidTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, bidStatus);
+
     }
 }
