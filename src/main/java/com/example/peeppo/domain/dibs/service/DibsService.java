@@ -30,13 +30,7 @@ public class DibsService {
     private final ImageRepository imageRepository;
 
     public boolean checkDibsGoods(Long userId, Long GoodsId) {
-        Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsId(userId, GoodsId);
-
-//        if(dibsGoods.isPresent()){
-//            return true;
-//        }
-//        return false;
-        return dibsGoods.isPresent();
+        return dibsRepository.findByUserUserIdAndGoodsGoodsId(userId, GoodsId).isPresent();
     }
 
 

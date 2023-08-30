@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.goods.repository;
 
 import com.example.peeppo.domain.goods.entity.Goods;
+import com.example.peeppo.domain.goods.enums.Category;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.enums.RequestedStatus;
 import com.example.peeppo.domain.user.entity.User;
@@ -65,6 +66,10 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
     Page<Goods> findByUserUserIdAndGoodsStatus(Long userId, Pageable pageable, GoodsStatus goodsStatus);
 
     Page<Goods> findByUserUserId(Long userId, Pageable pageable);
+
+    Page<Goods> findAllByCategoryAndIsDeletedFalse(@Param("category") Category category, Pageable pageable);
+
+    Page<Goods> findAllByGoodsStatusAndIsDeletedFalse(GoodsStatus goodsStatus, Pageable Pageable);
 
     Page<Goods> findByUserUserIdAndRequestedStatus(Long userId, Pageable pageable, RequestedStatus requestedStatus);
 }

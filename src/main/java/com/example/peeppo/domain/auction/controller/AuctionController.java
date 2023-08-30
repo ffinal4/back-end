@@ -24,6 +24,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import static com.example.peeppo.global.stringCode.SuccessCodeEnum.AUCTION_DELETE_SUCCESS;
 import static com.example.peeppo.global.stringCode.SuccessCodeEnum.AUCTION_END_SUCCESS;
 
@@ -46,9 +48,10 @@ public class AuctionController {
                                                                 @RequestParam("size") int size,
                                                                 @RequestParam("sortBy") String sortBy,
                                                                 @RequestParam("isAsc") boolean isAsc,
+                                                                @RequestParam(value = "category", required = false) String category,
                                                                 @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
-        return ResponseUtils.ok(auctionService.findAllAuction(page - 1, size, sortBy, isAsc, userDetails));
+        return ResponseUtils.ok(auctionService.findAllAuction(page - 1, size, sortBy, isAsc, category, userDetails));
     }
 
     @GetMapping("/{auctionId}")

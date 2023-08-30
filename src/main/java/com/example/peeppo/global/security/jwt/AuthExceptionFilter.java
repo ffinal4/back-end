@@ -22,7 +22,6 @@ public class AuthExceptionFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException {
         //다음 필터인 AuthFilter를 try하고 AuthFilter에서 던진 에러를 여기서 캐치
        try {
-            log.info("authException");
             filterChain.doFilter(request, response);
         } catch (Exception e) {
             log.error(e.getMessage());
