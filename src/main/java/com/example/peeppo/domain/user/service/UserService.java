@@ -108,6 +108,7 @@ public class UserService {
         if (!passwordEncoder.matches(myPageRequestDto.getOriginPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
+        user.deleteImg();
 
         String image = imageHelper.saveUserImages(multipartFile, amazonS3, bucket, user);
         user.upload(myPageRequestDto, image, encodedPassword);

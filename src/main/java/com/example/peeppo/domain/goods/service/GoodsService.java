@@ -65,6 +65,7 @@ public class GoodsService {
     private final String bucket;
     private final UserRepository userRepository;
     private final RatingGoodsRepository ratingGoodsRepository;
+    private final RequestRepository requestRepository;
 
     private final RatingHelper ratingHelper;
     private final DibsService dibsService;
@@ -86,6 +87,12 @@ public class GoodsService {
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
         Goods goods = new Goods(goodsRequestDto, wantedGoods, user, GoodsStatus.ONSALE);
         RatingGoods ratingGoods = new RatingGoods(goods);
+
+        List<String> imageUrls = imageHelper
+                .saveImagesToS3AndRepository(images, amazonS3, bucket, goods)
+                .stream()
+                .map(Image::getImageUrl)
+                .collect(Collectors.toList());
 
         goodsRepository.save(goods);
         ratingGoodsRepository.save(ratingGoods);
@@ -325,110 +332,87 @@ public class GoodsService {
     }
 
     //교환 요청 받은 페이지
-//    public ResponseEntity<Page<GoodsResponseListDto>> requestedTradeList(User user, int page, int size, String sortBy, boolean isAsc,
-//                                                                         RequestedStatus requestedStatus) {
-////        Pageable pageable = paging(page, size, sortBy, isAsc);
-////        Page<Goods> myGoodsPage;
-//
-////        if (goodsStatus != null) {
-////            myGoodsPage = goodsRepository.findByUserUserIdAndGoodsStatus(user.getUserId(), pageable, goodsStatus);
-////        } else {
-////            myGoodsPage = goodsRepository.findByUserUserId(user.getUserId(), pageable);
-////        }
-//
-////        List<GoodsListResponseDto> goodsListResponseDtoList = myGoodsPage.stream()
-////                .map(goods -> {
-////                    Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
-////                    return new GoodsListResponseDto(goods, image.getImageUrl());
-////                })
-////                .collect(Collectors.toList());
-//
-//        Pageable pageable = paging(page, size, sortBy, isAsc);
-//        Page<Goods> myGoodsPage;
-//
-//        if (requestedStatus != null) {
-//            myGoodsPage = goodsRepository.findByUserUserIdAndRequestedStatus(user.getUserId(), pageable, requestedStatus);
-//        } else {
-//            myGoodsPage = goodsRepository.findByUserUserId(user.getUserId(), pageable);
-//        }
-//
-//        for (Goods goods : myGoodsPage) {
-//            if (goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)) {
-//                List<GoodsResponseListDto> goodsListResponseDtos = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.REQUEST)
-//                        .stream()
-//                        .map(requestGoods -> {
-//                            Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
-//                            return new GoodsResponseListDto(goods, image.getImageUrl(), requestGoods);
-//                        })
-//                        .collect(Collectors.toList());
-//            } else if (goods.getRequestedStatus().equals(RequestedStatus.TRADING)) {
-//                List<GoodsResponseListDto> goodsListResponseDtos = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.TRADING)
-//                        .stream()
-//                        .map(requestGoods -> {
-//                            Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
-//                            return new GoodsResponseListDto(goods, image.getImageUrl(), requestGoods);
-//                        })
-//                        .collect(Collectors.toList());
-//            } else if (goods.getRequestedStatus().equals(RequestedStatus.DONE)) {
-//                List<GoodsResponseListDto> goodsListResponseDtos = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.DONE)
-//                        .stream()
-//                        .map(requestGoods -> {
-//                            Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
-//                            return new GoodsResponseListDto(goods, image.getImageUrl(), requestGoods);
-//                        })
-//                        .collect(Collectors.toList());
-//            } else if (goods.getRequestedStatus().equals(RequestedStatus.CANCEL)) {
-//                List<GoodsResponseListDto> goodsListResponseDtos = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.CANCEL)
-//                        .stream()
-//                        .map(requestGoods -> {
-//                            Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
-//                            return new GoodsResponseListDto(goods, image.getImageUrl(), requestGoods);
-//                        })
-//                        .collect(Collectors.toList());
-//            }
-//            PageResponse response = new PageResponse<>(goodsListResponseDtos, pageable, myGoodsPage.getTotalElements());
-//        }
-////
-////            }{
-////                Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
-////                GoodsListResponseDto goodsListResponseDto = new GoodsListResponseDto(goods, image.getImageUrl());
-////                goodsListResponseDtos.add(goodsListResponseDto);
-////
-////                List<RequestGoods> requestGoodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), goods.getGoodsStatus());
-////                for (RequestGoods requestGoods : requestGoodsList) {
-////                    Image image1 = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
-////                    GoodsListResponseDto goodsListResponseDto = new GoodsListResponseDto(goods, image1.getImageUrl(), requestGoods);
-////                    goodsListResponseDtos.add(goodsListResponseDto);
-////                }
-////            }
-//
-//
-//        PageResponse response = new PageResponse<>(goodsListResponseDtos, pageable, myGoodsPage.getTotalElements());
-//        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-//    }
-//
-//    public ResponseEntity<Page<GoodsListResponseDto>> requestTradeList(User user, int page, int size, String sortBy, boolean isAsc,
-//                                                                       RequestStatus requestStatus) {
-//
-//        Pageable pageable = paging(page, size, sortBy, isAsc);
-//        Page<RequestGoods> myGoodsPage;
-//
-//        if (requestStatus != null) {
-//            myGoodsPage = requestRepository.findByUserUserIdAndRequestStatus(user.getUserId(), pageable, requestStatus);
-//        } else {
-//            myGoodsPage = requestRepository.findByUserUserId(user.getUserId(), pageable);
-//        }
-//
-//        List<GoodsListResponseDto> goodsListResponseDtoList = myGoodsPage.stream()
-//                .map(goods -> {
-//                    Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
-//                    return new GoodsListResponseDto(goods, image.getImageUrl());
-//                })
-//                .collect(Collectors.toList());
-//
-//        PageResponse response = new PageResponse<>(goodsListResponseDtoList, pageable, myGoodsPage.getTotalElements());
-//        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-//    }
+    public ResponseEntity<Page<GoodsResponseListDto>> requestedTradeList(User user, int page, int size, String sortBy, boolean isAsc,
+                                                                         RequestedStatus requestedStatus) {
+
+        Pageable pageable = paging(page, size, sortBy, isAsc);
+        Page<Goods> myGoodsPage;
+
+        if (requestedStatus != null) {
+            myGoodsPage = goodsRepository.findByUserUserIdAndRequestedStatus(user.getUserId(), pageable, requestedStatus);
+        } else {
+            myGoodsPage = goodsRepository.findByUserUserId(user.getUserId(), pageable);
+        }
+
+        List<GoodsResponseListDto> goodsListResponseDtos = new ArrayList<>();
+
+        for (Goods goods : myGoodsPage) {
+            List<RequestGoods> requestGoodsList = new ArrayList<>();
+
+            if (goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)) {
+                requestGoodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.REQUEST);
+            } else if (goods.getRequestedStatus().equals(RequestedStatus.TRADING)) {
+                requestGoodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.TRADING);
+            } else if (goods.getRequestedStatus().equals(RequestedStatus.DONE)) {
+                requestGoodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.DONE);
+            } else if (goods.getRequestedStatus().equals(RequestedStatus.CANCEL)) {
+                requestGoodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.CANCEL);
+            }
+
+            for (RequestGoods requestGoods : requestGoodsList) {
+                Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
+                GoodsResponseListDto goodsListResponseDto = new GoodsResponseListDto(goods, image.getImageUrl(), requestGoods);
+                goodsListResponseDtos.add(goodsListResponseDto);
+            }
+        }
+
+        PageResponse response = new PageResponse<>(goodsListResponseDtos, pageable, myGoodsPage.getTotalElements());
+        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+    }
+
+  /*  public ResponseEntity<Page<GoodsResponseListDto>> requestTradeList(User user, int page, int size, String sortBy, boolean isAsc,
+                                                                       RequestStatus requestStatus) {
+
+        Pageable pageable = paging(page, size, sortBy, isAsc);
+        Page<RequestGoods> myGoodsPage;
+
+        if (requestStatus != null) {
+            myGoodsPage = requestRepository.findByUserUserIdAndRequestStatus(user.getUserId(), pageable, requestStatus);
+        } else {
+            myGoodsPage = requestRepository.findByUserUserId(user.getUserId(), pageable);
+        }
+
+        for (RequestGoods requestGoods : myGoodsPage) {
+            List<RequestGoods> goodsList = new ArrayList<>();
+
+            if (requestGoods.getRequestStatus().equals(RequestStatus.REQUEST)) {
+                Goods goods = goodsRepository.findById(requestGoods.getGoods().getGoodsId());
+                goodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(requestGoods.getGoods().getGoodsId(), RequestStatus.TRADING);
+            } else if (requestGoods.getRequestStatus().equals(RequestStatus.TRADING)) {
+                goodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(requestGoods.getGoods().getGoodsId(), RequestStatus.TRADING);
+            } else if (requestGoods.getRequestStatus().equals(RequestStatus.DONE)) {
+                goodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(requestGoods.getGoods().getGoodsId(), RequestStatus.DONE);
+            } else if (requestGoods.getRequestStatus().equals(RequestStatus.CANCEL)) {
+                goodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(requestGoods.getGoods().getGoodsId(), RequestStatus.CANCEL);
+            }
+
+            for (Goods goods : goodsList) {
+                Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
+                GoodsResponseListDto goodsListResponseDto = new GoodsResponseListDto(goods, image.getImageUrl(), requestGoods);
+                goodsListResponseDtos.add(goodsListResponseDto);
+            }
+        }
+
+        List<GoodsResponseListDto> goodsListResponseDtoList = myGoodsPage.stream()
+                .map(requestGoods -> {
+                    Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(requestGoods.getGoods().getGoodsId());
+                    return new GoodsResponseListDto(requestGoods, image.getImageUrl());
+                })
+                .collect(Collectors.toList());
+
+        PageResponse response = new PageResponse<>(goodsListResponseDtoList, pageable, myGoodsPage.getTotalElements());
+        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+    }*/
 
     //알림과 카운트 올려줘야됨
     public ResponseDto goodsRequest(User user, GoodsRequestRequestDto goodsRequestRequestDto, Long urGoodsId) {
