@@ -427,7 +427,7 @@ public class GoodsService {
             Goods goods = goodsRepository.findById(goodsId).orElseThrow(
                     () -> new IllegalArgumentException("존재하지 않는 goodsId 입니다."));
 
-            if (!goods.getUser().getUserId().equals(user.getUserId())) {
+            if (!urGoodsId.equals(goods.getGoodsId())) {
                 if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE) ||
                         goods.getGoodsStatus().equals(GoodsStatus.REQUESTED)) {
                     new RequestGoods(urGoodsId, user, goods, RequestStatus.REQUEST);
