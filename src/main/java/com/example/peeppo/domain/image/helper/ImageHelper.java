@@ -5,7 +5,9 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.image.entity.Image;
+import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.image.repository.ImageRepository;
+import com.example.peeppo.domain.image.repository.UserImageRepository;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +29,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ImageHelper {
     private final ImageRepository imageRepository;
-    private final UserRepository userRepository;
+    private final UserImageRepository userImageRepository;
 
     @Transactional
     public List<Image> saveImagesToS3AndRepository(List<MultipartFile> images, AmazonS3 amazonS3, String bucket, Goods goods) {
@@ -95,6 +97,9 @@ public class ImageHelper {
 
         // S3 버킷에 등록
         amazonS3.putObject(request);
+        UserImage img = new UserImage(imageUuid, amazonS3.getUrl(bucket, imageUuid).toString(), user);
+
+        userImageRepository.save(img);
 
         return amazonS3.getUrl(bucket, imageUuid).toString();
     }
