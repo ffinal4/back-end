@@ -2,6 +2,8 @@ package com.example.peeppo.domain.goods.controller;
 
 import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
+import com.example.peeppo.domain.goods.enums.RequestStatus;
+import com.example.peeppo.domain.goods.enums.RequestedStatus;
 import com.example.peeppo.domain.goods.service.GoodsService;
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.global.responseDto.ApiResponse;
@@ -105,17 +107,29 @@ public class GoodsController {
     public ApiResponse<List<GoodsListResponseDto>> searchGoods(@RequestParam("keyword") String keyword) {
         return goodsService.searchGoods(keyword);
     }
-
-    @GetMapping("/users/trade")
-    public ResponseEntity<Page<GoodsListResponseDto>> goodsTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                                     @RequestParam("page") int page,
-                                                                     @RequestParam("size") int size,
-                                                                     @RequestParam("sortBy") String sortBy,
-                                                                     @RequestParam("isAsc") boolean isAsc,
-                                                                     @RequestParam(value = "status", required = false) GoodsStatus goodsStatus) {
-
-        return goodsService.goodsTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, goodsStatus);
-    }
+    //교환요청 페이지(받은)
+//    @GetMapping("/users/trade/request")
+//    public ResponseEntity<Page<GoodsListResponseDto>> requestedTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
+//                                                                     @RequestParam("page") int page,
+//                                                                     @RequestParam("size") int size,
+//                                                                     @RequestParam("sortBy") String sortBy,
+//                                                                     @RequestParam("isAsc") boolean isAsc,
+//                                                                     @RequestParam(value = "status", required = false) RequestedStatus requestedStatus) {
+//
+//        return goodsService.requestedTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, requestedStatus);
+//    }
+//
+//    //교환요청 페이지(보낸)
+//    @GetMapping("/users/trade/requested")
+//    public ResponseEntity<Page<GoodsListResponseDto>> requestTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
+//                                                                       @RequestParam("page") int page,
+//                                                                       @RequestParam("size") int size,
+//                                                                       @RequestParam("sortBy") String sortBy,
+//                                                                       @RequestParam("isAsc") boolean isAsc,
+//                                                                       @RequestParam(value = "status", required = false) RequestStatus requestStatus) {
+//
+//        return goodsService.requestTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, requestStatus);
+//    }
 
     //교환신청
     @PostMapping("/users/{goodsId}/request")

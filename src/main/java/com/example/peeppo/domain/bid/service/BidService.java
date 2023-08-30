@@ -73,10 +73,12 @@ public class BidService {
 
             if (goods.getIsDeleted() && !goods.getUser().getUserId().equals(user.getUserId())) {
                 System.out.println(" ");
-                throw new IllegalAccessException();//여기도 고민
+                throw new IllegalAccessException();
+                //여기도 고민
             }
             if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {
-                RatingGoods ratingGoods = ratingGoodsRepository.findByGoodsGoodsId(goodsId);//시작가보다 낮을 경우
+                RatingGoods ratingGoods = ratingGoodsRepository.findByGoodsGoodsId(goodsId);
+                //시작가보다 낮을 경우
 
                 totalPrice += ratingGoods.getAvgRatingPrice();
 
@@ -90,6 +92,7 @@ public class BidService {
         if (auction.getLowPrice() > totalPrice) {
             throw new IllegalAccessException("물건의 총합이 하한가보다 낮습니다.");
         }
+
         Notification notification = notificationRepository.findByUserUserId(auction.getUser().getUserId());
 
         if (notification == null) {
@@ -174,10 +177,6 @@ public class BidService {
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Auction> myAuctionPage = null;
 
-//        Goods goods = auction.getGoods();
-//        TimeRemaining timeRemaining = countDownTime(auction);
-//        Long bidCount = findBidCount(auction.getAuctionId());
-//        AuctionResponseDto auctionResponseDto = new AuctionResponseDto(auction, goods, timeRemaining, bidCount);
         if (bidStatus != null) {
             Bid bid = bidRepository.findByUserUserIdAndBidStatus(user.getUserId(), bidStatus);
             Long auctionId = bidRepository.findAuctionIdByBidId(bid.getBidId());
@@ -192,7 +191,7 @@ public class BidService {
                 .map(auction -> {
                     TimeRemaining timeRemaining = countDownTime(auction);
                     Long bidCount = findBidCount(auction.getAuctionId());
-                    Bid bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
+                    Bid bid = bidRepository.findByAuctionAuctionIdAndUserUserId(auction.getAuctionId(), user.getUserId());
                     return new BidTradeListResponseDto(auction, timeRemaining, bidCount, bid);
                 })
                 .collect(Collectors.toList());

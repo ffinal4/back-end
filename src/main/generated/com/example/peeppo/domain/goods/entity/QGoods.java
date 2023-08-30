@@ -54,6 +54,10 @@ public class QGoods extends EntityPathBase<Goods> {
 
     public final BooleanPath ratingCheck = createBoolean("ratingCheck");
 
+    public final EnumPath<com.example.peeppo.domain.goods.enums.RequestedStatus> requestedStatus = createEnum("requestedStatus", com.example.peeppo.domain.goods.enums.RequestedStatus.class);
+
+    public final ListPath<RequestGoods, QRequestGoods> requestGoods = this.<RequestGoods, QRequestGoods>createList("requestGoods", RequestGoods.class, QRequestGoods.class, PathInits.DIRECT2);
+
     public final NumberPath<Long> sellerPrice = createNumber("sellerPrice", Long.class);
 
     public final StringPath title = createString("title");

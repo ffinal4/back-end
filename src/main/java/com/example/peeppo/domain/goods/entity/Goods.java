@@ -6,6 +6,7 @@ import com.example.peeppo.domain.dibs.entity.Dibs;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.dto.GoodsRequestDto;
 import com.example.peeppo.domain.goods.enums.Category;
+import com.example.peeppo.domain.goods.enums.RequestedStatus;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.utils.Timestamped;
@@ -58,13 +59,17 @@ public class Goods extends Timestamped {
     @Enumerated(EnumType.STRING)
     private GoodsStatus goodsStatus;
 
+    @Enumerated(EnumType.STRING)
+    private RequestedStatus requestedStatus;
+
     @OneToMany(mappedBy = "goods")
     private List<Dibs> dibs;
 
     @OneToMany(mappedBy = "goods")
     private List<ChatRoom> chatRooms;
 
-
+    @OneToMany(mappedBy = "goods")
+    private List<RequestGoods> requestGoods;
 
     public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods){
         this.title = requestDto.getTitle();
@@ -74,6 +79,7 @@ public class Goods extends Timestamped {
         this.tradeType = requestDto.getTradeType();
         this.category = requestDto.getCategory();
         this.wantedGoods = wantedGoods;
+
     }
 
     public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods, User user, GoodsStatus goodsStatus) {
@@ -102,6 +108,7 @@ public class Goods extends Timestamped {
         this.content = requestDto.getContent();
         this.location = requestDto.getLocation();
     }
+
     public void delete(){
         this.isDeleted = true;
     }
@@ -114,6 +121,10 @@ public class Goods extends Timestamped {
         this.title = title;
         this.content = content;
         this.location = location;
+    }
+
+    public void setRequestedStatus(RequestedStatus requestedStatus) {
+        this.requestedStatus = requestedStatus;
     }
 }
 

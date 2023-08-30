@@ -11,6 +11,7 @@ import com.example.peeppo.domain.auction.dto.AuctionResponseDto;
 import com.example.peeppo.domain.auction.dto.TestListResponseDto;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.auction.service.AuctionService;
+import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
 import com.example.peeppo.domain.bid.enums.BidStatus;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
@@ -60,11 +61,11 @@ public class AuctionController {
     }
 
     // 경매 정상 종료 -> 우선 입찰 물품 전체 보여주기 -> 입찰 물품 선택
-    @DeleteMapping("/{auctionId}/pick/{bidId}")
+    @DeleteMapping("/{auctionId}/pick/bid/list")
     public ApiResponse<?> endAuction(@PathVariable("auctionId") Long auctionId,
-                                     @PathVariable("bidId") Long bidId,
+                                     @Valid @RequestBody ChoiceRequestDto choiceRequestDto,
                                      @AuthenticationPrincipal UserDetailsImpl userDetails) throws IllegalAccessException {
-        auctionService.endAuction(auctionId, bidId, userDetails.getUser());
+        auctionService.endAuction(auctionId, userDetails.getUser(), choiceRequestDto);
 
         return ResponseUtils.ok(ResponseUtils.okWithMessage(AUCTION_END_SUCCESS));
     }

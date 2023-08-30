@@ -4,7 +4,14 @@ import com.example.peeppo.domain.auction.dto.*;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
+import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
 import com.example.peeppo.domain.bid.entity.Bid;
+import com.example.peeppo.domain.bid.entity.Choice;
+import com.example.peeppo.domain.bid.enums.BidStatus;
+import com.example.peeppo.domain.dibs.repository.DibsRepository;
+import com.example.peeppo.domain.dibs.service.DibsService;
+import com.example.peeppo.domain.goods.dto.GoodsSingleResponseDto;
+import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.bid.repository.BidRepository;
 import com.example.peeppo.domain.dibs.service.DibsService;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
@@ -188,25 +195,34 @@ public class AuctionService {
 
     // 경매 입찰 성공 ( 경매물품과 입찰물품의 상태를 둘 다 soldout으로 변경해라 )
     @Transactional
-    public void endAuction(Long auctionId, Long bidId, User user) {
+    public void endAuction(Long auctionId, User user, ChoiceRequestDto choiceRequestDto) {
         Auction auction = findAuctionId(auctionId);
+//        List<Bid> bidList = new ArrayList<>();
 
         checkUsername(auctionId, user);
-        Bid bid = findBidId(bidId);
-        bid.changeBidStatus(SUCCESS);
 
-        Notification notification = notificationRepository.findByUserUserId(bid.getUser().getUserId());
+        List<Choice> bidsList = new ArrayList<>();
 
-        if (notification == null) {
-            notification = new Notification();
-            notification.setUser(user);
+        if (!auction.getUser().getUserId().equals(user.getUserId())) {
+            throw new IllegalArgumentException("본인 경매가 아닙니다.");
         }
+        for (Long bidId : choiceRequestDto.getbidId()) {
+            Bid bid = findBidId(bidId);
+            bid.changeBidStatus(SUCCESS);
 
-        notification.setIsRequest(false);
-        notification.updateRequestCount();
-        notification.Checked(false);
+            Notification notification = notificationRepository.findByUserUserId(bid.getUser().getUserId());
 
-        notificationRepository.save(notification);
+            if (notification == null) {
+                notification = new Notification();
+                notification.setUser(user);
+            }
+
+            notification.setIsRequest(false);
+            notification.updateRequestCount();
+            notification.Checked(false);
+
+            notificationRepository.save(notification);
+        }
 
         auction.changeAuctionStatus(REQUEST);
         auction.getGoods().changeStatus(SOLDOUT);
@@ -228,13 +244,24 @@ public class AuctionService {
             myAuctionPage = auctionRepository.findByUserUserId(user.getUserId(), pageable);
         }
 
-        List<TestListResponseDto> auctionResponseDtoList = myAuctionPage.stream()
-                .map(auction -> {
+        List<TestListResponseDto> auctionResponseDtoList = new ArrayList<>();
+
+        for (Auction auction : myAuctionPage) {
+            if(auction.getAuctionStatus().equals(REQUEST)){
+                List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndBidStatus(auction.getAuctionId(), SUCCESS);
+                for(Bid bid : bidList){
                     TimeRemaining timeRemaining = countDownTime(auction);
                     Long bidCount = findBidCount(auction.getAuctionId());
-                    return new TestListResponseDto(auction, timeRemaining, bidCount);
-                })
-                .collect(Collectors.toList());
+                    TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount, bid);
+                    auctionResponseDtoList.add(responseDto);
+                }
+            } else{
+                TimeRemaining timeRemaining = countDownTime(auction);
+                Long bidCount = findBidCount(auction.getAuctionId());
+                TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount);
+                auctionResponseDtoList.add(responseDto);
+            }
+        }//나중에 stream 으로 처리하자, flatMap 쓰면 될듯?
 
         PageResponse response = new PageResponse<>(auctionResponseDtoList, pageable, myAuctionPage.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);

@@ -1,15 +1,26 @@
 package com.example.peeppo.domain.goods.service;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.example.peeppo.domain.auction.dto.TestListResponseDto;
+import com.example.peeppo.domain.auction.dto.TimeRemaining;
+import com.example.peeppo.domain.auction.entity.Auction;
+import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.dibs.entity.Dibs;
 import com.example.peeppo.domain.dibs.repository.DibsRepository;
 import com.example.peeppo.domain.dibs.service.DibsService;
+import com.example.peeppo.domain.goods.entity.RequestGoods;
+import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.entity.WantedGoods;
+import com.example.peeppo.domain.goods.enums.RequestStatus;
+import com.example.peeppo.domain.goods.enums.RequestedStatus;
 import com.example.peeppo.domain.goods.enums.Category;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
+import com.example.peeppo.domain.goods.enums.RequestStatus;
+import com.example.peeppo.domain.goods.enums.RequestedStatus;
 import com.example.peeppo.domain.goods.repository.GoodsRepository;
+import com.example.peeppo.domain.goods.repository.RequestRepository;
 import com.example.peeppo.domain.goods.repository.WantedGoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.helper.ImageHelper;
@@ -30,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -237,7 +249,7 @@ public class GoodsService {
     }
 
     public List<GoodsResponseDto> getMyGoodsWithoutPagenation(User user) {
-       return getGoodsResponseDtos(user);
+        return getGoodsResponseDtos(user);
     }
 
     public ApiResponse<UrPocketResponseDto> getPocket(String nickname, UserDetailsImpl userDetails, int page,
@@ -286,6 +298,7 @@ public class GoodsService {
         }
         return goodsResponseDtoList;
     }
+
     public ApiResponse<List<GoodsListResponseDto>> searchGoods(String keyword) {
         List<Goods> searchList = goodsRepository.findByTitleContaining(keyword);
         List<GoodsListResponseDto> goodsListResponseDtos = new ArrayList<>();
@@ -311,32 +324,113 @@ public class GoodsService {
         return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods), null);
     }
 
-    public ResponseEntity<Page<GoodsListResponseDto>> goodsTradeList(User user,
-                                                                     int page,
-                                                                     int size,
-                                                                     String sortBy,
-                                                                     boolean isAsc,
-                                                                     GoodsStatus goodsStatus) {
-        Pageable pageable = paging(page, size, sortBy, isAsc);
-        Page<Goods> myGoodsPage;
+    //교환 요청 받은 페이지
+//    public ResponseEntity<Page<GoodsResponseListDto>> requestedTradeList(User user, int page, int size, String sortBy, boolean isAsc,
+//                                                                         RequestedStatus requestedStatus) {
+////        Pageable pageable = paging(page, size, sortBy, isAsc);
+////        Page<Goods> myGoodsPage;
+//
+////        if (goodsStatus != null) {
+////            myGoodsPage = goodsRepository.findByUserUserIdAndGoodsStatus(user.getUserId(), pageable, goodsStatus);
+////        } else {
+////            myGoodsPage = goodsRepository.findByUserUserId(user.getUserId(), pageable);
+////        }
+//
+////        List<GoodsListResponseDto> goodsListResponseDtoList = myGoodsPage.stream()
+////                .map(goods -> {
+////                    Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
+////                    return new GoodsListResponseDto(goods, image.getImageUrl());
+////                })
+////                .collect(Collectors.toList());
+//
+//        Pageable pageable = paging(page, size, sortBy, isAsc);
+//        Page<Goods> myGoodsPage;
+//
+//        if (requestedStatus != null) {
+//            myGoodsPage = goodsRepository.findByUserUserIdAndRequestedStatus(user.getUserId(), pageable, requestedStatus);
+//        } else {
+//            myGoodsPage = goodsRepository.findByUserUserId(user.getUserId(), pageable);
+//        }
+//
+//        for (Goods goods : myGoodsPage) {
+//            if (goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)) {
+//                List<GoodsResponseListDto> goodsListResponseDtos = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.REQUEST)
+//                        .stream()
+//                        .map(requestGoods -> {
+//                            Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
+//                            return new GoodsResponseListDto(goods, image.getImageUrl(), requestGoods);
+//                        })
+//                        .collect(Collectors.toList());
+//            } else if (goods.getRequestedStatus().equals(RequestedStatus.TRADING)) {
+//                List<GoodsResponseListDto> goodsListResponseDtos = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.TRADING)
+//                        .stream()
+//                        .map(requestGoods -> {
+//                            Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
+//                            return new GoodsResponseListDto(goods, image.getImageUrl(), requestGoods);
+//                        })
+//                        .collect(Collectors.toList());
+//            } else if (goods.getRequestedStatus().equals(RequestedStatus.DONE)) {
+//                List<GoodsResponseListDto> goodsListResponseDtos = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.DONE)
+//                        .stream()
+//                        .map(requestGoods -> {
+//                            Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
+//                            return new GoodsResponseListDto(goods, image.getImageUrl(), requestGoods);
+//                        })
+//                        .collect(Collectors.toList());
+//            } else if (goods.getRequestedStatus().equals(RequestedStatus.CANCEL)) {
+//                List<GoodsResponseListDto> goodsListResponseDtos = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.CANCEL)
+//                        .stream()
+//                        .map(requestGoods -> {
+//                            Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
+//                            return new GoodsResponseListDto(goods, image.getImageUrl(), requestGoods);
+//                        })
+//                        .collect(Collectors.toList());
+//            }
+//            PageResponse response = new PageResponse<>(goodsListResponseDtos, pageable, myGoodsPage.getTotalElements());
+//        }
+////
+////            }{
+////                Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
+////                GoodsListResponseDto goodsListResponseDto = new GoodsListResponseDto(goods, image.getImageUrl());
+////                goodsListResponseDtos.add(goodsListResponseDto);
+////
+////                List<RequestGoods> requestGoodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), goods.getGoodsStatus());
+////                for (RequestGoods requestGoods : requestGoodsList) {
+////                    Image image1 = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
+////                    GoodsListResponseDto goodsListResponseDto = new GoodsListResponseDto(goods, image1.getImageUrl(), requestGoods);
+////                    goodsListResponseDtos.add(goodsListResponseDto);
+////                }
+////            }
+//
+//
+//        PageResponse response = new PageResponse<>(goodsListResponseDtos, pageable, myGoodsPage.getTotalElements());
+//        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+//    }
+//
+//    public ResponseEntity<Page<GoodsListResponseDto>> requestTradeList(User user, int page, int size, String sortBy, boolean isAsc,
+//                                                                       RequestStatus requestStatus) {
+//
+//        Pageable pageable = paging(page, size, sortBy, isAsc);
+//        Page<RequestGoods> myGoodsPage;
+//
+//        if (requestStatus != null) {
+//            myGoodsPage = requestRepository.findByUserUserIdAndRequestStatus(user.getUserId(), pageable, requestStatus);
+//        } else {
+//            myGoodsPage = requestRepository.findByUserUserId(user.getUserId(), pageable);
+//        }
+//
+//        List<GoodsListResponseDto> goodsListResponseDtoList = myGoodsPage.stream()
+//                .map(goods -> {
+//                    Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
+//                    return new GoodsListResponseDto(goods, image.getImageUrl());
+//                })
+//                .collect(Collectors.toList());
+//
+//        PageResponse response = new PageResponse<>(goodsListResponseDtoList, pageable, myGoodsPage.getTotalElements());
+//        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+//    }
 
-        if (goodsStatus != null) {
-            myGoodsPage = goodsRepository.findByUserUserIdAndGoodsStatus(user.getUserId(), pageable, goodsStatus);
-        } else {
-            myGoodsPage = goodsRepository.findByUserUserId(user.getUserId(), pageable);
-        }
-
-        List<GoodsListResponseDto> goodsListResponseDtoList = myGoodsPage.stream()
-                .map(goods -> {
-                    Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
-                    return new GoodsListResponseDto(goods, image.getImageUrl());
-                })
-                .collect(Collectors.toList());
-
-        PageResponse response = new PageResponse<>(goodsListResponseDtoList, pageable, myGoodsPage.getTotalElements());
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-    }
-
+    //알림과 카운트 올려줘야됨
     public ResponseDto goodsRequest(User user, GoodsRequestRequestDto goodsRequestRequestDto, Long urGoodsId) {
         Goods urGoods = goodsRepository.findByGoodsId(urGoodsId)
                 .orElseThrow(() -> new NullPointerException("해당 상품이 존재하지 않습니다."));
@@ -346,8 +440,9 @@ public class GoodsService {
                     () -> new IllegalArgumentException("존재하지 않는 goodsId 입니다."));
 
             if (!goods.getUser().getUserId().equals(user.getUserId())) {
-                if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {
-                    goods.changeStatus(GoodsStatus.REQUEST);
+                if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE) ||
+                        goods.getGoodsStatus().equals(GoodsStatus.REQUESTED)) {
+                    new RequestGoods(user, goods, RequestStatus.REQUEST);
                 } else {
                     throw new IllegalArgumentException("해당 물품은 다른 곳에 사용되거나 판매중 상태가 아닙니다.");
                 }
@@ -355,11 +450,10 @@ public class GoodsService {
                 throw new IllegalArgumentException("내 물건은 교환할 수 없습니다.");
             }
         }
-        urGoods.changeStatus(GoodsStatus.REQUESTED);
+        urGoods.setRequestedStatus(RequestedStatus.REQUESTED);
 
         return new ResponseDto("교환신청이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
-
 
     public Page<GoodsListResponseDto> allGoods(Page<Goods> goodsPage, Pageable pageable, User user) {
 

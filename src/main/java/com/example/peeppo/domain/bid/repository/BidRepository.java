@@ -17,6 +17,8 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
 
     Bid findByAuctionAuctionId(Long auctionId);
 
+    List<Bid> findByAuctionAuctionIdAndBidStatus(Long auctionId, BidStatus bidStatus);
+
     Bid findByUserUserIdAndBidStatus(Long userId, BidStatus bidStatus);
     Page<Bid> findByUserUserId(Long userId, Pageable pageable);
 
@@ -28,4 +30,6 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
     Long findBidIdByUserUserId(Long userId);
 
     Long findAuctionIdByBidId(Long bidId);
+
+    Bid findByAuctionAuctionIdAndUserUserId(Long auctionId, Long userId);
 }

@@ -1,5 +1,8 @@
 package com.example.peeppo.domain.user.service;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.example.peeppo.domain.image.entity.Image;
+import com.example.peeppo.domain.image.helper.ImageHelper;
 import com.example.peeppo.domain.image.service.UploadService;
 import com.example.peeppo.domain.user.dto.*;
 import com.example.peeppo.domain.user.entity.User;
@@ -21,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import static com.example.peeppo.domain.goods.entity.QGoods.goods;
 import static org.springframework.http.HttpStatus.OK;
 
 @Service
@@ -32,6 +36,9 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final RedisTemplate redisTemplate;
     private final UploadService uploadService;
+    private final ImageHelper imageHelper;
+    private final AmazonS3 amazonS3;
+    private final String bucket;
 
     public ResponseDto signup(SignupRequestDto signupRequestDto) {
         String email = signupRequestDto.getEmail();
@@ -102,8 +109,8 @@ public class UserService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        String updateUserImg = uploadService.upload(multipartFile);
-        user.upload(myPageRequestDto, updateUserImg, encodedPassword);
+        String image = imageHelper.saveUserImages(multipartFile, amazonS3, bucket, user);
+        user.upload(myPageRequestDto, image, encodedPassword);
 
         userRepository.save(user);
 

@@ -2,6 +2,7 @@ package com.example.peeppo.domain.image.entity;
 
 
 import com.example.peeppo.domain.goods.entity.Goods;
+import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.utils.Timestamped;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
@@ -29,5 +30,10 @@ public class Image extends Timestamped {
         this.imageKey = imageKey;
         this.imageUrl = image;
         this.goods = goods;
+    }
+
+    public Image(String imageKey, String image) {
+        this.imageKey = imageKey;
+        this.imageUrl = image;
     }
 }
