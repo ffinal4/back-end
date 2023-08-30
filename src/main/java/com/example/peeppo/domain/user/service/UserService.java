@@ -113,8 +113,9 @@ public class UserService {
         }
         user.deleteImg();
         UserImage userImage = userImageRepository.findByUserUserId(user.getUserId());
-        userImageRepository.delete(userImage);
-
+        if(userImage != null) {
+            userImageRepository.delete(userImage);
+        }
         String image = imageHelper.saveUserImages(multipartFile, amazonS3, bucket, user);
         user.upload(myPageRequestDto, image, encodedPassword);
 
