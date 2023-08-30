@@ -2,6 +2,7 @@ package com.example.peeppo.domain.goods.repository;
 
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
+import com.example.peeppo.domain.goods.enums.RequestedStatus;
 import com.example.peeppo.domain.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -65,4 +66,5 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
 
     Page<Goods> findByUserUserId(Long userId, Pageable pageable);
 
+    Page<Goods> findByUserUserIdAndRequestedStatus(Long userId, Pageable pageable, RequestedStatus requestedStatus);
 }

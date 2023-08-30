@@ -6,6 +6,7 @@ import com.example.peeppo.domain.dibs.entity.Dibs;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.dto.GoodsRequestDto;
 import com.example.peeppo.domain.goods.enums.Category;
+import com.example.peeppo.domain.goods.enums.RequestedStatus;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.utils.Timestamped;
@@ -58,13 +59,17 @@ public class Goods extends Timestamped {
     @Enumerated(EnumType.STRING)
     private GoodsStatus goodsStatus;
 
+    @Enumerated(EnumType.STRING)
+    private RequestedStatus requestedStatus;
+
     @OneToMany(mappedBy = "goods")
     private List<Dibs> dibs;
 
     @OneToMany(mappedBy = "goods")
     private List<ChatRoom> chatRooms;
 
-
+    @OneToMany(mappedBy = "goods")
+    private List<RequestGoods> requestGoods;
 
     public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods){
         this.title = requestDto.getTitle();
@@ -110,6 +115,10 @@ public class Goods extends Timestamped {
 
     public void changeStatus(GoodsStatus goodsStatus) {
         this.goodsStatus = goodsStatus;
+    }
+
+    public void setRequestedStatus(RequestedStatus requestedStatus) {
+        this.requestedStatus = requestedStatus;
     }
 }
 

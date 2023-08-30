@@ -60,36 +60,37 @@ public class BidService {
 
         Auction auction = getAuction(auctionId);
         List<Bid> List = new ArrayList<>();
+        Double totalPrice = null;
 
         //경매 진행 여부
-        if (auction.getGoods().getGoodsStatus().equals(GoodsStatus.ONAUCTION) &&
-                !auction.getUser().getUserId().equals(user.getUserId())) {
-                for (Long goodsId : bidGoodsListRequestDto.getGoodsId()) {
-                    Goods goods = getGoods(goodsId);
-                    String goodsImg = String.valueOf(imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsId));
+        if (!auction.getGoods().getGoodsStatus().equals(GoodsStatus.ONAUCTION) ||
+                auction.getUser().getUserId().equals(user.getUserId())) {
+            throw new IllegalAccessException("본인의 경매물품엔 입찰하실 수 없습니다.");
+        }
+        for (Long goodsId : bidGoodsListRequestDto.getGoodsId()) {
+            Goods goods = getGoods(goodsId);
+            String goodsImg = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsId).getImageUrl();
 
-                    if (goods.getIsDeleted() && !goods.getUser().getUserId().equals(user.getUserId())) {
-                        System.out.println(" ");
-                        throw new IllegalAccessException();
-                        //여기도 고민
-                    }
-                    if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {
-                        RatingGoods ratingGoods = ratingGoodsRepository.findByGoodsGoodsId(goodsId);
-                        //시작가보다 낮을 경우
-                        if (auction.getLowPrice() > ratingGoods.getAvgRatingPrice()) {   //평균가 이상함
-                            System.out.println("2 ");
-                            throw new IllegalAccessException();
-                        }
-                        List.add(new Bid(user, auction, goods, goodsImg));
-                        goods.changeStatus(GoodsStatus.BIDDING);
-                    } else {
-                        System.out.println("3 ");
-                        throw new IllegalAccessException();
-                    }
-                }
-        } else {
-            System.out.println("4 ");
-            throw new IllegalAccessException();
+            if (goods.getIsDeleted() && !goods.getUser().getUserId().equals(user.getUserId())) {
+                System.out.println(" ");
+                throw new IllegalAccessException();
+                //여기도 고민
+            }
+            if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {
+                RatingGoods ratingGoods = ratingGoodsRepository.findByGoodsGoodsId(goodsId);
+                //시작가보다 낮을 경우
+
+                totalPrice += ratingGoods.getAvgRatingPrice();
+
+                List.add(new Bid(user, auction, goods, goodsImg));
+                goods.changeStatus(GoodsStatus.BIDDING);
+            } else {
+                System.out.println("3 ");
+                throw new IllegalAccessException();
+            }
+        }
+        if (auction.getLowPrice() > totalPrice) {
+            throw new IllegalAccessException("물건의 총합이 하한가보다 낮습니다.");
         }
 
         Notification notification = notificationRepository.findByUserUserId(auction.getUser().getUserId());
@@ -172,14 +173,10 @@ public class BidService {
     }
 
     public ResponseEntity<Page<BidTradeListResponseDto>> bidTradeList(User user, int page, int size, String sortBy, boolean isAsc,
-                                                                  BidStatus bidStatus) {
+                                                                      BidStatus bidStatus) {
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Auction> myAuctionPage = null;
 
-//        Goods goods = auction.getGoods();
-//        TimeRemaining timeRemaining = countDownTime(auction);
-//        Long bidCount = findBidCount(auction.getAuctionId());
-//        AuctionResponseDto auctionResponseDto = new AuctionResponseDto(auction, goods, timeRemaining, bidCount);
         if (bidStatus != null) {
             Bid bid = bidRepository.findByUserUserIdAndBidStatus(user.getUserId(), bidStatus);
             Long auctionId = bidRepository.findAuctionIdByBidId(bid.getBidId());
@@ -194,7 +191,7 @@ public class BidService {
                 .map(auction -> {
                     TimeRemaining timeRemaining = countDownTime(auction);
                     Long bidCount = findBidCount(auction.getAuctionId());
-                    Bid bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
+                    Bid bid = bidRepository.findByAuctionAuctionIdAndUserUserId(auction.getAuctionId(), user.getUserId());
                     return new BidTradeListResponseDto(auction, timeRemaining, bidCount, bid);
                 })
                 .collect(Collectors.toList());

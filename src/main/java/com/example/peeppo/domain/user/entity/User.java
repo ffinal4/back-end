@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.user.entity;
 
 import com.example.peeppo.domain.chat.entity.ChatRoom;
+import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.user.dto.MyPageRequestDto;
 import com.example.peeppo.domain.user.dto.SignupRequestDto;
 import jakarta.persistence.*;
@@ -37,7 +38,6 @@ public class User {
     @Column
     private String location;    //null 안되게 수정해둘것
 
-    @Column(nullable = true)
     private String userImg;
 
     @Column(nullable = false)
@@ -87,7 +87,9 @@ public class User {
         this.totalPoint = 0L;
     }
 
-
+    public void imgUpdate(String image){
+        this.userImg = image;
+    }
 
     public void userPointAdd(Long userPoint) {
         this.userPoint += userPoint;
