@@ -113,6 +113,7 @@ public class GoodsResponseDto {
         this.sellerPrice = goods.getSellerPrice();
         this.ratingCheck = goods.getRatingCheck();
         this.dibsCount = dibsCount;
+        this.goodsStatus = goods.getGoodsStatus();
     }
 
     public GoodsResponseDto(Goods goods, List<String> imageUrls, WantedGoods wantedGoods, boolean checkSameUser) {

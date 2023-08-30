@@ -159,15 +159,31 @@ public class AuctionService {
     }
 
     // 경매 상세 조회
-    public AuctionResponseDto findAuctionById(Long auctionId, User user) {
-        Auction auction = findAuctionId(auctionId);
+    public GetAuctionResponseDto findAuctionById(Long auctionId, User user) {
+        Auction auction1 = findAuctionId(auctionId);
         boolean checkSameUser = true;
-        if (auction.getUser().getUserId() != user.getUserId()) {
+        if (auction1.getUser().getUserId() != user.getUserId()) {
             checkSameUser = false;
         }
-        List<String> imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(auction.getGoods().getGoodsId())
+        List<String> imageUrl1 = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(auction1.getGoods().getGoodsId())
                 .stream().map(Image::getImageUrl).collect(Collectors.toList());
-        return new AuctionResponseDto(auction, auction.getGoods(), countDownTime(auction), findBidCount(auctionId), checkSameUser, imageUrl);
+
+        List<Auction> auctionList = auctionRepository.findTop20ByAuctionStatus(AuctionStatus.AUCTION);
+        List<AuctionListResponseDto> auctionResponseDtos = new ArrayList<>();
+        for (Auction auction : auctionList) {
+            TimeRemaining timeRemaining = countDownTime(auction);
+            boolean checkDibs = false;
+            String imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(auction.getGoods().getGoodsId()).getImageUrl();
+
+            if(user != null) {
+                checkDibs = dibsService.checkDibsGoods(user.getUserId(),auction.getGoods().getGoodsId());
+            }
+            AuctionListResponseDto auctionResponseDto = new AuctionListResponseDto(auction, imageUrl, timeRemaining, findBidCount(auction.getAuctionId()), checkDibs);
+            auctionResponseDtos.add(auctionResponseDto);
+        }
+
+        AuctionResponseDto auctionResponseDto = new AuctionResponseDto(auction1, auction1.getGoods(), countDownTime(auction1), findBidCount(auctionId), checkSameUser, imageUrl1);
+        return new GetAuctionResponseDto(auctionResponseDtos, auctionResponseDto);
     }
 
     // 경매 삭제 (경매 입찰 취소)
@@ -241,12 +257,15 @@ public class AuctionService {
         if (auctionStatus != null) {
             myAuctionPage = auctionRepository.findByUserUserIdAndAuctionStatus(user.getUserId(), pageable, auctionStatus);
         } else {
-            myAuctionPage = auctionRepository.findByUserUserId(user.getUserId(), pageable);
+            myAuctionPage = auctionRepository.findByUserUserIdAndAuctionStatusIsNotNull(user.getUserId(), pageable);
         }
 
         List<TestListResponseDto> auctionResponseDtoList = new ArrayList<>();
 
         for (Auction auction : myAuctionPage) {
+            if(auction.getAuctionStatus() == null){
+                continue;
+            }
             if(auction.getAuctionStatus().equals(REQUEST)){
                 List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndBidStatus(auction.getAuctionId(), SUCCESS);
                 for(Bid bid : bidList){

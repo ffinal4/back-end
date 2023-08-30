@@ -20,6 +20,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -39,13 +41,9 @@ public class BidController {
 
     //전체조회
     @GetMapping("/auction/{auctionId}/bid")
-    public ApiResponse<Page<BidListResponseDto>> bidList(@PathVariable Long auctionId,
-                                                            @RequestParam("page") int page,
-                                                            @RequestParam("size") int size,
-                                                            @RequestParam("sortBy") String sortBy,
-                                                            @RequestParam("isAsc") boolean isAsc) {
+    public ApiResponse<List<BidListResponseDto>> bidList(@PathVariable Long auctionId) {
 
-        return ResponseUtils.ok(bidService.BidList(auctionId, page - 1, size, sortBy, isAsc));
+        return ResponseUtils.ok(bidService.BidList(auctionId));
     }
 
     @PostMapping("/auction/{auctionId}/choice/bids")

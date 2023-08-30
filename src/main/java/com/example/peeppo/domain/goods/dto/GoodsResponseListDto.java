@@ -15,7 +15,7 @@ public class GoodsResponseListDto {
     private String location;
     private String title;
     private String nickname;
-    private String image;
+    private String urImage;
     private GoodsStatus goodsStatus;
     private Long requestId;
     private String sellerLocation;
@@ -23,18 +23,20 @@ public class GoodsResponseListDto {
     private String sellerTitle;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
+    private String image;
 
-    public GoodsResponseListDto(Goods goods, String imageUrl, RequestGoods requestGoods) {
+    public GoodsResponseListDto(Goods goods, String imageUrl, RequestGoods requestGoods, String imageRequest) {
         this.goodsId = goods.getGoodsId();
         this.location = goods.getLocation();
         this.title = goods.getTitle();
         this.nickname = goods.getUser().getNickname();
-        this.image = imageUrl;
+        this.urImage = imageUrl;
         this.goodsStatus = goods.getGoodsStatus();
         this.requestId = requestGoods.getRequestId();
         this.sellerNickname = requestGoods.getGoods().getUser().getNickname();
         this.sellerLocation = requestGoods.getGoods().getLocation();
         this.sellerTitle = requestGoods.getGoods().getTitle();
+        this.image = imageRequest;
         this.createdAt = requestGoods.getCreatedAt();
         this.modifiedAt = requestGoods.getModifiedAt();
     }

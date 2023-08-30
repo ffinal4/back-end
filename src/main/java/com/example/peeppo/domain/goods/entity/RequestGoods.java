@@ -20,13 +20,16 @@ public class RequestGoods extends Timestamped {
     @Column(name = "request_id")
     private Long requestId;
 
-    private Long sellerId;
+    @ManyToOne
+    @JoinColumn(name = "sellerGoods_id", nullable = false)
+    @JsonBackReference
+    private Goods seller;
 
     @Enumerated(EnumType.STRING)
     private RequestStatus requestStatus;
 
     @ManyToOne
-    @JoinColumn(name = "goods_id", nullable = false)
+    @JoinColumn(name = "buyerGoods_id", nullable = false)
     @JsonBackReference
     private Goods goods;
 
@@ -35,8 +38,8 @@ public class RequestGoods extends Timestamped {
     @JsonBackReference
     private User user;
 
-    public RequestGoods(Long urGoodsId, User user, Goods goods, RequestStatus requestStatus) {
-        this.sellerId = urGoodsId;
+    public RequestGoods(Goods urGoods, User user, Goods goods, RequestStatus requestStatus) {
+        this.seller = urGoods;
         this.user = user;
         this.goods = goods;
         this.requestStatus = requestStatus;

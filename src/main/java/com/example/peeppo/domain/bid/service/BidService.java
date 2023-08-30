@@ -60,7 +60,12 @@ public class BidService {
 
         Auction auction = getAuction(auctionId);
         List<Bid> List = new ArrayList<>();
-        Double totalPrice = null;
+        Double totalPrice = 0D;
+
+        for (Long goodsId : bidGoodsListRequestDto.getGoodsId()){
+            RatingGoods ratingGoods = ratingGoodsRepository.findByGoodsGoodsId(goodsId);
+            totalPrice += ratingGoods.getAvgRatingPrice();
+        }
 
         //경매 진행 여부
         if (!auction.getGoods().getGoodsStatus().equals(GoodsStatus.ONAUCTION) ||
@@ -76,12 +81,9 @@ public class BidService {
                 throw new IllegalAccessException();
                 //여기도 고민
             }
-            if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {
-                RatingGoods ratingGoods = ratingGoodsRepository.findByGoodsGoodsId(goodsId);
+            if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE) &&
+                    totalPrice > auction.getLowPrice()) {
                 //시작가보다 낮을 경우
-
-                totalPrice += ratingGoods.getAvgRatingPrice();
-
                 List.add(new Bid(user, auction, goods, goodsImg));
                 goods.changeStatus(GoodsStatus.BIDDING);
             } else {
@@ -111,19 +113,20 @@ public class BidService {
         return new ResponseDto("입찰이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
-    public Page<BidListResponseDto> BidList(Long auctionId, int page, int size, String sortBy, boolean isAsc) {
-        Pageable pageable = paging(page, size, sortBy, isAsc);
-        Page<Bid> bidPage = bidRepository.findAllByAuctionAuctionId(auctionId, pageable);
+    public List<BidListResponseDto> BidList(Long auctionId) {
+        List<Bid> bidPage = bidRepository.findAllByAuctionAuctionId(auctionId);
 
         Auction auction = getAuction(auctionId);
         Long goodsId = auction.getGoods().getGoodsId();
 
         String goodsImg = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsId).getImageUrl();
-        List<BidListResponseDto> bidList = bidPage.getContent().stream()
-                .map(Bid -> new BidListResponseDto(Bid, goodsImg))
-                .toList();
+        List<BidListResponseDto> bidList = new ArrayList<>();
 
-        return new PageResponse<>(bidList, pageable, bidPage.getTotalElements());
+        for (Bid bid : bidPage) {
+            bidList.add(new BidListResponseDto(bid, goodsImg));
+        }
+
+        return bidList;
     }
 
     //경매자가 선택
@@ -182,7 +185,7 @@ public class BidService {
             Long auctionId = bidRepository.findAuctionIdByBidId(bid.getBidId());
             myAuctionPage = auctionRepository.findByAuctionId(auctionId, pageable);
         } else {
-            Bid bid = bidRepository.findByUserUserId(user.getUserId());
+            Bid bid = bidRepository.findByUserUserIdAndBidStatusIsNotNull(user.getUserId());
             Long auctionId = bidRepository.findAuctionIdByBidId(bid.getBidId());
             myAuctionPage = auctionRepository.findByAuctionId(auctionId, pageable);
         }
