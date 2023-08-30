@@ -72,4 +72,7 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
     Page<Goods> findAllByGoodsStatusAndIsDeletedFalse(GoodsStatus goodsStatus, Pageable Pageable);
 
     Page<Goods> findByUserUserIdAndRequestedStatus(Long userId, Pageable pageable, RequestedStatus requestedStatus);
+
+    @Query(value = "SELECT g.* from goods g where g.is_deleted = false and g.category = category ORDER BY g.created_at desc LIMIT 20", nativeQuery = true)
+    List<Goods> findByCategoryAndIsDeletedFalse(Category category);
 }

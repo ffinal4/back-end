@@ -46,9 +46,11 @@ public class GoodsController {
         return goodsService.allGoods(page - 1, size, sortBy, isAsc, category, userDetails);
     }
 
+
+
     // 게시물 상세조회
     @GetMapping("/{goodsId}")
-    public ApiResponse<GoodsResponseDto> getGoods(@PathVariable Long goodsId,
+    public ApiResponse<GoodsDetailResponseDto> getGoods(@PathVariable Long goodsId,
                                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
         if (userDetails != null) {
             return goodsService.getGoods(goodsId, userDetails.getUser());
@@ -139,5 +141,12 @@ public class GoodsController {
 
         return ResponseUtils.ok(goodsService.goodsRequest(userDetails.getUser(), goodsRequestRequestDto, goodsId));
     }
+
+
+/*    @DeleteMapping("/users/{goodsId}/request")
+    public ApiResponse<?>  refuseGoods(@PathVariable Long goodsId,
+                                       @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return ResponseUtils.ok(goodsService.refuseGoods(goodsId, userDetails.getUser()));
+    }*/
 }
 
