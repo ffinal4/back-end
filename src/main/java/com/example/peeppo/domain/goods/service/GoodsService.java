@@ -160,8 +160,9 @@ public class GoodsService {
     }
 
 
-    public ApiResponse<GoodsResponseDto> getGoods(Long goodsId, User user) {
+    public ApiResponse<GoodsDetailResponseDto> getGoods(Long goodsId, User user) {
         Goods goods = findGoods(goodsId);
+        List<RcGoodsResponseDto> rcGoodsResponseDtoList = getSameCategoryGoodsWithUser(goods,user);
         boolean checkSameUser = goods.getUser().getUserId() == user.getUserId();
         WantedGoods wantedGoods = findWantedGoods(goodsId);
         List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(goodsId)
@@ -176,7 +177,7 @@ public class GoodsService {
         Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goodsId);
         boolean checkDibs = dibsGoods.isPresent();
         Long dibsCount = dibsRepository.countByGoodsGoodsId(goodsId);
-        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods, checkSameUser, checkDibs, dibsCount), null);
+        return new ApiResponse<>(true, new GoodsDetailResponseDto(new GoodsResponseDto(goods, imageUrls, wantedGoods, checkSameUser, checkDibs, dibsCount), rcGoodsResponseDtoList), null);
     }
 
     public ApiResponse<PocketResponseDto> getMyGoods(int page,
@@ -319,10 +320,32 @@ public class GoodsService {
         return new ApiResponse<>(true, goodsListResponseDtos, null);
     }
 
+    public List<RcGoodsResponseDto> getSameCategoryGoods(Goods goods){
+        List<Goods> goodsList = goodsRepository.findByCategoryAndIsDeletedFalse(goods.getCategory());
+        List<RcGoodsResponseDto> rcGoodsResponseDtoList = new ArrayList<>();
+        for(Goods goods1 : goodsList){
+            RcGoodsResponseDto rcGoodsResponseDto = new RcGoodsResponseDto(goods1);
+            rcGoodsResponseDtoList.add(rcGoodsResponseDto);
+        }
+        return rcGoodsResponseDtoList;
+    }
+
+    public List<RcGoodsResponseDto> getSameCategoryGoodsWithUser(Goods goods, User user){
+        List<Goods> goodsList = goodsRepository.findByCategoryAndIsDeletedFalse(goods.getCategory());
+        List<RcGoodsResponseDto> rcGoodsResponseDtoList = new ArrayList<>();
+        for(Goods goods1 : goodsList){
+            boolean checkDibs = false;
+            checkDibs = dibsService.checkDibsGoods(user.getUserId(), goods1.getGoodsId());
+            RcGoodsResponseDto rcGoodsResponseDto = new RcGoodsResponseDto(goods1, checkDibs);
+            rcGoodsResponseDtoList.add(rcGoodsResponseDto);
+        }
+        return rcGoodsResponseDtoList;
+    }
 
     // 로그인 없이 조회
-    public ApiResponse<GoodsResponseDto> getGoodsEveryone(Long goodsId) {
+    public ApiResponse<GoodsDetailResponseDto> getGoodsEveryone(Long goodsId) {
         Goods goods = findGoods(goodsId);
+        List<RcGoodsResponseDto> rcGoodsResponseDtoList = getSameCategoryGoods(goods);
         WantedGoods wantedGoods = findWantedGoods(goodsId);
         List<Image> images = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(goodsId);
         List<String> imageUrls = images.stream()
@@ -332,7 +355,7 @@ public class GoodsService {
             goodsRecent.remove(0);
         }
         goodsRecent.add(Long.toString(goods.getGoodsId())); // 조회시에 리스트에 추가 !
-        return new ApiResponse<>(true, new GoodsResponseDto(goods, imageUrls, wantedGoods), null);
+        return new ApiResponse<>(true, new GoodsDetailResponseDto(new GoodsResponseDto(goods, imageUrls, wantedGoods), rcGoodsResponseDtoList), null);
     }
 
     //교환 요청 받은 페이지
@@ -498,4 +521,15 @@ public class GoodsService {
         // pageable 생성
         return PageRequest.of(page, size, sort);
     }
+
+/*    public String refuseGoods(Long goodsId, User user) {
+        // 존재하는 물품의 ID인지 확인
+        Goods goods = goodsRepository.findByGoodsId(goodsId)
+                .orElseThrow(() -> new NullPointerException("해당 상품이 존재하지 않습니다."));
+        // 물품의 상태를 ONSALE 로 변경하고 물품 교환에서 request_goods 내의 request_status 를 cancel로 변경하기
+
+
+
+    }*/
+
 }

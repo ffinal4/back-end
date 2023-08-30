@@ -35,7 +35,6 @@ public class Goods extends Timestamped {
     private String tradeType;
     @Enumerated(EnumType.STRING) // ENUM타입을 String으로 넣음
     private Category category;
-
     private Long sellerPrice;
     @Column(nullable = false)
     private Boolean isDeleted = false;
