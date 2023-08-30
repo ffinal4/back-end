@@ -2,7 +2,9 @@ package com.example.peeppo.domain.user.service;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.example.peeppo.domain.image.entity.Image;
+import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.image.helper.ImageHelper;
+import com.example.peeppo.domain.image.repository.UserImageRepository;
 import com.example.peeppo.domain.image.service.UploadService;
 import com.example.peeppo.domain.user.dto.*;
 import com.example.peeppo.domain.user.entity.User;
@@ -39,6 +41,7 @@ public class UserService {
     private final ImageHelper imageHelper;
     private final AmazonS3 amazonS3;
     private final String bucket;
+    private final UserImageRepository userImageRepository;
 
     public ResponseDto signup(SignupRequestDto signupRequestDto) {
         String email = signupRequestDto.getEmail();
@@ -109,6 +112,8 @@ public class UserService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
         user.deleteImg();
+        UserImage userImage = userImageRepository.findByUserUserId(user.getUserId());
+        userImageRepository.delete(userImage);
 
         String image = imageHelper.saveUserImages(multipartFile, amazonS3, bucket, user);
         user.upload(myPageRequestDto, image, encodedPassword);

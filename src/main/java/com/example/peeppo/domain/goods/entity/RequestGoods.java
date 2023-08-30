@@ -20,6 +20,8 @@ public class RequestGoods extends Timestamped {
     @Column(name = "request_id")
     private Long requestId;
 
+    private Long sellerId;
+
     @Enumerated(EnumType.STRING)
     private RequestStatus requestStatus;
 
@@ -33,7 +35,8 @@ public class RequestGoods extends Timestamped {
     @JsonBackReference
     private User user;
 
-    public RequestGoods(User user, Goods goods, RequestStatus requestStatus) {
+    public RequestGoods(Long urGoodsId, User user, Goods goods, RequestStatus requestStatus) {
+        this.sellerId = urGoodsId;
         this.user = user;
         this.goods = goods;
         this.requestStatus = requestStatus;

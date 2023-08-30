@@ -78,15 +78,22 @@ public class GoodsService {
 
     @Transactional
     public ApiResponse<MsgResponseDto> goodsCreate(GoodsRequestDto goodsRequestDto,
-                                                     List<MultipartFile> images,
-                                                     WantedRequestDto wantedRequestDto,
-                                                     User user) {
+                                                   List<MultipartFile> images,
+                                                   WantedRequestDto wantedRequestDto,
+                                                   User user) {
         if (goodsRequestDto.getSellerPrice() == null && goodsRequestDto.getRatingCheck()) {
             throw new IllegalArgumentException("레이팅을 원하시면 가격을 입력해주세요.");
+        }
+        if (images == null) {
+            throw new IllegalArgumentException("물품 이미지가 꼭 필요합니다.");
         }
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
         Goods goods = new Goods(goodsRequestDto, wantedGoods, user, GoodsStatus.ONSALE);
         RatingGoods ratingGoods = new RatingGoods(goods);
+
+        goodsRepository.save(goods);
+        ratingGoodsRepository.save(ratingGoods);
+        wantedGoodsRepository.save(wantedGoods);
 
         List<String> imageUrls = imageHelper
                 .saveImagesToS3AndRepository(images, amazonS3, bucket, goods)
@@ -94,9 +101,6 @@ public class GoodsService {
                 .map(Image::getImageUrl)
                 .collect(Collectors.toList());
 
-        goodsRepository.save(goods);
-        ratingGoodsRepository.save(ratingGoods);
-        wantedGoodsRepository.save(wantedGoods);
         return new ApiResponse<>(true, new MsgResponseDto("게시글이 등록되었습니다."), null);
     }
 
@@ -369,8 +373,8 @@ public class GoodsService {
         PageResponse response = new PageResponse<>(goodsListResponseDtos, pageable, myGoodsPage.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
-
-  /*  public ResponseEntity<Page<GoodsResponseListDto>> requestTradeList(User user, int page, int size, String sortBy, boolean isAsc,
+/*
+    public ResponseEntity<Page<GoodsResponseListDto>> requestTradeList(User user, int page, int size, String sortBy, boolean isAsc,
                                                                        RequestStatus requestStatus) {
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
@@ -426,7 +430,7 @@ public class GoodsService {
             if (!goods.getUser().getUserId().equals(user.getUserId())) {
                 if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE) ||
                         goods.getGoodsStatus().equals(GoodsStatus.REQUESTED)) {
-                    new RequestGoods(user, goods, RequestStatus.REQUEST);
+                    new RequestGoods(urGoodsId, user, goods, RequestStatus.REQUEST);
                 } else {
                     throw new IllegalArgumentException("해당 물품은 다른 곳에 사용되거나 판매중 상태가 아닙니다.");
                 }

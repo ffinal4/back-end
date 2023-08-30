@@ -120,7 +120,7 @@ public class GoodsController {
     }
 
     //교환요청 페이지(보낸)
- /*   @GetMapping("/users/trade/request")
+  /*  @GetMapping("/users/trade/request")
     public ResponseEntity<Page<GoodsResponseListDto>> requestTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                                        @RequestParam("page") int page,
                                                                        @RequestParam("size") int size,
