@@ -125,7 +125,6 @@ public class BidService {
         for (Bid bid : bidPage) {
             bidList.add(new BidListResponseDto(bid, goodsImg));
         }
-
         return bidList;
     }
 

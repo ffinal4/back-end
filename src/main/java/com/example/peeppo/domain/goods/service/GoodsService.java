@@ -324,8 +324,10 @@ public class GoodsService {
         List<Goods> goodsList = goodsRepository.findByCategoryAndIsDeletedFalse(goods.getCategory());
         List<RcGoodsResponseDto> rcGoodsResponseDtoList = new ArrayList<>();
         for(Goods goods1 : goodsList){
-            RcGoodsResponseDto rcGoodsResponseDto = new RcGoodsResponseDto(goods1);
-            rcGoodsResponseDtoList.add(rcGoodsResponseDto);
+            if(goods1.getGoodsId() != goods.getGoodsId()){
+                RcGoodsResponseDto rcGoodsResponseDto = new RcGoodsResponseDto(goods1);
+                rcGoodsResponseDtoList.add(rcGoodsResponseDto);
+            }
         }
         return rcGoodsResponseDtoList;
     }
@@ -334,10 +336,12 @@ public class GoodsService {
         List<Goods> goodsList = goodsRepository.findByCategoryAndIsDeletedFalse(goods.getCategory());
         List<RcGoodsResponseDto> rcGoodsResponseDtoList = new ArrayList<>();
         for(Goods goods1 : goodsList){
-            boolean checkDibs = false;
-            checkDibs = dibsService.checkDibsGoods(user.getUserId(), goods1.getGoodsId());
-            RcGoodsResponseDto rcGoodsResponseDto = new RcGoodsResponseDto(goods1, checkDibs);
-            rcGoodsResponseDtoList.add(rcGoodsResponseDto);
+            if(((goods1.getGoodsId() != goods.getGoodsId()) && (user.getUserId() != goods1.getUser().getUserId()))){
+                boolean checkDibs = false;
+                checkDibs = dibsService.checkDibsGoods(user.getUserId(), goods1.getGoodsId());
+                RcGoodsResponseDto rcGoodsResponseDto = new RcGoodsResponseDto(goods1, checkDibs);
+                rcGoodsResponseDtoList.add(rcGoodsResponseDto);
+            }
         }
         return rcGoodsResponseDtoList;
     }

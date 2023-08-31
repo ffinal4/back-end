@@ -66,8 +66,6 @@ public class HomeService {
             AuctionListResponseDto auctionResponseDto = new AuctionListResponseDto(auction, imageUrl, timeRemaining, auctionService.findBidCount(auction.getAuctionId()), checkDibs);
             auctionResponseDtos.add(auctionResponseDto);
         }
-
-
         return new HomeResponseDto(goodsListResponseDtos, ratingUserListResponseDto, auctionResponseDtos);
     }
 }
