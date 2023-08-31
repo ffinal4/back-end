@@ -88,18 +88,21 @@ public class BidService {
             }
         }
 
-        Notification notification = notificationRepository.findByUserUserId(auction.getUser().getUserId());
+        List<Notification> notificationList = notificationRepository.findByUserUserId(auction.getUser().getUserId());
 
-        if (notification == null) {
-            notification = new Notification();
-            notification.setUser(user);
+        for(Notification notification : notificationList){
+            if (notification == null) {
+                notification = new Notification();
+                notification.setUser(user);
+            }
+
+            notification.setIsAuction(false);
+            notification.updateAuctionCount();
+            notification.Checked(false);
+
+            notificationRepository.save(notification);
         }
 
-        notification.setIsAuction(false);
-        notification.updateAuctionCount();
-        notification.Checked(false);
-
-        notificationRepository.save(notification);
 
         bidRepository.saveAll(bidList);
 

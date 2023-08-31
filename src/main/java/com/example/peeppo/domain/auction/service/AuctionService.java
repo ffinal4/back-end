@@ -248,18 +248,21 @@ public class AuctionService {
             Bid bid = findBidId(bidId);
             bid.changeBidStatus(SUCCESS);
 
-            Notification notification = notificationRepository.findByUserUserId(bid.getUser().getUserId());
+            List<Notification> notificationList = notificationRepository.findByUserUserId(auction.getUser().getUserId());
 
-            if (notification == null) {
-                notification = new Notification();
-                notification.setUser(user);
+            for(Notification notification : notificationList){
+                if (notification == null) {
+                    notification = new Notification();
+                    notification.setUser(user);
+                }
+
+                notification.setIsAuction(false);
+                notification.updateAuctionCount();
+                notification.Checked(false);
+
+                notificationRepository.save(notification);
             }
 
-            notification.setIsRequest(false);
-            notification.updateRequestCount();
-            notification.Checked(false);
-
-            notificationRepository.save(notification);
         }
 
         auction.getGoods().changeStatus(SOLDOUT);
