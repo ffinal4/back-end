@@ -74,10 +74,10 @@ public class AuctionService {
         userRepository.save(user);
 
         Goods getGoods = findGoodsId(goodsId);
-        if (!(getGoods.getGoodsStatus() == ONSALE)) {
+        if (getGoods.getGoodsStatus() != ONSALE) {
             throw new IllegalArgumentException("해당 물건으로는 경매를 등록할 수 없습니다");
         }
-        if (!(getGoods.getIsDeleted())) {
+        if (getGoods.getIsDeleted()) {
             throw new IllegalArgumentException("해당 물건은 삭제된 물건입니다.");
         }
 
@@ -135,6 +135,8 @@ public class AuctionService {
         return new TimeRemaining(days, hours % 24, minutes % 60, seconds % 60);
     }
 
+
+
     // 경매 전체 조회
     public Page<AuctionListResponseDto> findAllAuction(int i, int size, String sortBy, boolean isAsc, String categoryStr, UserDetailsImpl userDetails) {
         Pageable pageable = paging(i, size, sortBy, isAsc);
@@ -143,6 +145,19 @@ public class AuctionService {
             try {
                 Category category = Category.valueOf(categoryStr);
                 auctionPage = auctionRepository.findByGoodsCategory(category, pageable);
+                for (Auction auction : auctionPage) {
+                    TimeRemaining remainingTime = countDownTime(auction);
+
+                    if (remainingTime.isExpired()) {
+                        auction.changeAuctionStatus(AuctionStatus.END);
+                        auctionRepository.save(auction);
+                    }
+                    List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
+                    if (bid.isEmpty()) {
+                        auction.changeAuctionStatus(CANCEL);
+                        auctionRepository.save(auction);
+                    }
+                }
                 return findAllAuction(auctionPage, pageable, userDetails);
             } catch (IllegalArgumentException e) {
                 log.error("올바르지 않은 카테고리입니다.");
@@ -150,6 +165,19 @@ public class AuctionService {
             }
         } else {
             auctionPage = auctionRepository.findAll(pageable);
+            for (Auction auction : auctionPage) {
+                TimeRemaining remainingTime = countDownTime(auction);
+
+                if (remainingTime.isExpired()) {
+                    auction.changeAuctionStatus(AuctionStatus.END);
+                    auctionRepository.save(auction);
+                }
+                List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
+                if (bid.isEmpty()) {
+                    auction.changeAuctionStatus(CANCEL);
+                    auctionRepository.save(auction);
+                }
+            }
             return findAllAuction(auctionPage, pageable, userDetails);
         }
     }
@@ -216,31 +244,30 @@ public class AuctionService {
         if (!auction.getUser().getUserId().equals(user.getUserId())) {
             throw new IllegalArgumentException("본인 경매가 아닙니다.");
         }
-//        for (Long bidId : choiceRequestDto.getbidId()) {
-//            Bid bid = findBidId(bidId);
-//            bid.changeBidStatus(SUCCESS);
-//
-//            Notification notification = notificationRepository.findByUserUserId(bid.getUser().getUserId());
-//
-//            if (notification == null) {
-//                notification = new Notification();
-//                notification.setUser(user);
-//            }
-//
-//            notification.setIsRequest(false);
-//            notification.updateRequestCount();
-//            notification.Checked(false);
-//
-//            notificationRepository.save(notification);
-//        }
-//
-//        auction.changeAuctionStatus(REQUEST);
-//        auction.getGoods().changeStatus(SOLDOUT);
-//
-//        user.userPointAdd(10L);
-//        userRepository.save(user);
-//
-//        auction.changeDeleteStatus(true);
+        for (Long bidId : choiceRequestDto.getBidId()) {
+            Bid bid = findBidId(bidId);
+            bid.changeBidStatus(SUCCESS);
+
+            Notification notification = notificationRepository.findByUserUserId(bid.getUser().getUserId());
+
+            if (notification == null) {
+                notification = new Notification();
+                notification.setUser(user);
+            }
+
+            notification.setIsRequest(false);
+            notification.updateRequestCount();
+            notification.Checked(false);
+
+            notificationRepository.save(notification);
+        }
+
+        auction.getGoods().changeStatus(SOLDOUT);
+
+        user.userPointAdd(10L);
+        userRepository.save(user);
+
+        auction.changeDeleteStatus(true);
     }
 
     public ResponseEntity<Page<TestListResponseDto>> auctionTradeList(User user, int page, int size, String sortBy, boolean isAsc,
