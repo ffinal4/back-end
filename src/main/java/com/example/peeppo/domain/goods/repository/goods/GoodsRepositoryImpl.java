@@ -1,10 +1,6 @@
-package com.example.peeppo.domain.goods.repository;
+package com.example.peeppo.domain.goods.repository.goods;
 
 import com.example.peeppo.domain.goods.entity.Goods;
-import com.example.peeppo.domain.user.entity.User;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
@@ -12,10 +8,6 @@ import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport
 import java.util.List;
 
 import static com.example.peeppo.domain.goods.entity.QGoods.goods;
-import static com.example.peeppo.domain.rating.entity.QRating.rating;
-import static com.example.peeppo.domain.rating.entity.QRatingGoods.ratingGoods;
-import static com.example.peeppo.domain.rating.entity.QUserRatingRelation.userRatingRelation;
-import static com.example.peeppo.domain.user.entity.QUser.user;
 
 public class GoodsRepositoryImpl extends QuerydslRepositorySupport implements GoodsRepositoryCustom {
 
