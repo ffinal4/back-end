@@ -10,14 +10,13 @@ import com.example.peeppo.domain.auction.service.AuctionService;
 import com.example.peeppo.domain.dibs.service.DibsService;
 import com.example.peeppo.domain.goods.dto.GoodsListResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
-import com.example.peeppo.domain.goods.repository.GoodsRepository;
+import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.home.dto.HomeResponseDto;
 import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.domain.user.dto.RatingUserResponseDto;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

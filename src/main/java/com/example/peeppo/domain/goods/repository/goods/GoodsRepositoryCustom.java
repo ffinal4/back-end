@@ -1,4 +1,4 @@
-package com.example.peeppo.domain.goods.repository;
+package com.example.peeppo.domain.goods.repository.goods;
 
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.goods.entity.Goods;

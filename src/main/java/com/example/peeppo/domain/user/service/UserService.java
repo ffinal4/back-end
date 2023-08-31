@@ -9,6 +9,7 @@ import com.example.peeppo.domain.image.service.UploadService;
 import com.example.peeppo.domain.user.dto.*;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.entity.UserRoleEnum;
+import com.example.peeppo.domain.user.helper.UserImageHelper;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.jwt.JwtUtil;
@@ -42,6 +43,7 @@ public class UserService {
     private final AmazonS3 amazonS3;
     private final String bucket;
     private final UserImageRepository userImageRepository;
+    private final UserImageHelper userImageHelper;
 
     public ResponseDto signup(SignupRequestDto signupRequestDto) {
         String email = signupRequestDto.getEmail();
@@ -107,19 +109,26 @@ public class UserService {
     @Transactional
     public ApiResponse<ResponseDto> updateMyPage(MyPageRequestDto myPageRequestDto, MultipartFile multipartFile, User user) throws IOException {
 
-        String encodedPassword = passwordEncoder.encode(myPageRequestDto.getPassword());
         if (!passwordEncoder.matches(myPageRequestDto.getOriginPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        user.deleteImg();
-        UserImage userImage = userImageRepository.findByUserUserId(user.getUserId());
-
-        if(userImage != null) {
-            userImageRepository.delete(userImage);
-            imageHelper.deleteFileFromS3(userImage.getImageKey(), amazonS3, bucket);
+        String encodedPassword = user.getPassword();
+        if(null != myPageRequestDto.getPassword()) {
+            encodedPassword = passwordEncoder.encode(myPageRequestDto.getPassword());
         }
-        String image = imageHelper.saveUserImages(multipartFile, amazonS3, bucket, user);
+
+        String image = user.getUserImg();
+        if(null != multipartFile) {
+
+            UserImage userImage = userImageRepository.findByUserUserId(user.getUserId());
+            if(userImage != null) {
+//                userImageHelper.userImageDelete(userImage);
+                userImageRepository.delete(userImage);
+                imageHelper.deleteFileFromS3(userImage.getImageKey(), amazonS3, bucket);
+            }
+             image = imageHelper.saveUserImages(multipartFile, amazonS3, bucket, user);
+        }
         user.upload(myPageRequestDto, image, encodedPassword);
 
         userRepository.save(user);

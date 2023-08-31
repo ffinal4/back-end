@@ -5,7 +5,7 @@ import com.example.peeppo.domain.dibs.entity.Dibs;
 import com.example.peeppo.domain.dibs.repository.DibsRepository;
 import com.example.peeppo.domain.goods.dto.GoodsListResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
-import com.example.peeppo.domain.goods.repository.GoodsRepository;
+import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.domain.user.dto.CheckResponseDto;
 import com.example.peeppo.domain.user.entity.User;
@@ -36,7 +36,6 @@ public class DibsService {
 
     public CheckResponseDto dibsGoods(UserDetailsImpl userDetails, DibsRequestDto dibsRequestDto) {
         User user = userDetails.getUser();
-        findUser(user.getUserId());
         Goods goods = findGoods(dibsRequestDto.getGoodsId());
 
         Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goods.getGoodsId());

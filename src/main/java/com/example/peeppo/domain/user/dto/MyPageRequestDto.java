@@ -18,7 +18,6 @@ public class MyPageRequestDto {
     @Pattern(regexp = "^[a-zA-Z0-9가-힣]+$", message = "영어와 숫자, 한글만 사용 가능합니다.")
     String nickname;
 
-    @NotBlank
     @Size(message = "알파벳 문자, 숫자, 특수문자 포함이 되어야 하며, 8자리 이상, 15자리 이하여야 합니다")
     @Pattern(regexp = "^(?=.*?[A-Za-z])(?=.*?[0-9])[A-Za-z\\d~!@#$%^&*()+|=]{8,15}$")
     String password;
@@ -26,6 +25,5 @@ public class MyPageRequestDto {
     @NotBlank
     String originPassword;
 
-    @NotBlank
     String location;
 }

@@ -27,6 +27,8 @@ public class Bid extends Timestamped {
 
     private String goodsImg;
 
+    private boolean sellersPick;
+
     @Enumerated(EnumType.STRING)
     private BidStatus bidStatus;
 
@@ -41,6 +43,7 @@ public class Bid extends Timestamped {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "auction_id")
     private Auction auction;
+
 
     public Bid(User user, Auction auction, Goods goods, String goodsImg) {
         this.location = user.getLocation();
@@ -62,5 +65,9 @@ public class Bid extends Timestamped {
 
     public void changeBidStatus(BidStatus bidStatus) {
         this.bidStatus = bidStatus;
+    }
+
+    public void select() {
+        this.sellersPick = true;
     }
 }
