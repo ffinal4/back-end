@@ -4,6 +4,7 @@ import com.example.peeppo.domain.auction.dto.*;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
+import com.example.peeppo.domain.bid.dto.BidListResponseDto;
 import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
 import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.bid.entity.Choice;
@@ -45,10 +46,10 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.example.peeppo.domain.auction.enums.AuctionStatus.CANCEL;
-import static com.example.peeppo.domain.auction.enums.AuctionStatus.REQUEST;
 import static com.example.peeppo.domain.bid.enums.BidStatus.FAIL;
 import static com.example.peeppo.domain.bid.enums.BidStatus.SUCCESS;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.ONSALE;
@@ -147,6 +148,19 @@ public class AuctionService {
             try {
                 Category category = Category.valueOf(categoryStr);
                 auctionPage = auctionRepository.findByGoodsCategory(category, pageable);
+                for (Auction auction : auctionPage) {
+                    TimeRemaining remainingTime = countDownTime(auction);
+
+                    if (remainingTime.isExpired()) {
+                        auction.changeAuctionStatus(AuctionStatus.END);
+                        auctionRepository.save(auction);
+                    }
+                    List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
+                    if (bid.isEmpty()) {
+                        auction.changeAuctionStatus(CANCEL);
+                        auctionRepository.save(auction);
+                    }
+                }
                 return findAllAuction(auctionPage, pageable, userDetails);
             } catch (IllegalArgumentException e) {
                 log.error("올바르지 않은 카테고리입니다.");
@@ -154,6 +168,19 @@ public class AuctionService {
             }
         } else {
             auctionPage = auctionRepository.findAll(pageable);
+            for (Auction auction : auctionPage) {
+                TimeRemaining remainingTime = countDownTime(auction);
+
+                if (remainingTime.isExpired()) {
+                    auction.changeAuctionStatus(AuctionStatus.END);
+                    auctionRepository.save(auction);
+                }
+                List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
+                if (bid.isEmpty()) {
+                    auction.changeAuctionStatus(CANCEL);
+                    auctionRepository.save(auction);
+                }
+            }
             return findAllAuction(auctionPage, pageable, userDetails);
         }
     }
@@ -175,8 +202,8 @@ public class AuctionService {
             boolean checkDibs = false;
             String imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(auction.getGoods().getGoodsId()).getImageUrl();
 
-            if(user != null) {
-                checkDibs = dibsService.checkDibsGoods(user.getUserId(),auction.getGoods().getGoodsId());
+            if (user != null) {
+                checkDibs = dibsService.checkDibsGoods(user.getUserId(), auction.getGoods().getGoodsId());
             }
             AuctionListResponseDto auctionResponseDto = new AuctionListResponseDto(auction, imageUrl, timeRemaining, findBidCount(auction.getAuctionId()), checkDibs);
             auctionResponseDtos.add(auctionResponseDto);
@@ -240,7 +267,6 @@ public class AuctionService {
             notificationRepository.save(notification);
         }
 
-        auction.changeAuctionStatus(REQUEST);
         auction.getGoods().changeStatus(SOLDOUT);
 
         user.userPointAdd(10L);
@@ -248,6 +274,19 @@ public class AuctionService {
 
         auction.changeDeleteStatus(true);
     }
+
+//    public void test(Long auctionId, User user) {
+//        Auction auction1 = findAuctionId(auctionId);
+//        boolean checkSameUser = true;
+//        if (auction1.getUser().getUserId() != user.getUserId()) {
+//            checkSameUser = false;
+//        }
+//        List<String> imageUrl1 = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(auction1.getGoods().getGoodsId())
+//                .stream().map(Image::getImageUrl).collect(Collectors.toList());
+//
+//        AuctionResponseDto auctionResponseDto = new AuctionResponseDto(auction1, auction1.getGoods(), countDownTime(auction1), findBidCount(auctionId), checkSameUser, imageUrl1);
+//        return new GetAuctionResponseDto(auctionResponseDtos, auctionResponseDto);
+//    }
 
     public ResponseEntity<Page<TestListResponseDto>> auctionTradeList(User user, int page, int size, String sortBy, boolean isAsc,
                                                                       AuctionStatus auctionStatus) {
@@ -260,25 +299,27 @@ public class AuctionService {
             myAuctionPage = auctionRepository.findByUserUserIdAndAuctionStatusIsNotNull(user.getUserId(), pageable);
         }
 
-        List<TestListResponseDto> auctionResponseDtoList = new ArrayList<>();
+        List<GetAuctionBidResponseDto> auctionResponseDtoList = new ArrayList<>();
 
         for (Auction auction : myAuctionPage) {
-            if(auction.getAuctionStatus() == null){
-                continue;
-            }
-            if(auction.getAuctionStatus().equals(REQUEST)){
+            if (auction.getAuctionStatus().equals(AuctionStatus.END) ||
+                    auction.getAuctionStatus().equals(AuctionStatus.DONE)) {
                 List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndBidStatus(auction.getAuctionId(), SUCCESS);
-                for(Bid bid : bidList){
-                    TimeRemaining timeRemaining = countDownTime(auction);
-                    Long bidCount = findBidCount(auction.getAuctionId());
-                    TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount, bid);
-                    auctionResponseDtoList.add(responseDto);
+                List<BidListResponseDto> bidListResponseDtos = new ArrayList<>();
+                for (Bid bid : bidList) {
+                    bidListResponseDtos.add(new BidListResponseDto(bid, bid.getGoodsImg()));
                 }
-            } else{
                 TimeRemaining timeRemaining = countDownTime(auction);
                 Long bidCount = findBidCount(auction.getAuctionId());
                 TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount);
-                auctionResponseDtoList.add(responseDto);
+                GetAuctionBidResponseDto getAuctionBidResponseDto = new GetAuctionBidResponseDto(responseDto, bidListResponseDtos);
+                auctionResponseDtoList.add(getAuctionBidResponseDto);
+            } else {
+                TimeRemaining timeRemaining = countDownTime(auction);
+                Long bidCount = findBidCount(auction.getAuctionId());
+                TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount);
+                GetAuctionBidResponseDto getAuctionBidResponseDto = new GetAuctionBidResponseDto(responseDto);
+                auctionResponseDtoList.add(getAuctionBidResponseDto);
             }
         }//나중에 stream 으로 처리하자, flatMap 쓰면 될듯?
 
