@@ -78,7 +78,7 @@ public class BidService {
                 //여기도 고민
             }
             if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE) &&
-                    totalPrice > auction.getLowPrice()) {
+                    (totalPrice >= auction.getLowPrice())) {
                 //시작가보다 낮을 경우
                 List.add(new Bid(user, auction, goods, goodsImg));
                 goods.changeStatus(GoodsStatus.BIDDING);

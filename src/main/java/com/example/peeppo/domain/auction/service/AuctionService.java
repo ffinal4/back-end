@@ -149,14 +149,15 @@ public class AuctionService {
                     TimeRemaining remainingTime = countDownTime(auction);
 
                     if (remainingTime.isExpired()) {
+                        List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
+                        if (bid.isEmpty()) {
+                            auction.changeAuctionStatus(CANCEL);
+                            auctionRepository.save(auction);
+                        }
                         auction.changeAuctionStatus(AuctionStatus.END);
                         auctionRepository.save(auction);
                     }
-                    List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
-                    if (bid.isEmpty()) {
-                        auction.changeAuctionStatus(CANCEL);
-                        auctionRepository.save(auction);
-                    }
+
                 }
                 return findAllAuction(auctionPage, pageable, userDetails);
             } catch (IllegalArgumentException e) {
@@ -167,14 +168,13 @@ public class AuctionService {
             auctionPage = auctionRepository.findAll(pageable);
             for (Auction auction : auctionPage) {
                 TimeRemaining remainingTime = countDownTime(auction);
-
                 if (remainingTime.isExpired()) {
+                    List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
+                    if (bid.isEmpty()) {
+                        auction.changeAuctionStatus(CANCEL);
+                        auctionRepository.save(auction);
+                    }
                     auction.changeAuctionStatus(AuctionStatus.END);
-                    auctionRepository.save(auction);
-                }
-                List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
-                if (bid.isEmpty()) {
-                    auction.changeAuctionStatus(CANCEL);
                     auctionRepository.save(auction);
                 }
             }
