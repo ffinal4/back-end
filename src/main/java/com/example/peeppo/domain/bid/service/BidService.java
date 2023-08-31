@@ -55,7 +55,7 @@ public class BidService {
     public ResponseDto bidding(User user, Long auctionId, BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
 
         Auction auction = getAuction(auctionId);
-        List<Bid> List = new ArrayList<>();
+        List<Bid> bidList = new ArrayList<>();
         Double totalPrice = 0D;
 
         for (Long goodsId : bidGoodsListRequestDto.getGoodsId()){
@@ -80,7 +80,7 @@ public class BidService {
             if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE) &&
                     (totalPrice >= auction.getLowPrice())) {
                 //시작가보다 낮을 경우
-                List.add(new Bid(user, auction, goods, goodsImg));
+                bidList.add(new Bid(user, auction, goods, goodsImg));
                 goods.changeStatus(GoodsStatus.BIDDING);
             } else {
                 System.out.println("3 ");
@@ -101,7 +101,7 @@ public class BidService {
 
         notificationRepository.save(notification);
 
-        bidRepository.saveAll(List);
+        bidRepository.saveAll(bidList);
 
         return new ResponseDto("입찰이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
