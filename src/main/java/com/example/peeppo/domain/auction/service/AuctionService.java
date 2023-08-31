@@ -185,7 +185,7 @@ public class AuctionService {
     // 경매 상세 조회
     public GetAuctionResponseDto findAuctionById(Long auctionId, User user) {
         Auction auction = findAuctionId(auctionId);
-        boolean checkSameUser = (auction.getUser().getUserId() != user.getUserId());
+        boolean checkSameUser = auction.getUser().getUserId().equals(user.getUserId());
 
         List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(auction.getGoods().getGoodsId())
                 .stream().map(Image::getImageUrl).collect(Collectors.toList());

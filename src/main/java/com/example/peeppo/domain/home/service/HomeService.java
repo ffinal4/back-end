@@ -53,7 +53,6 @@ public class HomeService {
                 .map(ratingUser -> new RatingUserResponseDto(ratingUser.getUserImg(), ratingUser.getNickname(), ratingUser.getMaxRatingCount()))
                 .collect(Collectors.toList());
 
-
         List<Auction> auctionList = findTopAuctionByCount();
         List<AuctionListResponseDto> auctionResponseDtos = new ArrayList<>();
         for (Auction auction : auctionList) {
