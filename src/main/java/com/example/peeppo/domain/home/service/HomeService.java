@@ -70,3 +70,4 @@ public class HomeService {
     }
 }
 
+// 마감된 경매는 나오지 않게 수정
