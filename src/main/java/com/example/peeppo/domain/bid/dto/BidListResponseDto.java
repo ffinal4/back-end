@@ -16,6 +16,7 @@ public class BidListResponseDto {
     private String title;
     private String location;
     private BidStatus bidStatus;
+    private boolean sellersPick;
 
     public BidListResponseDto(Bid bid, String goodsImg) {
         this.bidId = bid.getBidId();
@@ -25,5 +26,6 @@ public class BidListResponseDto {
         this.title = bid.getGoods().getTitle();
         this.location = bid.getUser().getLocation();
         this.bidStatus = bid.getBidStatus();
+        this.sellersPick = bid.isSellersPick();
     }
 }
