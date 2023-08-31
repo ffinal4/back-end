@@ -5,11 +5,9 @@ import lombok.Getter;
 @Getter
 public enum AuctionStatus {
         AUCTION("is auction"),
-        REQUEST("trading request"),
-        CANCEL("trading cancel"),
+        END("end auction"),
         DONE("trading complete"),
-        TRADING("trading continue");
-
+        CANCEL("trading cancel");
         private final String status;
 
         AuctionStatus(String status) {
