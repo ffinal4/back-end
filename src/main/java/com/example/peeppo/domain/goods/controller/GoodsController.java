@@ -109,6 +109,7 @@ public class GoodsController {
     public ApiResponse<List<GoodsListResponseDto>> searchGoods(@RequestParam("keyword") String keyword) {
         return goodsService.searchGoods(keyword);
     }
+
     //교환요청 페이지(받은)
     @GetMapping("/users/trade/requested")
     public ResponseEntity<Page<GoodsResponseListDto>> requestedTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
@@ -121,8 +122,8 @@ public class GoodsController {
         return goodsService.requestedTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, requestedStatus);
     }
 
-    //교환요청 페이지(보낸)
-  /*  @GetMapping("/users/trade/request")
+/*    //교환요청 페이지(보낸)
+   @GetMapping("/users/trade/request")
     public ResponseEntity<Page<GoodsResponseListDto>> requestTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                                        @RequestParam("page") int page,
                                                                        @RequestParam("size") int size,
@@ -141,7 +142,25 @@ public class GoodsController {
 
         return ResponseUtils.ok(goodsService.goodsRequest(userDetails.getUser(), goodsRequestRequestDto, goodsId));
     }
+/*
 
+    // 교환요청 수락
+    @PostMapping("/users/{requestGoodsId}/accept")
+    public ApiResponse<?> goodsAccept(@PathVariable("requestGoodsId") Long requestId,
+                                      @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return goodsService.goodsAccept(requestId, userDetails.getUser());
+        }
+    }
+*/
+
+/*
+    // 교환요청 거절(교환취소)
+    @DeleteMapping("/users/{requestGoodsId}/refuse")
+    public ApiResponse<?> goodsRefuse(){
+
+    }*/
+
+    // 교환요청 완료
 
 /*    @DeleteMapping("/users/{goodsId}/request")
     public ApiResponse<?>  refuseGoods(@PathVariable Long goodsId,

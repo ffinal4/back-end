@@ -459,7 +459,8 @@ public class GoodsService {
 
             if (!urGoodsId.equals(goods.getGoodsId())) {
                 if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {// ||goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)
-                    new RequestGoods(urGoods, user, goods, RequestStatus.REQUEST);
+                    //new RequestGoods(urGoods, user, goods, RequestStatus.REQUEST);
+                    new RequestGoods(user, urGoods, goods, RequestStatus.REQUEST); // 요청이 들어오면 새로 생성해주기
                 } else {
                     throw new IllegalArgumentException("해당 물품은 다른 곳에 사용되거나 판매중 상태가 아닙니다.");
                 }
@@ -527,6 +528,11 @@ public class GoodsService {
         // pageable 생성
         return PageRequest.of(page, size, sort);
     }
+
+/*    public ApiResponse<?> goodsAccept(Long requestId, User user) { // 교환요청 들어온거 수락 ! => 교환중으로 변경 필요
+
+
+    }*/
 
 /*    public String refuseGoods(Long goodsId, User user) {
         // 존재하는 물품의 ID인지 확인
