@@ -1,10 +1,6 @@
 package com.example.peeppo.domain.goods.service;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.example.peeppo.domain.auction.dto.TestListResponseDto;
-import com.example.peeppo.domain.auction.dto.TimeRemaining;
-import com.example.peeppo.domain.auction.entity.Auction;
-import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.dibs.entity.Dibs;
 import com.example.peeppo.domain.dibs.repository.DibsRepository;
 import com.example.peeppo.domain.dibs.service.DibsService;
@@ -16,12 +12,9 @@ import com.example.peeppo.domain.goods.entity.WantedGoods;
 import com.example.peeppo.domain.goods.enums.RequestStatus;
 import com.example.peeppo.domain.goods.enums.RequestedStatus;
 import com.example.peeppo.domain.goods.enums.Category;
-import com.example.peeppo.domain.goods.enums.GoodsStatus;
-import com.example.peeppo.domain.goods.enums.RequestStatus;
-import com.example.peeppo.domain.goods.enums.RequestedStatus;
-import com.example.peeppo.domain.goods.repository.GoodsRepository;
-import com.example.peeppo.domain.goods.repository.RequestRepository;
-import com.example.peeppo.domain.goods.repository.WantedGoodsRepository;
+import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
+import com.example.peeppo.domain.goods.repository.request.RequestRepository;
+import com.example.peeppo.domain.goods.repository.wantedGoods.WantedGoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.helper.ImageHelper;
 import com.example.peeppo.domain.image.repository.ImageRepository;
@@ -41,7 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -324,10 +316,8 @@ public class GoodsService {
         List<Goods> goodsList = goodsRepository.findByCategoryAndIsDeletedFalse(goods.getCategory());
         List<RcGoodsResponseDto> rcGoodsResponseDtoList = new ArrayList<>();
         for(Goods goods1 : goodsList){
-            if(goods1.getGoodsId() != goods.getGoodsId()){
-                RcGoodsResponseDto rcGoodsResponseDto = new RcGoodsResponseDto(goods1);
-                rcGoodsResponseDtoList.add(rcGoodsResponseDto);
-            }
+            RcGoodsResponseDto rcGoodsResponseDto = new RcGoodsResponseDto(goods1);
+            rcGoodsResponseDtoList.add(rcGoodsResponseDto);
         }
         return rcGoodsResponseDtoList;
     }
@@ -336,12 +326,9 @@ public class GoodsService {
         List<Goods> goodsList = goodsRepository.findByCategoryAndIsDeletedFalse(goods.getCategory());
         List<RcGoodsResponseDto> rcGoodsResponseDtoList = new ArrayList<>();
         for(Goods goods1 : goodsList){
-            if(((goods1.getGoodsId() != goods.getGoodsId()) && (user.getUserId() != goods1.getUser().getUserId()))){
-                boolean checkDibs = false;
-                checkDibs = dibsService.checkDibsGoods(user.getUserId(), goods1.getGoodsId());
-                RcGoodsResponseDto rcGoodsResponseDto = new RcGoodsResponseDto(goods1, checkDibs);
-                rcGoodsResponseDtoList.add(rcGoodsResponseDto);
-            }
+            boolean checkDibs = dibsService.checkDibsGoods(user.getUserId(), goods1.getGoodsId());
+            RcGoodsResponseDto rcGoodsResponseDto = new RcGoodsResponseDto(goods1, checkDibs);
+            rcGoodsResponseDtoList.add(rcGoodsResponseDto);
         }
         return rcGoodsResponseDtoList;
     }
@@ -463,8 +450,7 @@ public class GoodsService {
 
             if (!urGoodsId.equals(goods.getGoodsId())) {
                 if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {// ||goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)
-                    //new RequestGoods(urGoods, user, goods, RequestStatus.REQUEST);
-                    new RequestGoods(user, urGoods, goods, RequestStatus.REQUEST); // 요청이 들어오면 새로 생성해주기
+                    new RequestGoods(urGoods, user, goods, RequestStatus.REQUEST);
                 } else {
                     throw new IllegalArgumentException("해당 물품은 다른 곳에 사용되거나 판매중 상태가 아닙니다.");
                 }
@@ -532,11 +518,6 @@ public class GoodsService {
         // pageable 생성
         return PageRequest.of(page, size, sort);
     }
-
-/*    public ApiResponse<?> goodsAccept(Long requestId, User user) { // 교환요청 들어온거 수락 ! => 교환중으로 변경 필요
-
-
-    }*/
 
 /*    public String refuseGoods(Long goodsId, User user) {
         // 존재하는 물품의 ID인지 확인

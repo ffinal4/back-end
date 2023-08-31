@@ -42,6 +42,8 @@ public class QBid extends EntityPathBase<Bid> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
+    public final BooleanPath sellersPick = createBoolean("sellersPick");
+
     public final StringPath title = createString("title");
 
     public final com.example.peeppo.domain.user.entity.QUser user;

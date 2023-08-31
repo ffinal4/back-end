@@ -2,7 +2,7 @@ package com.example.peeppo.global.scheduler;
 
 
 import com.example.peeppo.domain.goods.entity.Goods;
-import com.example.peeppo.domain.goods.repository.GoodsRepository;
+import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.rating.helper.RatingHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
