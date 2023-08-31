@@ -1,4 +1,4 @@
-package com.example.peeppo.domain.goods.repository;
+package com.example.peeppo.domain.goods.repository.goods;
 
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.enums.Category;

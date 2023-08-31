@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface AuctionRepository extends JpaRepository<Auction, Long> {
+public interface AuctionRepository extends JpaRepository<Auction, Long>, AuctionRepositoryCustom {
     Page<Auction> findByUserUserIdAndAuctionStatus(Long userId, Pageable pageable, AuctionStatus auctionStatus);
 
 
@@ -27,6 +27,6 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
     Page<Auction> findByUserUserIdAndAuctionStatusIsNotNull(Long userId, Pageable pageable);
 
 
-    @Query(value = "SELECT a.* FROM auction a WHERE a.auction_Status = auction_Status ORDER BY a.auction_end_time LIMIT 20", nativeQuery = true)
-    List<Auction> findTop20ByAuctionStatus(AuctionStatus auctionStatus);
+//    @Query(value = "SELECT a.* FROM auction a WHERE a.auction_Status = auction_Status ORDER BY a.auction_end_time LIMIT 20", nativeQuery = true)
+//    List<Auction> findTop20ByAuctionStatus(AuctionStatus auctionStatus);
 }
