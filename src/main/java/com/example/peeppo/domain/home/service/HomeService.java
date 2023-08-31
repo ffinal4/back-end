@@ -4,6 +4,7 @@ package com.example.peeppo.domain.home.service;
 import com.example.peeppo.domain.auction.dto.AuctionListResponseDto;
 import com.example.peeppo.domain.auction.dto.TimeRemaining;
 import com.example.peeppo.domain.auction.entity.Auction;
+import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.auction.service.AuctionService;
 import com.example.peeppo.domain.dibs.service.DibsService;
@@ -52,7 +53,8 @@ public class HomeService {
                 .map(ratingUser -> new RatingUserResponseDto(ratingUser.getUserImg(), ratingUser.getNickname(), ratingUser.getMaxRatingCount()))
                 .collect(Collectors.toList());
 
-        List<Auction> auctionList = auctionRepository.findTop3Auction();
+
+        List<Auction> auctionList = findTopAuctionByCount();
         List<AuctionListResponseDto> auctionResponseDtos = new ArrayList<>();
         for (Auction auction : auctionList) {
             TimeRemaining timeRemaining = auctionService.countDownTime(auction);
@@ -67,6 +69,16 @@ public class HomeService {
         }
         return new HomeResponseDto(goodsListResponseDtos, ratingUserListResponseDto, auctionResponseDtos);
     }
+
+    public List<Auction> findTopAuctionByCount(){
+        List<Auction> auctionLists = auctionRepository.findByAuctionStatus(AuctionStatus.AUCTION);
+        if(auctionLists.size() <= 3) {
+          return auctionRepository.findTop3Auction();
+        }
+        return auctionRepository.findTop3AuctionAll();
+    }
+
 }
+
 
 // 마감된 경매는 나오지 않게 수정
