@@ -23,7 +23,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
 
     Page<Auction> findByUserUserId(Long userId, Pageable pageable);
 
-    Page<Auction> findByAuctionId(Long auctionId, Pageable pageable);
+    Auction findByAuctionId(Long auctionId);
 
     Page<Auction> findByGoodsCategory(Category category, Pageable pageable);
 
@@ -31,6 +31,9 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
 
     @Query(value = "SELECT a.* FROM auction a WHERE a.auction_Status = auction_Status ORDER BY a.auction_end_time LIMIT 20", nativeQuery = true)
     List<Auction> findTop20ByAuctionStatus(AuctionStatus auctionStatus);
+
+    @Query("SELECT DISTINCT b.auction FROM Bid b WHERE b.user.userId = :user_id")
+    Page<Auction> findAuctionListByUserUserId(@Param("user_id") Long userId, Pageable pageable);
 
     @Query(value = "SELECT a.* FROM auction a WHERE a.auction_Status = auction_Status", nativeQuery = true)
     List<Auction> findByAuctionStatus(AuctionStatus auction);
