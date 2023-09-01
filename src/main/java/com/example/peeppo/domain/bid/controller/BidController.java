@@ -1,5 +1,6 @@
 package com.example.peeppo.domain.bid.controller;
 
+import com.example.peeppo.domain.auction.dto.GetAuctionBidResponseDto;
 import com.example.peeppo.domain.auction.dto.TestListResponseDto;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.bid.dto.BidGoodsListRequestDto;
@@ -21,6 +22,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -41,8 +43,8 @@ public class BidController {
 
     //전체조회
     @GetMapping("/auction/{auctionId}/bid/{page}")
-    public ApiResponse<Page<BidListResponseDto>> bidList(@PathVariable Long auctionId,
-                                                         @PathVariable int page) {
+    public ApiResponse<Page<Map<Long, List<BidListResponseDto>>>> bidList(@PathVariable Long auctionId,
+                                                                    @PathVariable int page) {
 
         return bidService.BidList(auctionId, page-1);
     }
@@ -65,12 +67,12 @@ public class BidController {
 
     //교환 요청 페이지(입찰 경매)
     @GetMapping("/bid/users/trade")
-    public ResponseEntity<Page<BidTradeListResponseDto>> auctionTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                                          @RequestParam("page") int page,
-                                                                          @RequestParam("size") int size,
-                                                                          @RequestParam("sortBy") String sortBy,
-                                                                          @RequestParam("isAsc") boolean isAsc,
-                                                                          @RequestParam(value = "bid status", required = false) BidStatus bidStatus) {
+    public ResponseEntity<Page<GetAuctionBidResponseDto>> auctionTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                           @RequestParam("page") int page,
+                                                                           @RequestParam("size") int size,
+                                                                           @RequestParam("sortBy") String sortBy,
+                                                                           @RequestParam("isAsc") boolean isAsc,
+                                                                           @RequestParam(value = "bid status", required = false) BidStatus bidStatus) {
 
         return bidService.bidTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, bidStatus);
     }

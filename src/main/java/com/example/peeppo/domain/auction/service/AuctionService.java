@@ -135,8 +135,6 @@ public class AuctionService {
         return new TimeRemaining(days, hours % 24, minutes % 60, seconds % 60);
     }
 
-
-
     // 경매 전체 조회
     public Page<AuctionListResponseDto> findAllAuction(int i, int size, String sortBy, boolean isAsc, String categoryStr, UserDetailsImpl userDetails) {
         Pageable pageable = paging(i, size, sortBy, isAsc);
@@ -157,7 +155,6 @@ public class AuctionService {
                         auction.changeAuctionStatus(AuctionStatus.END);
                         auctionRepository.save(auction);
                     }
-
                 }
                 return findAllAuction(auctionPage, pageable, userDetails);
             } catch (IllegalArgumentException e) {
@@ -168,6 +165,7 @@ public class AuctionService {
             auctionPage = auctionRepository.findAll(pageable);
             for (Auction auction : auctionPage) {
                 TimeRemaining remainingTime = countDownTime(auction);
+
                 if (remainingTime.isExpired()) {
                     List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
                     if (bid.isEmpty()) {
@@ -235,7 +233,12 @@ public class AuctionService {
     @Transactional
     public void endAuction(Long auctionId, User user, ChoiceRequestDto choiceRequestDto) {
         Auction auction = findAuctionId(auctionId);
-        List<Bid> bidList = new ArrayList<>();
+        List<Bid> bidList = bidRepository.findByAuctionAuctionId(auctionId);
+
+        for(Bid bid : bidList){
+            bid.changeBidStatus(FAIL);
+            bidRepository.save(bid);
+        }
 
         checkUsername(auctionId, user);
 

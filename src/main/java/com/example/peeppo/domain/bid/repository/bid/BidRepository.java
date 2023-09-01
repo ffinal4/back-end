@@ -14,7 +14,9 @@ import java.util.Optional;
 
 public interface BidRepository extends JpaRepository<Bid, Long>, BidRepositoryCustom {
     List<Bid> findAllByAuctionAuctionId(Long auctionId);
+
     Long countByAuctionAuctionId(Long auctionId);
+
     List<Bid> findBidByAuctionAuctionId(Long auctionId);
 
     List<Bid> findByAuctionAuctionId(Long auctionId);
@@ -22,7 +24,8 @@ public interface BidRepository extends JpaRepository<Bid, Long>, BidRepositoryCu
     List<Bid> findByAuctionAuctionIdAndBidStatus(Long auctionId, BidStatus bidStatus);
 
     Bid findByUserUserIdAndBidStatus(Long userId, BidStatus bidStatus);
-    Page<Bid> findByUserUserId(Long userId, Pageable pageable);
+
+    List<Bid> findByUserUserId(Long userId, Pageable pageable);
 
     Bid findByUserUserId(Long userId);
 
@@ -33,9 +36,12 @@ public interface BidRepository extends JpaRepository<Bid, Long>, BidRepositoryCu
 
     Long findAuctionIdByBidId(Long bidId);
 
-    Bid findByAuctionAuctionIdAndUserUserId(Long auctionId, Long userId);
+    List<Bid> findByAuctionAuctionIdAndUserUserId(Long auctionId, Long userId);
+
+    List<Bid> findByUserUserIdAndBidStatusIsNotNull(Long userId, BidStatus bidStatus, Pageable pageable);
 
     Bid findByUserUserIdAndBidStatusIsNotNull(Long userId);
+
     Optional<Bid> findById(Long aLong);
 
 }

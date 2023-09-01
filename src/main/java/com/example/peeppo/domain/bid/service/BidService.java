@@ -1,7 +1,11 @@
 package com.example.peeppo.domain.bid.service;
 
+import com.example.peeppo.domain.auction.dto.AuctionListResponseDto;
+import com.example.peeppo.domain.auction.dto.GetAuctionBidResponseDto;
+import com.example.peeppo.domain.auction.dto.TestListResponseDto;
 import com.example.peeppo.domain.auction.dto.TimeRemaining;
 import com.example.peeppo.domain.auction.entity.Auction;
+import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.bid.dto.BidGoodsListRequestDto;
 import com.example.peeppo.domain.bid.dto.BidListResponseDto;
@@ -34,8 +38,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,11 +57,14 @@ public class BidService {
 
     public ResponseDto bidding(User user, Long auctionId, BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
 
+        if(getAuction(auctionId).getUser().getUserId().equals(user.getUserId())){
+            throw new IllegalAccessException("이미 참여중인 경매입니다.");
+        }
         Auction auction = getAuction(auctionId);
         List<Bid> bidList = new ArrayList<>();
         Double totalPrice = 0D;
 
-        for (Long goodsId : bidGoodsListRequestDto.getGoodsId()){
+        for (Long goodsId : bidGoodsListRequestDto.getGoodsId()) {
             RatingGoods ratingGoods = ratingGoodsRepository.findByGoodsGoodsId(goodsId);
             totalPrice += ratingGoods.getAvgRatingPrice();
         }
@@ -80,7 +86,7 @@ public class BidService {
             if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE) &&
                     (totalPrice >= auction.getLowPrice())) {
                 //시작가보다 낮을 경우
-                bidList.add(new Bid(user, auction, goods, goodsImg));
+                bidList.add(new Bid(user, auction, goods, goodsImg, BidStatus.BIDDING));
                 goods.changeStatus(GoodsStatus.BIDDING);
             } else {
                 System.out.println("3 ");
@@ -109,21 +115,26 @@ public class BidService {
         return new ResponseDto("입찰이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
-    public ApiResponse<Page<BidListResponseDto>> BidList(Long auctionId, int page) {
+    public ApiResponse<Page<Map<Long, List<BidListResponseDto>>>> BidList(Long auctionId, int page) {
         Pageable pageable = PageRequest.of(page, 8);
-        Page<Bid> bidPage = bidRepository.findSortedBySellersPick(auctionId, pageable);
-        List<BidListResponseDto> bidListResponseList = bidPage
-                .stream()
-                .map(bid -> {
-                    String goodsImg = imageRepository
-                            .findByGoodsGoodsIdOrderByCreatedAtAscFirst(bid.getGoods().getGoodsId())
-                            .getImageUrl();
-                    return new BidListResponseDto(bid, goodsImg);
-                })
-                .collect(Collectors.toList());
+        List<Bid> bidListMap = bidRepository.findSortedBySellersPick(auctionId, pageable);
 
-        Page<BidListResponseDto> bidPageResponse = new PageImpl<>(bidListResponseList, pageable, bidPage.getTotalElements());
-        return new ApiResponse<>(true, bidPageResponse, null);
+        Map<Long, List<Bid>> groupedBidsByUserId = bidListMap.stream()
+                .collect(Collectors.groupingBy(bid -> bid.getUser().getUserId()));
+        Map<Long, List<BidListResponseDto>> userBidLists = new HashMap<>();
+        for (Map.Entry<Long, List<Bid>> entry : groupedBidsByUserId.entrySet()) {
+            Long bidId = entry.getKey();
+            List<Bid> bidsWithSameId = entry.getValue();
+
+            List<BidListResponseDto> bidListResponseDtos = bidsWithSameId.stream()
+                    .map(bid -> new BidListResponseDto(bid))
+                    .collect(Collectors.toList());
+
+            userBidLists.put(bidId, bidListResponseDtos);
+        }
+
+        Page<Map<Long, List<BidListResponseDto>>> pageResult = new PageImpl<>(Collections.singletonList(userBidLists), pageable, bidListMap.size());
+    return new ApiResponse<>(true, pageResult, null);
     }
 
     //경매자가 선택
@@ -133,13 +144,13 @@ public class BidService {
             throw new IllegalAccessException("잘못된 접근입니다. 다시 시도해주세요.");
         }
         List<Bid> bidList = new ArrayList<>();
-            for (Long bidId : choiceRequestDto.getBidId()) {
-                Bid bid = bidRepository.findById(bidId)
-                        .orElseThrow(() -> new NullPointerException("존재하지 않는 입찰품입니다."));
-                bid.select();
-                bidList.add(bid);
-            }
-            bidRepository.saveAll(bidList);
+        for (Long bidId : choiceRequestDto.getBidId()) {
+            Bid bid = bidRepository.findById(bidId)
+                    .orElseThrow(() -> new NullPointerException("존재하지 않는 입찰품입니다."));
+            bid.select();
+            bidList.add(bid);
+        }
+        bidRepository.saveAll(bidList);
         return new ResponseDto("선택이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
@@ -175,29 +186,34 @@ public class BidService {
         choiceBidRepository.saveAll(bidsList);
     }
 
-    public ResponseEntity<Page<BidTradeListResponseDto>> bidTradeList(User user, int page, int size, String sortBy, boolean isAsc,
+    public ResponseEntity<Page<GetAuctionBidResponseDto>> bidTradeList(User user, int page, int size, String sortBy, boolean isAsc,
                                                                       BidStatus bidStatus) {
+
         Pageable pageable = paging(page, size, sortBy, isAsc);
-        Page<Auction> myAuctionPage = null;
+        List<Bid> myBidPage;
+        Page<Auction> myAuctionPage;
+        List<GetAuctionBidResponseDto> auctionResponseDtoList = new ArrayList<>();
 
         if (bidStatus != null) {
-            Bid bid = bidRepository.findByUserUserIdAndBidStatus(user.getUserId(), bidStatus);
-            Long auctionId = bidRepository.findAuctionIdByBidId(bid.getBidId());
-            myAuctionPage = auctionRepository.findByAuctionId(auctionId, pageable);
+            myBidPage = bidRepository.findByUserUserIdAndBidStatusIsNotNull(user.getUserId(), bidStatus, pageable);
         } else {
-            Bid bid = bidRepository.findByUserUserIdAndBidStatusIsNotNull(user.getUserId());
-            Long auctionId = bidRepository.findAuctionIdByBidId(bid.getBidId());
-            myAuctionPage = auctionRepository.findByAuctionId(auctionId, pageable);
+            myBidPage = bidRepository.findByUserUserId(user.getUserId(), pageable);
         }
 
-        List<BidTradeListResponseDto> auctionResponseDtoList = myAuctionPage.stream()
-                .map(auction -> {
-                    TimeRemaining timeRemaining = countDownTime(auction);
-                    Long bidCount = findBidCount(auction.getAuctionId());
-                    Bid bid = bidRepository.findByAuctionAuctionIdAndUserUserId(auction.getAuctionId(), user.getUserId());
-                    return new BidTradeListResponseDto(auction, timeRemaining, bidCount, bid);
-                })
-                .collect(Collectors.toList());
+        myAuctionPage = auctionRepository.findAuctionListByUserUserId(user.getUserId(), pageable);
+        for (Auction auction : myAuctionPage) {
+            List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndUserUserId(auction.getAuctionId(), user.getUserId());
+
+            List<BidListResponseDto> bidListResponseDtos = new ArrayList<>();
+            for (Bid bid : bidList) {
+                bidListResponseDtos.add(new BidListResponseDto(bid, bid.getGoodsImg()));
+            }
+            TimeRemaining timeRemaining = countDownTime(auction);
+            Long bidCount = findBidCount(auction.getAuctionId());
+            TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount);
+            GetAuctionBidResponseDto getAuctionBidResponseDto = new GetAuctionBidResponseDto(responseDto, bidListResponseDtos);
+            auctionResponseDtoList.add(getAuctionBidResponseDto);
+        }
 
         PageResponse response = new PageResponse<>(auctionResponseDtoList, pageable, myAuctionPage.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
