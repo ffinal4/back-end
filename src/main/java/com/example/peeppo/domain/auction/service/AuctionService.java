@@ -226,7 +226,6 @@ public class AuctionService {
         }
 
         checkUsername(auctionId, user);
-        auctionRepository.delete(auction);
     }
 
     // 경매 입찰 성공 ( 경매물품과 입찰물품의 상태를 둘 다 soldout으로 변경해라 )
@@ -235,21 +234,19 @@ public class AuctionService {
         Auction auction = findAuctionId(auctionId);
         List<Bid> bidList = bidRepository.findByAuctionAuctionId(auctionId);
 
-        for(Bid bid : bidList){
-            bid.changeBidStatus(FAIL);
-            bidRepository.save(bid);
-        }
-
         checkUsername(auctionId, user);
-
-        List<Choice> bidsList = new ArrayList<>();
 
         if (!auction.getUser().getUserId().equals(user.getUserId())) {
             throw new IllegalArgumentException("본인 경매가 아닙니다.");
         }
+        for(Bid bid1 : bidList){
+            bid1.changeBidStatus(FAIL);
+            bidRepository.save(bid1);
+        }
         for (Long bidId : choiceRequestDto.getBidId()) {
             Bid bid = findBidId(bidId);
             bid.changeBidStatus(SUCCESS);
+            bidRepository.save(bid);
 
             List<Notification> notificationList = notificationRepository.findByUserUserId(auction.getUser().getUserId());
 

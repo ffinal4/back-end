@@ -2,6 +2,7 @@ package com.example.peeppo.domain.auction.entity;
 
 import com.example.peeppo.domain.auction.dto.AuctionRequestDto;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
+import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.rating.entity.Rating;
 import com.example.peeppo.domain.rating.entity.RatingGoods;
@@ -14,6 +15,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
