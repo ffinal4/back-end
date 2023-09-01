@@ -28,9 +28,9 @@ public class GoodsController {
 
     @PostMapping
     public ApiResponse<MsgResponseDto> goodsCreate(@RequestPart(value = "data") GoodsRequestDto goodsRequestDto,
-                                                     @RequestPart(value = "images") List<MultipartFile> images,
-                                                     @RequestPart(value = "wanted") WantedRequestDto wantedRequestDto,
-                                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
+                                                   @RequestPart(value = "images") List<MultipartFile> images,
+                                                   @RequestPart(value = "wanted") WantedRequestDto wantedRequestDto,
+                                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
 
         return goodsService.goodsCreate(goodsRequestDto, images, wantedRequestDto, userDetails.getUser());
     }
@@ -47,11 +47,10 @@ public class GoodsController {
     }
 
 
-
     // 게시물 상세조회
     @GetMapping("/{goodsId}")
     public ApiResponse<GoodsDetailResponseDto> getGoods(@PathVariable Long goodsId,
-                                                  @AuthenticationPrincipal UserDetailsImpl userDetails) {
+                                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
         if (userDetails != null) {
             return goodsService.getGoods(goodsId, userDetails.getUser());
         }
@@ -132,23 +131,26 @@ public class GoodsController {
 
         return ResponseUtils.ok(goodsService.goodsRequest(userDetails.getUser(), goodsRequestRequestDto, goodsId));
     }
-/*
 
-    // 교환요청 수락
-    @PostMapping("/users/{requestGoodsId}/accept")
-    public ApiResponse<?> goodsAccept(@PathVariable("requestGoodsId") Long requestId,
-                                      @AuthenticationPrincipal UserDetailsImpl userDetails){
-        return goodsService.goodsAccept(requestId, userDetails.getUser());
-        }
+    @PostMapping("/rating/check")
+    public ApiResponse<ResponseDto> ratingCheck(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        return ResponseUtils.ok(goodsService.ratingCheck(userDetails.getUser()));
     }
-*/
 
-/*
-    // 교환요청 거절(교환취소)
-    @DeleteMapping("/users/{requestGoodsId}/refuse")
-    public ApiResponse<?> goodsRefuse(){
-
-    }*/
+//    // 교환요청 수락
+//    @PostMapping("/users/{requestGoodsId}/accept")
+//    public ApiResponse<?> goodsAccept(@PathVariable("requestGoodsId") Long requestId,
+//                                      @AuthenticationPrincipal UserDetailsImpl userDetails){
+//        return goodsService.goodsAccept(requestId, userDetails.getUser());
+//    }
+//
+//    // 교환요청 거절(교환취소)
+//    @DeleteMapping("/users/{requestGoodsId}/refuse")
+//    public ApiResponse<?> goodsRefuse(@PathVariable("requestGoodsId") Long requestId,
+//                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
+//        return goodsService.goodsRefuse(requestId, userDetails.getUser());
+//    }
 
     // 교환요청 완료
 
