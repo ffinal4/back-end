@@ -470,14 +470,14 @@ public class GoodsService {
     public ResponseDto goodsRequest(User user, GoodsRequestRequestDto goodsRequestRequestDto, Long urGoodsId) {
         Goods urGoods = goodsRepository.findByGoodsId(urGoodsId) // sellergoods(남의 물건)
                 .orElseThrow(() -> new NullPointerException("해당 상품이 존재하지 않습니다."));
-
         List<RequestGoods> requestGoods = new ArrayList<>();
         for (Long goodsId : goodsRequestRequestDto.getGoodsId()) {
             Goods goods = goodsRepository.findById(goodsId).orElseThrow(
                     () -> new IllegalArgumentException("존재하지 않는 goodsId 입니다.")); // 내 물건
+            RequestGoods requestGoods1 = requestRepository.findByBuyerGoodsId(goods.getGoodsId());
 
             if (!(urGoods.getUser().equals(goods.getUser()))) {
-                if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {// ||goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)
+                if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE) && (requestGoods1 == null)) {// ||goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)
                     requestGoods.add(new RequestGoods(urGoods, user, goods, RequestStatus.REQUEST));
                 } else {
                     throw new IllegalArgumentException("해당 물품은 다른 곳에 사용되거나 판매중 상태가 아닙니다.");
@@ -593,6 +593,36 @@ public class GoodsService {
             RequestGoods requestGoods = requestRepository.findById(requestId).orElseThrow(()-> new IllegalArgumentException("해당하는 요청은 존재하지 않습니다"));
             requestGoods.changeStatus(RequestStatus.CANCEL);
         }
+    }
+
+    //내가 받은 교환요청
+    public ResponseEntity<Page<GoodsRequestResponseDto>> receiveTradeList(User user, int page, int size, String sortBy, boolean isAsc, RequestStatus requestStatus) {
+
+        Pageable pageable = paging(page, size, sortBy, isAsc);
+        Page<Goods> requestGoods;
+
+        List<GoodsRequestResponseDto> goodsRequestResponseDtos = new ArrayList<>();
+
+        //1) requestgoods 테이블에서 seller goods 전부 찾아오기 => DTO 변환해주기
+        requestGoods = requestRepository.findSellerByReceiveUser(user.getUserId(), pageable);
+
+        //2) requestGoods 순회하면서 buyerGoods 찾아오기
+        for(Goods requestGood : requestGoods){
+            Goods goods = goodsRepository.findByGoodsId(requestGood.getGoodsId()).orElse(null);// sellergoods가 뭔지 찾았다 !
+            GoodsListResponseDto goodsListResponseDto = new GoodsListResponseDto(goods);
+            List<RequestGoods> buyerGoodsList = requestRepository.findAllBySellerGoodsId(goods.getGoodsId());
+            List<GoodsListResponseDto> goodsListResponseDtos = new ArrayList<>();
+            // 3) requestGoods 순회하며 buyerGoods 물품 정보 가져오기 => dto 로 변환하기
+            for(RequestGoods buyerGoods : buyerGoodsList){
+                Goods goods1 = goodsRepository.findByGoodsId(buyerGoods.getBuyer().getGoodsId()).orElse(null);// buyerGoods 찾기
+                GoodsListResponseDto goodsListResponseDto2 = new GoodsListResponseDto(goods1);
+                goodsListResponseDtos.add(goodsListResponseDto2);
+            }
+            goodsRequestResponseDtos.add(new GoodsRequestResponseDto(goodsListResponseDto, goodsListResponseDtos));
+        }
+
+        PageResponse response = new PageResponse<>(goodsRequestResponseDtos, pageable, requestGoods.getTotalElements() );
+        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
 

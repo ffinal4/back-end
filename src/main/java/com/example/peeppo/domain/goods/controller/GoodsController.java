@@ -112,7 +112,7 @@ public class GoodsController {
     }
 
     //교환요청 페이지(받은)
-    @GetMapping("/users/trade/request")
+    @GetMapping("/users/trade/receive")
     public ResponseEntity<Page<GoodsRequestResponseDto>> receiveTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                                           @RequestParam("page") int page,
                                                                           @RequestParam("size") int size,
@@ -120,7 +120,7 @@ public class GoodsController {
                                                                           @RequestParam("isAsc") boolean isAsc,
                                                                           @RequestParam(value = "status", required = false) RequestStatus requestStatus) {
 
-        return goodsService.requestTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, requestStatus);
+        return goodsService.receiveTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, requestStatus);
     }
 
   //교환요청 페이지(보낸)

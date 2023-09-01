@@ -32,6 +32,8 @@ public class QRequestGoods extends EntityPathBase<RequestGoods> {
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
+    public final NumberPath<Long> receiveUser = createNumber("receiveUser", Long.class);
+
     public final NumberPath<Long> requestId = createNumber("requestId", Long.class);
 
     public final EnumPath<com.example.peeppo.domain.goods.enums.RequestStatus> requestStatus = createEnum("requestStatus", com.example.peeppo.domain.goods.enums.RequestStatus.class);

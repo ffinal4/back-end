@@ -33,6 +33,7 @@ public class RequestGoods extends Timestamped {
     @Enumerated(EnumType.STRING)
     private RequestStatus requestStatus;
 
+    private Long receiveUser;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -41,6 +42,7 @@ public class RequestGoods extends Timestamped {
 
     public RequestGoods(Goods urGoods, User user, Goods goods, RequestStatus requestStatus) {
         this.seller = urGoods;
+        this.receiveUser = urGoods.getUser().getUserId();
         this.user = user;
         this.buyer = goods;
         this.requestStatus = requestStatus;

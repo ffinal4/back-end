@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RequestRepository extends JpaRepository<RequestGoods, Long> {
 
@@ -24,4 +25,9 @@ public interface RequestRepository extends JpaRepository<RequestGoods, Long> {
     Page<Goods> findSellerByUserId(@Param("user_id") Long userId, Pageable pageable);
 
     List<RequestGoods> findAllBySellerGoodsId(Long goodsId);
+
+    @Query("SELECT DISTINCT r.seller FROM RequestGoods r WHERE r.receiveUser = :user_id")
+    Page<Goods> findSellerByReceiveUser(@Param("user_id") Long userId, Pageable pageable);
+
+    RequestGoods findByBuyerGoodsId(Long id);
 }
