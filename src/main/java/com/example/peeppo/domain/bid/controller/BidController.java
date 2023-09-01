@@ -22,6 +22,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -41,10 +42,11 @@ public class BidController {
     }
 
     //전체조회
-    @GetMapping("/auction/{auctionId}/bid")
-    public ApiResponse<List<BidListResponseDto>> bidList(@PathVariable Long auctionId) {
+    @GetMapping("/auction/{auctionId}/bid/{page}")
+    public ApiResponse<Page<Map<Long, List<BidListResponseDto>>>> bidList(@PathVariable Long auctionId,
+                                                                    @PathVariable int page) {
 
-        return ResponseUtils.ok(bidService.BidList(auctionId));
+        return bidService.BidList(auctionId, page-1);
     }
 
     @PostMapping("/auction/{auctionId}/choice/bids")
@@ -73,6 +75,5 @@ public class BidController {
                                                                            @RequestParam(value = "bid status", required = false) BidStatus bidStatus) {
 
         return bidService.bidTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, bidStatus);
-
     }
 }

@@ -27,6 +27,8 @@ public class Bid extends Timestamped {
 
     private String goodsImg;
 
+    private boolean sellersPick;
+
     @Enumerated(EnumType.STRING)
     private BidStatus bidStatus;
 
@@ -63,5 +65,9 @@ public class Bid extends Timestamped {
 
     public void changeBidStatus(BidStatus bidStatus) {
         this.bidStatus = bidStatus;
+    }
+
+    public void select() {
+        this.sellersPick = true;
     }
 }

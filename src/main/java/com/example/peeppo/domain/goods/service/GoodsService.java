@@ -1,10 +1,6 @@
 package com.example.peeppo.domain.goods.service;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.example.peeppo.domain.auction.dto.TestListResponseDto;
-import com.example.peeppo.domain.auction.dto.TimeRemaining;
-import com.example.peeppo.domain.auction.entity.Auction;
-import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.dibs.entity.Dibs;
 import com.example.peeppo.domain.dibs.repository.DibsRepository;
 import com.example.peeppo.domain.dibs.service.DibsService;
@@ -16,12 +12,9 @@ import com.example.peeppo.domain.goods.entity.WantedGoods;
 import com.example.peeppo.domain.goods.enums.RequestStatus;
 import com.example.peeppo.domain.goods.enums.RequestedStatus;
 import com.example.peeppo.domain.goods.enums.Category;
-import com.example.peeppo.domain.goods.enums.GoodsStatus;
-import com.example.peeppo.domain.goods.enums.RequestStatus;
-import com.example.peeppo.domain.goods.enums.RequestedStatus;
-import com.example.peeppo.domain.goods.repository.GoodsRepository;
-import com.example.peeppo.domain.goods.repository.RequestRepository;
-import com.example.peeppo.domain.goods.repository.WantedGoodsRepository;
+import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
+import com.example.peeppo.domain.goods.repository.request.RequestRepository;
+import com.example.peeppo.domain.goods.repository.wantedGoods.WantedGoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.helper.ImageHelper;
 import com.example.peeppo.domain.image.repository.ImageRepository;
@@ -41,7 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -65,7 +57,7 @@ public class GoodsService {
     private final String bucket;
     private final UserRepository userRepository;
     private final RatingGoodsRepository ratingGoodsRepository;
-    private final RequestRepository requestRepository;
+    //private final RequestRepository requestRepository;
 
     private final RatingHelper ratingHelper;
     private final DibsService dibsService;
@@ -363,7 +355,7 @@ public class GoodsService {
     }
 
     //교환 요청 받은 페이지
-    public ResponseEntity<Page<GoodsResponseListDto>> requestedTradeList(User user, int page, int size, String sortBy, boolean isAsc,
+  /*  public ResponseEntity<Page<GoodsResponseListDto>> requestedTradeList(User user, int page, int size, String sortBy, boolean isAsc,
                                                                          RequestedStatus requestedStatus) {
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
@@ -383,7 +375,7 @@ public class GoodsService {
             if(goods.getRequestedStatus() == null){
                 continue;
             }
-            if (goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)) {
+ *//*           if (goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)) {
                 requestGoodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.REQUEST);
             }
             if (goods.getRequestedStatus().equals(RequestedStatus.TRADING)) {
@@ -395,7 +387,7 @@ public class GoodsService {
             if (goods.getRequestedStatus().equals(RequestedStatus.CANCEL)) {
                 requestGoodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.CANCEL);
             }
-
+*//*
             for (RequestGoods requestGoods : requestGoodsList) {
                 Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
                 Image imageRequest = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(requestGoods.getGoods().getGoodsId());
@@ -406,7 +398,7 @@ public class GoodsService {
 
         PageResponse response = new PageResponse<>(goodsListResponseDtos, pageable, myGoodsPage.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-    }
+    }*/
 /*
     public ResponseEntity<Page<GoodsResponseListDto>> requestTradeList(User user, int page, int size, String sortBy, boolean isAsc,
                                                                        RequestStatus requestStatus) {

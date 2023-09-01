@@ -19,7 +19,7 @@ import com.example.peeppo.domain.bid.repository.ChoiceBidRepository;
 import com.example.peeppo.domain.bid.repository.QueryRepository;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
-import com.example.peeppo.domain.goods.repository.GoodsRepository;
+import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.domain.notification.entity.Notification;
 import com.example.peeppo.domain.notification.repository.NotificationRepository;
@@ -28,20 +28,17 @@ import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingG
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
+import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.responseDto.PageResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,8 +57,11 @@ public class BidService {
 
     public ResponseDto bidding(User user, Long auctionId, BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
 
+        if(getAuction(auctionId).getUser().getUserId().equals(user.getUserId())){
+            throw new IllegalAccessException("이미 참여중인 경매입니다.");
+        }
         Auction auction = getAuction(auctionId);
-        List<Bid> List = new ArrayList<>();
+        List<Bid> bidList = new ArrayList<>();
         Double totalPrice = 0D;
 
         for (Long goodsId : bidGoodsListRequestDto.getGoodsId()) {
@@ -86,8 +86,7 @@ public class BidService {
             if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE) &&
                     (totalPrice >= auction.getLowPrice())) {
                 //시작가보다 낮을 경우
-
-                List.add(new Bid(user, auction, goods, goodsImg, BidStatus.BIDDING));
+                bidList.add(new Bid(user, auction, goods, goodsImg, BidStatus.BIDDING));
                 goods.changeStatus(GoodsStatus.BIDDING);
             } else {
                 System.out.println("3 ");
@@ -97,7 +96,7 @@ public class BidService {
 
         List<Notification> notificationList = notificationRepository.findByUserUserId(auction.getUser().getUserId());
 
-        for (Notification notification : notificationList) {
+        for(Notification notification : notificationList){
             if (notification == null) {
                 notification = new Notification();
                 notification.setUser(user);
@@ -110,37 +109,48 @@ public class BidService {
             notificationRepository.save(notification);
         }
 
-        bidRepository.saveAll(List);
+
+        bidRepository.saveAll(bidList);
 
         return new ResponseDto("입찰이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
-    public List<BidListResponseDto> BidList(Long auctionId) {
-        List<Bid> bidPage = bidRepository.findAllByAuctionAuctionId(auctionId);
+    public ApiResponse<Page<Map<Long, List<BidListResponseDto>>>> BidList(Long auctionId, int page) {
+        Pageable pageable = PageRequest.of(page, 8);
+        List<Bid> bidListMap = bidRepository.findSortedBySellersPick(auctionId, pageable);
 
-        Auction auction = getAuction(auctionId);
-        Long goodsId = auction.getGoods().getGoodsId();
+        Map<Long, List<Bid>> groupedBidsByUserId = bidListMap.stream()
+                .collect(Collectors.groupingBy(bid -> bid.getUser().getUserId()));
+        Map<Long, List<BidListResponseDto>> userBidLists = new HashMap<>();
+        for (Map.Entry<Long, List<Bid>> entry : groupedBidsByUserId.entrySet()) {
+            Long bidId = entry.getKey();
+            List<Bid> bidsWithSameId = entry.getValue();
 
-        String goodsImg = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsId).getImageUrl();
-        List<BidListResponseDto> bidList = new ArrayList<>();
+            List<BidListResponseDto> bidListResponseDtos = bidsWithSameId.stream()
+                    .map(bid -> new BidListResponseDto(bid))
+                    .collect(Collectors.toList());
 
-        for (Bid bid : bidPage) {
-            bidList.add(new BidListResponseDto(bid, goodsImg));
+            userBidLists.put(bidId, bidListResponseDtos);
         }
-        return bidList;
+
+        Page<Map<Long, List<BidListResponseDto>>> pageResult = new PageImpl<>(Collections.singletonList(userBidLists), pageable, bidListMap.size());
+    return new ApiResponse<>(true, pageResult, null);
     }
 
     //경매자가 선택
     public ResponseDto choiceBids(User user, Long auctionId, ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
         Auction auction = getAuction(auctionId);
-        List<Choice> bidsList = new ArrayList<>();
-
-        if (auction.getUser().getUserId().equals(user.getUserId())) {
-            getBiddingList(choiceRequestDto, auction, bidsList);
-        } else {
-            throw new IllegalAccessException();
+        if (!auction.getUser().getUserId().equals(user.getUserId())) {
+            throw new IllegalAccessException("잘못된 접근입니다. 다시 시도해주세요.");
         }
-
+        List<Bid> bidList = new ArrayList<>();
+        for (Long bidId : choiceRequestDto.getBidId()) {
+            Bid bid = bidRepository.findById(bidId)
+                    .orElseThrow(() -> new NullPointerException("존재하지 않는 입찰품입니다."));
+            bid.select();
+            bidList.add(bid);
+        }
+        bidRepository.saveAll(bidList);
         return new ResponseDto("선택이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
@@ -164,7 +174,7 @@ public class BidService {
     }
 
     private void getBiddingList(ChoiceRequestDto choiceRequestDto, Auction auction, List<Choice> bidsList) throws IllegalAccessException {
-        for (Long bidId : choiceRequestDto.getbidId()) {
+        for (Long bidId : choiceRequestDto.getBidId()) {
             Bid bid = getBid(bidId);
 
             if (!auction.getAuctionId().equals(bid.getAuction().getAuctionId())) {

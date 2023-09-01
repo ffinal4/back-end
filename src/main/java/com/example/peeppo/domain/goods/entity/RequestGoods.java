@@ -45,6 +45,13 @@ public class RequestGoods extends Timestamped {
         this.requestStatus = requestStatus;
     }
 
+    public RequestGoods(User user, Goods urGoods, Goods goods, RequestStatus requestStatus) {
+        this.user = user;
+        this.seller = urGoods;
+        this.goods = goods;
+        this.requestStatus = requestStatus;
+    }
+
     public void changeStatus(RequestStatus requestStatus) {
         this.requestStatus = requestStatus;
     }
