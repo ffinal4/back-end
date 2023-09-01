@@ -356,7 +356,7 @@ public class GoodsService {
         return new ApiResponse<>(true, new GoodsDetailResponseDto(new GoodsResponseDto(goods, imageUrls, wantedGoods), rcGoodsResponseDtoList), null);
     }
 
-    //교환 요청 받은 페이지
+  /*  //교환 요청 받은 페이지
     public ResponseEntity<Page<GoodsResponseListDto>> requestedTradeList(User user, int page, int size, String sortBy, boolean isAsc,
                                                                          RequestStatus requestedStatus) {
 
@@ -396,7 +396,7 @@ public class GoodsService {
         PageResponse response = new PageResponse<>(goodsListResponseDtos, pageable, myGoodsPage.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
-
+*/
     // 내가 보낸 교환요청
     public ResponseEntity<Page<GoodsResponseListDto>> requestTradeList(User user, int page, int size, String sortBy, boolean isAsc,
                                                                        RequestStatus requestStatus) {
@@ -412,19 +412,19 @@ public class GoodsService {
 
         for (RequestGoods requestGoods : myGoodsPage) {
             List<RequestGoods> goodsList = new ArrayList<>();
-
             if (requestGoods.getRequestStatus().equals(RequestStatus.REQUEST)) {
-                Goods goods = goodsRepository.findById(requestGoods.getGoods().getGoodsId());
-                goodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(requestGoods.getGoods().getGoodsId(), RequestStatus.TRADING);
+                goodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(requestGoods.getSeller().getGoodsId(), RequestStatus.REQUEST);
             } else if (requestGoods.getRequestStatus().equals(RequestStatus.TRADING)) {
-                goodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(requestGoods.getGoods().getGoodsId(), RequestStatus.TRADING);
+                goodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(requestGoods.getSeller().getGoodsId(), RequestStatus.TRADING);
             } else if (requestGoods.getRequestStatus().equals(RequestStatus.DONE)) {
-                goodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(requestGoods.getGoods().getGoodsId(), RequestStatus.DONE);
+                goodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(requestGoods.getSeller().getGoodsId(), RequestStatus.DONE);
             } else if (requestGoods.getRequestStatus().equals(RequestStatus.CANCEL)) {
-                goodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(requestGoods.getGoods().getGoodsId(), RequestStatus.CANCEL);
+                goodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(requestGoods.getSeller().getGoodsId(), RequestStatus.CANCEL);
             }
 
-            for (Goods goods : goodsList) {
+            for (RequestGoods requestGoods1 : goodsList) {
+                Goods sellerGoods = goodsRepository.findByGoodsId(requestGoods1.getSeller().getGoodsId()).orElse(null);
+                Goods buyerGoods = goodsRepository.findByGoodsId(requestGoods1.getBuyer().getGoodsId()).orElse(null);
                 Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
                 GoodsResponseListDto goodsListResponseDto = new GoodsResponseListDto(goods, image.getImageUrl(), requestGoods);
                 goodsListResponseDtos.add(goodsListResponseDto);

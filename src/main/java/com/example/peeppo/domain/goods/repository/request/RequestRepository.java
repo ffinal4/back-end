@@ -11,11 +11,11 @@ import java.util.List;
 
 public interface RequestRepository extends JpaRepository<RequestGoods, Long> {
 
-//    Page<RequestGoods> findByUserUserIdAndRequestStatus(Long userId, Pageable pageable, RequestStatus requestStatus);
-//
-//    Page<RequestGoods> findByUserUserId(Long userId, Pageable pageable);
-//
-//    RequestGoods findByGoodsGoodsId(Long goodsId);
-//
-//    List<RequestGoods> findByGoodsGoodsIdAndRequestStatus(Long goodsId, RequestStatus requestStatus);
+    Page<RequestGoods> findByUserUserIdAndRequestStatus(Long userId, Pageable pageable, RequestStatus requestStatus);
+
+    Page<RequestGoods> findByUserUserId(Long userId, Pageable pageable);
+
+    RequestGoods findByGoodsGoodsId(Long goodsId);
+
+    List<RequestGoods> findByGoodsGoodsIdAndRequestStatus(Long goodsId, RequestStatus requestStatus);
 }
