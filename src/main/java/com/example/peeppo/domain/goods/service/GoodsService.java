@@ -10,7 +10,6 @@ import com.example.peeppo.domain.goods.dto.*;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.entity.WantedGoods;
 import com.example.peeppo.domain.goods.enums.RequestStatus;
-import com.example.peeppo.domain.goods.enums.RequestedStatus;
 import com.example.peeppo.domain.goods.enums.Category;
 import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.goods.repository.request.RequestRepository;
@@ -29,6 +28,7 @@ import com.example.peeppo.global.responseDto.PageResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
@@ -357,17 +357,13 @@ public class GoodsService {
     }
 
     //교환 요청 받은 페이지
-  /*  public ResponseEntity<Page<GoodsResponseListDto>> requestedTradeList(User user, int page, int size, String sortBy, boolean isAsc,
-                                                                         RequestedStatus requestedStatus) {
+    public ResponseEntity<Page<GoodsResponseListDto>> requestedTradeList(User user, int page, int size, String sortBy, boolean isAsc,
+                                                                         RequestStatus requestedStatus) {
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Goods> myGoodsPage;
 
-        if (requestedStatus != null) {
-            myGoodsPage = goodsRepository.findByUserUserIdAndRequestedStatus(user.getUserId(), pageable, requestedStatus);
-        } else {
-            myGoodsPage = goodsRepository.findByUserUserIdAndRequestedStatusIsNotNull(user.getUserId(), pageable);
-        }
+
 
         List<GoodsResponseListDto> goodsListResponseDtos = new ArrayList<>();
 
@@ -377,7 +373,7 @@ public class GoodsService {
             if(goods.getRequestedStatus() == null){
                 continue;
             }
- *//*           if (goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)) {
+       if (goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)) {
                 requestGoodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.REQUEST);
             }
             if (goods.getRequestedStatus().equals(RequestedStatus.TRADING)) {
@@ -389,7 +385,6 @@ public class GoodsService {
             if (goods.getRequestedStatus().equals(RequestedStatus.CANCEL)) {
                 requestGoodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.CANCEL);
             }
-*//*
             for (RequestGoods requestGoods : requestGoodsList) {
                 Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
                 Image imageRequest = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(requestGoods.getGoods().getGoodsId());
@@ -400,8 +395,9 @@ public class GoodsService {
 
         PageResponse response = new PageResponse<>(goodsListResponseDtos, pageable, myGoodsPage.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-    }*/
-/*
+    }
+
+    // 내가 보낸 교환요청
     public ResponseEntity<Page<GoodsResponseListDto>> requestTradeList(User user, int page, int size, String sortBy, boolean isAsc,
                                                                        RequestStatus requestStatus) {
 
@@ -444,7 +440,7 @@ public class GoodsService {
 
         PageResponse response = new PageResponse<>(goodsListResponseDtoList, pageable, myGoodsPage.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-    }*/
+    }
 
     //내물건이 아니여야한다 !
     public ResponseDto goodsRequest(User user, GoodsRequestRequestDto goodsRequestRequestDto, Long urGoodsId) {
@@ -526,12 +522,21 @@ public class GoodsService {
         return PageRequest.of(page, size, sort);
     }
 
-/*    // 승인 => 교환중으로 상태 변경
-    public ApiResponse<?> goodsAccept(Long requestId, User user) {
-        RequestGoods requestGoods = requestRepository.findById(requestId).orElseThrow(()-> new IllegalArgumentException("해당하는 요청은 존재하지 않습니다"));
+    // 승인 => 교환중으로 상태 변경
+    public void goodsAccept(RequestAcceptRequestDto requestAcceptRequestDto, User user) {
+        for(Long requestId : requestAcceptRequestDto.getRequestId()){
+            RequestGoods requestGoods = requestRepository.findById(requestId).orElseThrow(()-> new IllegalArgumentException("해당하는 요청은 존재하지 않습니다"));
+            requestGoods.changeStatus(RequestStatus.TRADING);
+        }
+    }
+    // 요청 -> 거절
+    public void goodsRefuse(RequestAcceptRequestDto requestAcceptRequestDto, User user) {
+        for(Long requestId : requestAcceptRequestDto.getRequestId()){
+            RequestGoods requestGoods = requestRepository.findById(requestId).orElseThrow(()-> new IllegalArgumentException("해당하는 요청은 존재하지 않습니다"));
+            requestGoods.changeStatus(RequestStatus.CANCEL);
+        }
+    }
 
-        requestGoods.changeStatus(RequestStatus.TRADING);
-    }*/
 
 /*    public String refuseGoods(Long goodsId, User user) {
         // 존재하는 물품의 ID인지 확인
