@@ -112,8 +112,8 @@ public class GoodsController {
 
     //교환요청 페이지(받은)
 
-/*    //교환요청 페이지(보낸)
-   @GetMapping("/users/trade/request")
+  //교환요청 페이지(보낸)
+  /* @GetMapping("/users/trade/request")
     public ResponseEntity<Page<GoodsResponseListDto>> requestTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                                        @RequestParam("page") int page,
                                                                        @RequestParam("size") int size,
@@ -122,7 +122,7 @@ public class GoodsController {
                                                                        @RequestParam(value = "status", required = false) RequestStatus requestStatus) {
 
         return goodsService.requestTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, requestStatus);
-    }*/
+*/
 
     //교환신청
     @PostMapping("/users/{goodsId}/request")
@@ -132,6 +132,7 @@ public class GoodsController {
 
         return ResponseUtils.ok(goodsService.goodsRequest(userDetails.getUser(), goodsRequestRequestDto, goodsId));
     }
+
 /*
 
     // 교환요청 수락
@@ -142,6 +143,7 @@ public class GoodsController {
         }
     }
 */
+
 
 /*
     // 교환요청 거절(교환취소)

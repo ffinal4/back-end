@@ -62,6 +62,8 @@ public class GoodsService {
     private final RatingHelper ratingHelper;
     private final DibsService dibsService;
 
+    private final RequestRepository requestRepository;
+
     private final DibsRepository dibsRepository;
     private static final String RECENT_GOODS = "goods";
     private static final int MAX_RECENT_GOODS = 4;
@@ -444,18 +446,19 @@ public class GoodsService {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }*/
 
-    //알림과 카운트 올려줘야됨
+    //내물건이 아니여야한다 !
     public ResponseDto goodsRequest(User user, GoodsRequestRequestDto goodsRequestRequestDto, Long urGoodsId) {
-        Goods urGoods = goodsRepository.findByGoodsId(urGoodsId)
+        Goods urGoods = goodsRepository.findByGoodsId(urGoodsId) // sellergoods(남의 물건)
                 .orElseThrow(() -> new NullPointerException("해당 상품이 존재하지 않습니다."));
 
+        List<RequestGoods> requestGoods = new ArrayList<>();
         for (Long goodsId : goodsRequestRequestDto.getGoodsId()) {
             Goods goods = goodsRepository.findById(goodsId).orElseThrow(
-                    () -> new IllegalArgumentException("존재하지 않는 goodsId 입니다."));
+                    () -> new IllegalArgumentException("존재하지 않는 goodsId 입니다.")); // 내 물건
 
-            if (!urGoodsId.equals(goods.getGoodsId())) {
+            if (!(urGoods.getUser().equals(goods.getUser()))) {
                 if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {// ||goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)
-                    new RequestGoods(urGoods, user, goods, RequestStatus.REQUEST);
+                    requestGoods.add(new RequestGoods(urGoods, user, goods, RequestStatus.REQUEST));
                 } else {
                     throw new IllegalArgumentException("해당 물품은 다른 곳에 사용되거나 판매중 상태가 아닙니다.");
                 }
@@ -463,8 +466,7 @@ public class GoodsService {
                 throw new IllegalArgumentException("내 물건은 교환할 수 없습니다.");
             }
         }
-        urGoods.setRequestedStatus(RequestedStatus.REQUESTED);
-
+        requestRepository.saveAll(requestGoods);
         return new ResponseDto("교환신청이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
@@ -524,6 +526,13 @@ public class GoodsService {
         return PageRequest.of(page, size, sort);
     }
 
+/*    // 승인 => 교환중으로 상태 변경
+    public ApiResponse<?> goodsAccept(Long requestId, User user) {
+        RequestGoods requestGoods = requestRepository.findById(requestId).orElseThrow(()-> new IllegalArgumentException("해당하는 요청은 존재하지 않습니다"));
+
+        requestGoods.changeStatus(RequestStatus.TRADING);
+    }*/
+
 /*    public String refuseGoods(Long goodsId, User user) {
         // 존재하는 물품의 ID인지 확인
         Goods goods = goodsRepository.findByGoodsId(goodsId)
@@ -531,7 +540,6 @@ public class GoodsService {
         // 물품의 상태를 ONSALE 로 변경하고 물품 교환에서 request_goods 내의 request_status 를 cancel로 변경하기
 
 
-
-    }*/
+  }*/
 
 }

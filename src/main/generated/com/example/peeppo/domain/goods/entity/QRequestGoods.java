@@ -24,10 +24,10 @@ public class QRequestGoods extends EntityPathBase<RequestGoods> {
 
     public final com.example.peeppo.global.utils.QTimestamped _super = new com.example.peeppo.global.utils.QTimestamped(this);
 
+    public final QGoods buyer;
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
-
-    public final QGoods goods;
 
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
@@ -58,7 +58,7 @@ public class QRequestGoods extends EntityPathBase<RequestGoods> {
 
     public QRequestGoods(Class<? extends RequestGoods> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.goods = inits.isInitialized("goods") ? new QGoods(forProperty("goods"), inits.get("goods")) : null;
+        this.buyer = inits.isInitialized("buyer") ? new QGoods(forProperty("buyer"), inits.get("buyer")) : null;
         this.seller = inits.isInitialized("seller") ? new QGoods(forProperty("seller"), inits.get("seller")) : null;
         this.user = inits.isInitialized("user") ? new com.example.peeppo.domain.user.entity.QUser(forProperty("user")) : null;
     }

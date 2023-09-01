@@ -58,17 +58,17 @@ public class Goods extends Timestamped {
     @Enumerated(EnumType.STRING)
     private GoodsStatus goodsStatus;
 
-    @Enumerated(EnumType.STRING)
-    private RequestedStatus requestedStatus;
-
     @OneToMany(mappedBy = "goods")
     private List<Dibs> dibs;
 
     @OneToMany(mappedBy = "goods")
     private List<ChatRoom> chatRooms;
 
-    @OneToMany(mappedBy = "goods")
+/*    @OneToMany(mappedBy = "goods")
     private List<RequestGoods> requestGoods;
+
+    @OneToMany(mappedBy = "goods")
+    private List<RequestGoods> requestGoods;*/
 
     public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods){
         this.title = requestDto.getTitle();
@@ -122,9 +122,6 @@ public class Goods extends Timestamped {
         this.location = location;
     }
 
-    public void setRequestedStatus(RequestedStatus requestedStatus) {
-        this.requestedStatus = requestedStatus;
-    }
 }
 
 
