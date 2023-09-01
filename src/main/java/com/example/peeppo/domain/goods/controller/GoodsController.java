@@ -1,9 +1,7 @@
 package com.example.peeppo.domain.goods.controller;
 
 import com.example.peeppo.domain.goods.dto.*;
-import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.enums.RequestStatus;
-import com.example.peeppo.domain.goods.enums.RequestedStatus;
 import com.example.peeppo.domain.goods.service.GoodsService;
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.global.responseDto.ApiResponse;
@@ -114,10 +112,20 @@ public class GoodsController {
     }
 
     //교환요청 페이지(받은)
+    @GetMapping("/users/trade/request")
+    public ResponseEntity<Page<GoodsRequestResponseDto>> receiveTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                          @RequestParam("page") int page,
+                                                                          @RequestParam("size") int size,
+                                                                          @RequestParam("sortBy") String sortBy,
+                                                                          @RequestParam("isAsc") boolean isAsc,
+                                                                          @RequestParam(value = "status", required = false) RequestStatus requestStatus) {
+
+        return goodsService.requestTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, requestStatus);
+    }
 
   //교환요청 페이지(보낸)
    @GetMapping("/users/trade/request")
-    public ResponseEntity<Page<GoodsResponseListDto>> requestTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
+    public ResponseEntity<Page<GoodsRequestResponseDto>> requestTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                                        @RequestParam("page") int page,
                                                                        @RequestParam("size") int size,
                                                                        @RequestParam("sortBy") String sortBy,

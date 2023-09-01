@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,8 +62,6 @@ public class GoodsService {
 
     private final RatingHelper ratingHelper;
     private final DibsService dibsService;
-
-    private final RequestRepository requestRepository;
 
     private final DibsRepository dibsRepository;
     private static final String RECENT_GOODS = "goods";
@@ -398,19 +397,44 @@ public class GoodsService {
     }
 */
     // 내가 보낸 교환요청
-    public ResponseEntity<Page<GoodsResponseListDto>> requestTradeList(User user, int page, int size, String sortBy, boolean isAsc,
+    public ResponseEntity<Page<GoodsRequestResponseDto>> requestTradeList(User user, int page, int size, String sortBy, boolean isAsc,
                                                                        RequestStatus requestStatus) {
-
         Pageable pageable = paging(page, size, sortBy, isAsc);
-        Page<RequestGoods> myGoodsPage;
+        Page<Goods> requestGoods;
 
-        if (requestStatus != null) {
-            myGoodsPage = requestRepository.findByUserUserIdAndRequestStatus(user.getUserId(), pageable, requestStatus);
-        } else {
-            myGoodsPage = requestRepository.findByUserUserId(user.getUserId(), pageable);
+        List<GoodsRequestResponseDto> goodsRequestResponseDtos = new ArrayList<>();
+
+        //1) requestgoods 테이블에서 seller goods 전부 찾아오기 => DTO 변환해주기
+        requestGoods = requestRepository.findSellerByUserId(user.getUserId(), pageable);
+
+        //2) requestGoods 순회하면서 buyerGoods 찾아오기
+        for(Goods requestGood : requestGoods){
+            Goods goods = goodsRepository.findByGoodsId(requestGood.getGoodsId()).orElse(null);// sellergoods가 뭔지 찾았다 !
+            GoodsListResponseDto goodsListResponseDto = new GoodsListResponseDto(goods);
+            List<RequestGoods> buyerGoodsList = requestRepository.findAllBySellerGoodsId(goods.getGoodsId());
+            List<GoodsListResponseDto> goodsListResponseDtos = new ArrayList<>();
+            // 3) requestGoods 순회하며 buyerGoods 물품 정보 가져오기 => dto 로 변환하기
+            for(RequestGoods buyerGoods : buyerGoodsList){
+                Goods goods1 = goodsRepository.findByGoodsId(buyerGoods.getBuyer().getGoodsId()).orElse(null);// buyerGoods 찾기
+                GoodsListResponseDto goodsListResponseDto2 = new GoodsListResponseDto(goods1);
+                goodsListResponseDtos.add(goodsListResponseDto2);
+            }
+            goodsRequestResponseDtos.add(new GoodsRequestResponseDto(goodsListResponseDto, goodsListResponseDtos));
         }
 
-        for (RequestGoods requestGoods : myGoodsPage) {
+        PageResponse response = new PageResponse<>(goodsRequestResponseDtos, pageable, requestGoods.getTotalElements() );
+        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+
+
+
+ /*       if (requestStatus != null) { // 필터가 있는경우
+            myGoodsPage = requestRepository.findByUserUserIdAndRequestStatus(user.getUserId(), pageable, requestStatus);
+        } else { // 필터가 없는경우
+            myGoodsPage = requestRepository.findByUserUserId(user.getUserId(), pageable); // 요청 전부
+        }
+
+
+       for (RequestGoods requestGoods : myGoodsPage) {
             List<RequestGoods> goodsList = new ArrayList<>();
             if (requestGoods.getRequestStatus().equals(RequestStatus.REQUEST)) {
                 goodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(requestGoods.getSeller().getGoodsId(), RequestStatus.REQUEST);
@@ -439,7 +463,7 @@ public class GoodsService {
                 .collect(Collectors.toList());
 
         PageResponse response = new PageResponse<>(goodsListResponseDtoList, pageable, myGoodsPage.getTotalElements());
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+        return ResponseEntity.status(HttpStatus.OK.value()).body(response);*/
     }
 
     //내물건이 아니여야한다 !
