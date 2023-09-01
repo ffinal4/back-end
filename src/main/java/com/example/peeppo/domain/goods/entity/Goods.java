@@ -68,7 +68,7 @@ public class Goods extends Timestamped {
     @OneToMany(mappedBy = "goods")
     private List<RequestGoods> requestGoods;*/
 
-    public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods){
+    public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.location = requestDto.getLocation();
@@ -87,12 +87,11 @@ public class Goods extends Timestamped {
         this.tradeType = requestDto.getTradeType();
         this.category = requestDto.getCategory();
         this.ratingCheck = requestDto.getRatingCheck();
-        if(!ratingCheck){
+        if (!ratingCheck) {
             sellerPrice = 0L;
-        } else if(null != requestDto.getSellerPrice()) {
+        } else if (null != requestDto.getSellerPrice()) {
             this.sellerPrice = requestDto.getSellerPrice();
-        }
-        else{
+        } else {
             throw new IllegalArgumentException("올바르지 않은 값입니다.");
         }
         this.wantedGoods = wantedGoods;
@@ -120,6 +119,12 @@ public class Goods extends Timestamped {
         this.location = location;
     }
 
+/*    public void setRequestedStatus(RequestedStatus requestedStatus) {
+        this.requestedStatus = requestedStatus;
+    }*/
+    public void changeCheck(Boolean ratingCheck) {
+        this.ratingCheck = ratingCheck;
+    }
 }
 
 

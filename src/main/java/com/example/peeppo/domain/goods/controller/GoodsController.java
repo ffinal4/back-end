@@ -1,7 +1,9 @@
 package com.example.peeppo.domain.goods.controller;
 
 import com.example.peeppo.domain.goods.dto.*;
+import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.enums.RequestStatus;
+import com.example.peeppo.domain.goods.enums.RequestedStatus;
 import com.example.peeppo.domain.goods.service.GoodsService;
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.global.responseDto.ApiResponse;
@@ -52,7 +54,7 @@ public class GoodsController {
     // 게시물 상세조회
     @GetMapping("/{goodsId}")
     public ApiResponse<GoodsDetailResponseDto> getGoods(@PathVariable Long goodsId,
-                                                  @AuthenticationPrincipal UserDetailsImpl userDetails) {
+                                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
         if (userDetails != null) {
             return goodsService.getGoods(goodsId, userDetails.getUser());
         }
@@ -140,7 +142,12 @@ public class GoodsController {
                                       @Valid @RequestBody RequestAcceptRequestDto requestAcceptRequestDto){
         goodsService.goodsAccept(requestAcceptRequestDto, userDetails.getUser());
         return ResponseUtils.okWithMessage(GOODS_ACCEPT_SUCCESS);
-        }
+    }
+
+    @PostMapping("/rating/check")
+    public ApiResponse<ResponseDto> ratingCheck(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseUtils.ok(goodsService.ratingCheck(userDetails.getUser()));
+    }
 
 
     // 교환요청 거절(교환취소)

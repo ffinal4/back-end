@@ -64,10 +64,10 @@ public class AuctionController {
     @DeleteMapping("/{auctionId}/pick/bid/list")
     public ApiResponse<?> endAuction(@PathVariable("auctionId") Long auctionId,
                                      @Valid @RequestBody ChoiceRequestDto choiceRequestDto,
-                                     @AuthenticationPrincipal UserDetailsImpl userDetails) throws IllegalAccessException {
+                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
         auctionService.endAuction(auctionId, userDetails.getUser(), choiceRequestDto);
 
-        return ResponseUtils.ok(ResponseUtils.okWithMessage(AUCTION_END_SUCCESS));
+        return ResponseUtils.ok(ResponseUtils.okWithMessage(AUCTION_DELETE_SUCCESS));
     }
 
     // 경매 비정상 종료 ( 입찰 취소 ) -> 여기에 포인트 차감 로직 추가 필요
