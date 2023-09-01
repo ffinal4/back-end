@@ -80,10 +80,10 @@ public class AuctionService {
         userRepository.save(user);
 
         Goods getGoods = findGoodsId(goodsId);
-        if (!(getGoods.getGoodsStatus() == ONSALE)) {
+        if (getGoods.getGoodsStatus() != ONSALE) {
             new IllegalArgumentException("해당 물건으로는 경매를 등록할 수 없습니다");
         }
-        if (!(getGoods.getIsDeleted())) {
+        if (getGoods.getIsDeleted()) {
             new IllegalArgumentException("해당 물건은 삭제된 물건입니다.");
         }
 
@@ -240,7 +240,12 @@ public class AuctionService {
     @Transactional
     public void endAuction(Long auctionId, User user, ChoiceRequestDto choiceRequestDto) {
         Auction auction = findAuctionId(auctionId);
-//        List<Bid> bidList = new ArrayList<>();
+        List<Bid> bidList = bidRepository.findByAuctionAuctionId(auctionId);
+
+        for(Bid bid : bidList){
+            bid.changeBidStatus(FAIL);
+            bidRepository.save(bid);
+        }
 
         checkUsername(auctionId, user);
 
@@ -253,18 +258,20 @@ public class AuctionService {
             Bid bid = findBidId(bidId);
             bid.changeBidStatus(SUCCESS);
 
-            Notification notification = notificationRepository.findByUserUserId(bid.getUser().getUserId());
+            List<Notification> notificationList = notificationRepository.findByUserUserId(auction.getUser().getUserId());
 
-            if (notification == null) {
-                notification = new Notification();
-                notification.setUser(user);
+            for(Notification notification : notificationList) {
+                if (notification == null) {
+                    notification = new Notification();
+                    notification.setUser(user);
+                }
+
+                notification.setIsAuction(false);
+                notification.updateAuctionCount();
+                notification.Checked(false);
+
+                notificationRepository.save(notification);
             }
-
-            notification.setIsRequest(false);
-            notification.updateRequestCount();
-            notification.Checked(false);
-
-            notificationRepository.save(notification);
         }
 
         auction.getGoods().changeStatus(SOLDOUT);
@@ -274,19 +281,6 @@ public class AuctionService {
 
         auction.changeDeleteStatus(true);
     }
-
-//    public void test(Long auctionId, User user) {
-//        Auction auction1 = findAuctionId(auctionId);
-//        boolean checkSameUser = true;
-//        if (auction1.getUser().getUserId() != user.getUserId()) {
-//            checkSameUser = false;
-//        }
-//        List<String> imageUrl1 = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(auction1.getGoods().getGoodsId())
-//                .stream().map(Image::getImageUrl).collect(Collectors.toList());
-//
-//        AuctionResponseDto auctionResponseDto = new AuctionResponseDto(auction1, auction1.getGoods(), countDownTime(auction1), findBidCount(auctionId), checkSameUser, imageUrl1);
-//        return new GetAuctionResponseDto(auctionResponseDtos, auctionResponseDto);
-//    }
 
     public ResponseEntity<Page<TestListResponseDto>> auctionTradeList(User user, int page, int size, String sortBy, boolean isAsc,
                                                                       AuctionStatus auctionStatus) {
