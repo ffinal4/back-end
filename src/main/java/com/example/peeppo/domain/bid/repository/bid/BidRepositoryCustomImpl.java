@@ -1,13 +1,8 @@
 package com.example.peeppo.domain.bid.repository.bid;
 
-import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.bid.entity.Bid;
-import com.example.peeppo.domain.goods.entity.Goods;
-import com.example.peeppo.domain.goods.repository.goods.GoodsRepositoryCustom;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
@@ -26,15 +21,12 @@ public class BidRepositoryCustomImpl extends QuerydslRepositorySupport implement
 
 
     @Override
-    public Page<Bid> findSortedBySellersPick(Long auctionId, Pageable pageable) {
-        List<Bid> bids = queryFactory.selectFrom(bid)
+    public List<Bid> findSortedBySellersPick(Long auctionId, Pageable pageable) {
+
+        return queryFactory.selectFrom(bid)
                 .where(bid.auction.auctionId.eq(auctionId))
-                .orderBy(bid.sellersPick.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
-
-        return new PageImpl<>(bids, pageable, bids.size());
     }
-
 }

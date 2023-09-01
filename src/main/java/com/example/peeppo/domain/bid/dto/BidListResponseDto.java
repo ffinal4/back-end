@@ -28,4 +28,14 @@ public class BidListResponseDto {
         this.bidStatus = bid.getBidStatus();
         this.sellersPick = bid.isSellersPick();
     }
+    public BidListResponseDto(Bid bid) {
+        this.bidId = bid.getBidId();
+        this.createdAt = bid.getCreatedAt();
+        this.modifiedAt = bid.getModifiedAt();
+        this.goodsImg = bid.getGoodsImg();
+        this.title = bid.getGoods().getTitle();
+        this.location = bid.getUser().getLocation();
+        this.bidStatus = bid.getBidStatus();
+        this.sellersPick = bid.isSellersPick();
+    }
 }
