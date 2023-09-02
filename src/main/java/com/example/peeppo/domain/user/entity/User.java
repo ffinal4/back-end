@@ -1,7 +1,6 @@
 package com.example.peeppo.domain.user.entity;
 
 import com.example.peeppo.domain.chat.entity.ChatRoom;
-import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.user.dto.MyPageRequestDto;
 import com.example.peeppo.domain.user.dto.SignupRequestDto;
 import jakarta.persistence.*;
@@ -10,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.io.Serializable;
 import java.util.List;
 
 import static lombok.AccessLevel.PROTECTED;
@@ -19,7 +19,7 @@ import static lombok.AccessLevel.PROTECTED;
 @NoArgsConstructor(access = PROTECTED)
 @DynamicUpdate
 @Slf4j
-public class User {
+public class User{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

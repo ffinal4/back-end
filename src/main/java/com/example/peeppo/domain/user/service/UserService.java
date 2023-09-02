@@ -46,6 +46,7 @@ public class UserService {
     private final UserImageHelper userImageHelper;
 
     public ResponseDto signup(SignupRequestDto signupRequestDto) {
+
         String email = signupRequestDto.getEmail();
         boolean validateDuplicateEmail = userRepository.findByEmail(email).isEmpty();
 

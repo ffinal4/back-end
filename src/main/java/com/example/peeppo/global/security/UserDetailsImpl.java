@@ -2,10 +2,15 @@ package com.example.peeppo.global.security;
 
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.entity.UserRoleEnum;
+import com.example.peeppo.domain.user.repository.UserRepository;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 
 import java.util.ArrayList;
@@ -19,17 +24,18 @@ public class UserDetailsImpl implements UserDetails {
     public UserDetailsImpl(User user) {
         this.user = user;
     }
-
+    @JsonProperty
     public User getUser() {
         return user;
     }
-
     @Override
+    @JsonProperty
     public String getPassword() {
         return user.getPassword();
     }
 
     @Override
+    @JsonProperty
     public String getUsername() {
         return user.getEmail();
     }
