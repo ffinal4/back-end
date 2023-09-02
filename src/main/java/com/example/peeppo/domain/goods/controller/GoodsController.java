@@ -144,7 +144,7 @@ public class GoodsController {
         return ResponseUtils.ok(goodsService.goodsRequest(userDetails.getUser(), goodsRequestRequestDto, goodsId));
     }
 
-    // 교환요청 수락
+    // 교환요청 수락 => 채팅방 생성 ( 나한테 교환요청들어온 친구들의 goodsId 를 넘겨받기 )
     @PostMapping("/users/accept")
     public ApiResponse<?> goodsAccept(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                       @Valid @RequestBody RequestAcceptRequestDto requestAcceptRequestDto){
