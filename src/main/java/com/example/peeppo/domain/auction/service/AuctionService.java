@@ -190,7 +190,7 @@ public class AuctionService {
         List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(auction.getGoods().getGoodsId())
                 .stream().map(Image::getImageUrl).collect(Collectors.toList());
 
-        List<Auction> auctionList = auctionRepository.findTop20ByAuctionStatus(AuctionStatus.AUCTION, auctionId, user.getUserId());
+        List<Auction> auctionList = auctionRepository.findTop20ByAuctionStatus(AuctionStatus.AUCTION);
         List<AuctionListResponseDto> AuctionListResponseDtos = new ArrayList<>();
         for (Auction recommendAuction : auctionList) {
             TimeRemaining timeRemaining = countDownTime(recommendAuction);

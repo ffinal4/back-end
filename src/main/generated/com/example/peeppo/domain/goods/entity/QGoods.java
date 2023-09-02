@@ -28,6 +28,8 @@ public class QGoods extends EntityPathBase<Goods> {
 
     public final EnumPath<com.example.peeppo.domain.goods.enums.Category> category = createEnum("category", com.example.peeppo.domain.goods.enums.Category.class);
 
+    public final ListPath<com.example.peeppo.domain.chat.entity.ChatRoom, com.example.peeppo.domain.chat.entity.QChatRoom> chatRooms = this.<com.example.peeppo.domain.chat.entity.ChatRoom, com.example.peeppo.domain.chat.entity.QChatRoom>createList("chatRooms", com.example.peeppo.domain.chat.entity.ChatRoom.class, com.example.peeppo.domain.chat.entity.QChatRoom.class, PathInits.DIRECT2);
+
     public final StringPath content = createString("content");
 
     //inherited

@@ -38,6 +38,7 @@ public class StompHandler implements ChannelInterceptor {
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message); // 각종 웹소켓 정보 가져올 수 있다
 
 
+
         if (StompCommand.CONNECT == accessor.getCommand()) { // websocket 연결요청
             System.out.println("웹소켓 연결 요청");
             String jwtToken = accessor.getFirstNativeHeader("AccessToken");
