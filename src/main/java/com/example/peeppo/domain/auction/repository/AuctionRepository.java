@@ -2,6 +2,7 @@ package com.example.peeppo.domain.auction.repository;
 
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
+import com.example.peeppo.domain.bid.enums.BidStatus;
 import com.example.peeppo.domain.goods.enums.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +35,9 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
 
     @Query("SELECT DISTINCT b.auction FROM Bid b WHERE b.user.userId = :user_id")
     Page<Auction> findAuctionListByUserUserId(@Param("user_id") Long userId, Pageable pageable);
+
+    @Query("SELECT DISTINCT b.auction FROM Bid b WHERE b.user.userId = :user_id AND b.bidStatus = :bidStatus")
+    Page<Auction> findAuctionListByUserUserIdAndBidStatus(@Param("user_id") Long userId, Pageable pageable, @Param("bidStatus") BidStatus bidStatus);
 
     @Query(value = "SELECT a.* FROM auction a WHERE a.auction_Status = auction_Status", nativeQuery = true)
     List<Auction> findByAuctionStatus(AuctionStatus auction);

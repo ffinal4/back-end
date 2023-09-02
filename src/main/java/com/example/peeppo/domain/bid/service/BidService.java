@@ -41,6 +41,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.example.peeppo.domain.bid.enums.BidStatus.SUCCESS;
+
 @Service
 @RequiredArgsConstructor
 public class BidService {
@@ -57,7 +59,7 @@ public class BidService {
 
     public ResponseDto bidding(User user, Long auctionId, BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
 
-        if(getAuction(auctionId).getUser().getUserId().equals(user.getUserId())){
+        if (getAuction(auctionId).getUser().getUserId().equals(user.getUserId())) {
             throw new IllegalAccessException("이미 참여중인 경매입니다.");
         }
         Auction auction = getAuction(auctionId);
@@ -96,7 +98,7 @@ public class BidService {
 
         List<Notification> notificationList = notificationRepository.findByUserUserId(auction.getUser().getUserId());
 
-        for(Notification notification : notificationList){
+        for (Notification notification : notificationList) {
             if (notification == null) {
                 notification = new Notification();
                 notification.setUser(user);
@@ -134,8 +136,30 @@ public class BidService {
         }
 
         Page<Map<Long, List<BidListResponseDto>>> pageResult = new PageImpl<>(Collections.singletonList(userBidLists), pageable, bidListMap.size());
-    return new ApiResponse<>(true, pageResult, null);
+        return new ApiResponse<>(true, pageResult, null);
     }
+
+ /*   //임시 나중에 지울것(위에랑 동일)
+    public Page<BidListResponseDto> test(Long auctionId, int page, int size, String sortBy, boolean isAsc) {
+        Auction auction = getAuction(auctionId);
+        Page<User> userPage = userRepository.findByuserId(auction.getUser().getUserId());
+        List<GetAuctionBidResponseDto> auctionResponseDtoList = new ArrayList<>();
+
+        for (User user : userPage) {
+            List<Bid> bidList = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
+            List<BidListResponseDto> bidListResponseDtos = new ArrayList<>();
+            for (Bid bid : bidList) {
+                bidListResponseDtos.add(new BidListResponseDto(bid, bid.getGoodsImg()));
+            }
+            TimeRemaining timeRemaining = countDownTime(auction);
+            Long bidCount = findBidCount(auction.getAuctionId());
+            TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount);
+            GetAuctionBidResponseDto getAuctionBidResponseDto = new GetAuctionBidResponseDto(responseDto, bidListResponseDtos);
+            auctionResponseDtoList.add(getAuctionBidResponseDto);
+        }
+
+        return new PageResponse<>(bidList, pageable, bidPage.getTotalElements());
+    }*/
 
     //경매자가 선택
     public ResponseDto choiceBids(User user, Long auctionId, ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
@@ -187,20 +211,18 @@ public class BidService {
     }
 
     public ResponseEntity<Page<GetAuctionBidResponseDto>> bidTradeList(User user, int page, int size, String sortBy, boolean isAsc,
-                                                                      BidStatus bidStatus) {
+                                                                       BidStatus bidStatus) {
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
-        List<Bid> myBidPage;
         Page<Auction> myAuctionPage;
         List<GetAuctionBidResponseDto> auctionResponseDtoList = new ArrayList<>();
 
         if (bidStatus != null) {
-            myBidPage = bidRepository.findByUserUserIdAndBidStatusIsNotNull(user.getUserId(), bidStatus, pageable);
+            myAuctionPage = auctionRepository.findAuctionListByUserUserIdAndBidStatus(user.getUserId(), pageable, bidStatus);
         } else {
-            myBidPage = bidRepository.findByUserUserId(user.getUserId(), pageable);
+            myAuctionPage = auctionRepository.findAuctionListByUserUserId(user.getUserId(), pageable);
         }
 
-        myAuctionPage = auctionRepository.findAuctionListByUserUserId(user.getUserId(), pageable);
         for (Auction auction : myAuctionPage) {
             List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndUserUserId(auction.getAuctionId(), user.getUserId());
 

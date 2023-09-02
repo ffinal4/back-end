@@ -21,8 +21,10 @@ import com.example.peeppo.domain.notification.entity.Notification;
 import com.example.peeppo.domain.notification.repository.NotificationRepository;
 import com.example.peeppo.domain.rating.entity.RatingGoods;
 import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
+import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
+import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.responseDto.PageResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -44,8 +46,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.example.peeppo.domain.auction.enums.AuctionStatus.CANCEL;
-import static com.example.peeppo.domain.bid.enums.BidStatus.FAIL;
-import static com.example.peeppo.domain.bid.enums.BidStatus.SUCCESS;
+import static com.example.peeppo.domain.bid.enums.BidStatus.*;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.ONSALE;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.SOLDOUT;
 
@@ -145,15 +146,17 @@ public class AuctionService {
                 auctionPage = auctionRepository.findByGoodsCategory(category, pageable);
                 for (Auction auction : auctionPage) {
                     TimeRemaining remainingTime = countDownTime(auction);
-
-                    if (remainingTime.isExpired()) {
-                        List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
-                        if (bid.isEmpty()) {
-                            auction.changeAuctionStatus(CANCEL);
-                            auctionRepository.save(auction);
+                    if (!auction.getAuctionStatus().equals(CANCEL)) {
+                        if (remainingTime.isExpired()) {
+                            List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
+                            if (bid.isEmpty()) {//체크해보세요 안먹히는거 같아요
+                                auction.changeAuctionStatus(CANCEL);
+                                auctionRepository.save(auction);
+                            }else {
+                                auction.changeAuctionStatus(AuctionStatus.END);
+                                auctionRepository.save(auction);
+                            }
                         }
-                        auction.changeAuctionStatus(AuctionStatus.END);
-                        auctionRepository.save(auction);
                     }
                 }
                 return findAllAuction(auctionPage, pageable, userDetails);
@@ -239,7 +242,7 @@ public class AuctionService {
         if (!auction.getUser().getUserId().equals(user.getUserId())) {
             throw new IllegalArgumentException("본인 경매가 아닙니다.");
         }
-        for(Bid bid1 : bidList){
+        for (Bid bid1 : bidList) {
             bid1.changeBidStatus(FAIL);
             bidRepository.save(bid1);
         }
@@ -250,7 +253,7 @@ public class AuctionService {
 
             List<Notification> notificationList = notificationRepository.findByUserUserId(auction.getUser().getUserId());
 
-            for(Notification notification : notificationList){
+            for (Notification notification : notificationList) {
                 if (notification == null) {
                     notification = new Notification();
                     notification.setUser(user);
@@ -310,6 +313,20 @@ public class AuctionService {
 
         PageResponse response = new PageResponse<>(auctionResponseDtoList, pageable, myAuctionPage.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+    }
+
+    public ApiResponse<?> goodsAccept(User user, ChoiceRequestDto choiceRequestDto, Long auctionId) {
+        Auction auction = auctionRepository.findByAuctionId(auctionId);
+        auction.changeAuctionStatus(AuctionStatus.DONE);
+
+        for (Long bidId : choiceRequestDto.getBidId()) {
+            Bid bid = findBidId(bidId);
+            bid.changeBidStatus(DONE);
+            bidRepository.save(bid);
+        }
+
+        ResponseDto responseDto = new ResponseDto("교환수락이 완료되었습니다.", HttpStatus.OK.value(), "OK");
+        return new ApiResponse<>(true, responseDto, null);
     }
 
     public Page<AuctionListResponseDto> findAllAuction(Page<Auction> auctionPage, Pageable pageable, UserDetailsImpl userDetails) {
