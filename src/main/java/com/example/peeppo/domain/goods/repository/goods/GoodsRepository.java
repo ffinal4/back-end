@@ -1,4 +1,4 @@
-package com.example.peeppo.domain.goods.repository;
+package com.example.peeppo.domain.goods.repository.goods;
 
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.enums.Category;
@@ -58,15 +58,25 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
     @Query(value = "SELECT g.* from goods g where g.is_deleted = false ORDER BY g.created_at desc LIMIT 8 ", nativeQuery = true)
     List<Goods> findTop8ByCreatedAt();
 
+    List<Goods> findAllByUserAndIsDeletedFalseAndGoodsStatus(User user, GoodsStatus onsale);
+
     List<Goods> findByTitleContaining(String keyword);
 
     Page<Goods> findByUserUserIdAndGoodsStatus(Long userId, Pageable pageable, GoodsStatus goodsStatus);
 
     Page<Goods> findByUserUserId(Long userId, Pageable pageable);
 
+    Goods findByUserUserId(Long userId);
+
     Page<Goods> findAllByCategoryAndIsDeletedFalse(@Param("category") Category category, Pageable pageable);
 
     Page<Goods> findAllByGoodsStatusAndIsDeletedFalse(GoodsStatus goodsStatus, Pageable Pageable);
 
-    List<Goods> findAllByUserAndIsDeletedFalseAndGoodsStatus(User user, GoodsStatus goodsStatus);
+   // Page<Goods> findByUserUserIdAndRequestedStatus(Long userId, Pageable pageable, RequestedStatus requestedStatus);
+
+   // Page<Goods> findByUserUserIdAndRequestedStatusIsNotNull(Long userId, Pageable pageable);
+
+    @Query(value = "SELECT g.* from goods g where g.is_deleted = false and g.category = category ORDER BY g.created_at desc LIMIT 20", nativeQuery = true)
+    List<Goods> findByCategoryAndIsDeletedFalse(Category category);
+
 }

@@ -17,7 +17,9 @@ public class GoodsListResponseDto {
     private String nickname;
     private String image;
     private GoodsStatus goodsStatus;
+    private Long ratingAvgPrice;
 
+    private boolean ratingCheck;
     private boolean checkSameUser;
 
 
@@ -74,6 +76,18 @@ public class GoodsListResponseDto {
         this.nickname = goods.getUser().getNickname();
         this.goodsStatus = goods.getGoodsStatus();
         this.checkSameUser = checkSameUser;
+    }
+
+    public GoodsListResponseDto(Goods goods, String image, Double ratingAvgPrice) {
+        this.goodsId = goods.getGoodsId();
+        this.title = goods.getTitle();
+        this.content = goods.getContent();
+        this.location = goods.getLocation();
+        this.ratingCheck = goods.getRatingCheck();
+        this.image = image;
+        this.nickname = goods.getUser().getNickname();
+        this.goodsStatus = goods.getGoodsStatus();
+        this.ratingAvgPrice = ratingAvgPrice.longValue();
     }
 
 }

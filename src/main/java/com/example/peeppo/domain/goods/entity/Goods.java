@@ -61,9 +61,16 @@ public class Goods extends Timestamped {
     @OneToMany(mappedBy = "goods", fetch = FetchType.EAGER)
     private List<Dibs> dibs;
 
+    @OneToMany(mappedBy = "goods")
+    private List<ChatRoom> chatRooms;
 
+/*    @OneToMany(mappedBy = "goods")
+    private List<RequestGoods> requestGoods;
 
-    public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods){
+    @OneToMany(mappedBy = "goods")
+    private List<RequestGoods> requestGoods;*/
+
+    public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();
         this.location = requestDto.getLocation();
@@ -71,6 +78,7 @@ public class Goods extends Timestamped {
         this.tradeType = requestDto.getTradeType();
         this.category = requestDto.getCategory();
         this.wantedGoods = wantedGoods;
+
     }
 
     public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods, User user, GoodsStatus goodsStatus) {
@@ -111,6 +119,13 @@ public class Goods extends Timestamped {
         this.title = title;
         this.content = content;
         this.location = location;
+    }
+
+/*    public void setRequestedStatus(RequestedStatus requestedStatus) {
+        this.requestedStatus = requestedStatus;
+    }*/
+    public void changeCheck(Boolean ratingCheck) {
+        this.ratingCheck = ratingCheck;
     }
 }
 

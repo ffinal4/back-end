@@ -1,11 +1,10 @@
 package com.example.peeppo.domain.rating.service;
 
 import com.example.peeppo.domain.goods.entity.Goods;
-import com.example.peeppo.domain.goods.repository.GoodsRepository;
+import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.rating.dto.RatingRequestDto;
 import com.example.peeppo.domain.rating.dto.RatingResponseDto;
 import com.example.peeppo.domain.rating.dto.RatingScoreResponseDto;
-import com.example.peeppo.domain.rating.dto.TopRatingUserResponseDto;
 import com.example.peeppo.domain.rating.helper.RatingHelper;
 import com.example.peeppo.domain.rating.repository.ratingRepository.RatingRepository;
 import com.example.peeppo.domain.user.dto.RatingUserResponseDto;

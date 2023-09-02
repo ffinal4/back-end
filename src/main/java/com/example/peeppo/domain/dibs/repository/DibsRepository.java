@@ -10,4 +10,6 @@ public interface DibsRepository extends JpaRepository<Dibs, Long> {
     Optional<Dibs> findByUserUserIdAndGoodsGoodsId(Long userId, Long goodsId);
 
     List<Dibs> findByUserUserId(Long userId);
+
+    Long countByGoodsGoodsId(Long goodsId);
 }

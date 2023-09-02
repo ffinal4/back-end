@@ -1,7 +1,7 @@
 package com.example.peeppo.domain.goods.controller;
 
 import com.example.peeppo.domain.goods.dto.*;
-import com.example.peeppo.domain.goods.enums.GoodsStatus;
+import com.example.peeppo.domain.goods.enums.RequestStatus;
 import com.example.peeppo.domain.goods.service.GoodsService;
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.global.responseDto.ApiResponse;
@@ -18,6 +18,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+import static com.example.peeppo.global.stringCode.SuccessCodeEnum.GOODS_ACCEPT_REFUSE;
+import static com.example.peeppo.global.stringCode.SuccessCodeEnum.GOODS_ACCEPT_SUCCESS;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/goods")
@@ -25,7 +28,7 @@ public class GoodsController {
     private final GoodsService goodsService;
 
     @PostMapping
-    public ApiResponse<GoodsResponseDto> goodsCreate(@RequestPart(value = "data") GoodsRequestDto goodsRequestDto,
+    public ApiResponse<MsgResponseDto> goodsCreate(@RequestPart(value = "data") GoodsRequestDto goodsRequestDto,
                                                      @RequestPart(value = "images") List<MultipartFile> images,
                                                      @RequestPart(value = "wanted") WantedRequestDto wantedRequestDto,
                                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
@@ -45,10 +48,12 @@ public class GoodsController {
         return goodsService.allGoods(page - 1, size, sortBy, isAsc, category, userDetails);
     }
 
+
+
     // 게시물 상세조회
     @GetMapping("/{goodsId}")
-    public ApiResponse<GoodsResponseDto> getGoods(@PathVariable Long goodsId,
-                                                  @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponse<GoodsDetailResponseDto> getGoods(@PathVariable Long goodsId,
+                                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
         if (userDetails != null) {
             return goodsService.getGoods(goodsId, userDetails.getUser());
         }
@@ -107,16 +112,29 @@ public class GoodsController {
         return goodsService.searchGoods(keyword);
     }
 
-    @GetMapping("/users/trade")
-    public ResponseEntity<Page<GoodsListResponseDto>> goodsTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                                     @RequestParam("page") int page,
-                                                                     @RequestParam("size") int size,
-                                                                     @RequestParam("sortBy") String sortBy,
-                                                                     @RequestParam("isAsc") boolean isAsc,
-                                                                     @RequestParam(value = "status", required = false) GoodsStatus goodsStatus) {
+    //교환요청 페이지(받은)
+    @GetMapping("/users/trade/receive")
+    public ResponseEntity<Page<GoodsRequestResponseDto>> receiveTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                          @RequestParam("page") int page,
+                                                                          @RequestParam("size") int size,
+                                                                          @RequestParam("sortBy") String sortBy,
+                                                                          @RequestParam("isAsc") boolean isAsc,
+                                                                          @RequestParam(value = "status", required = false) RequestStatus requestStatus) {
 
-        return goodsService.goodsTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, goodsStatus);
+        return goodsService.receiveTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, requestStatus);
     }
+
+  //교환요청 페이지(보낸)
+   @GetMapping("/users/trade/request")
+    public ResponseEntity<Page<GoodsRequestResponseDto>> requestTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                       @RequestParam("page") int page,
+                                                                       @RequestParam("size") int size,
+                                                                       @RequestParam("sortBy") String sortBy,
+                                                                       @RequestParam("isAsc") boolean isAsc,
+                                                                       @RequestParam(value = "status", required = false) RequestStatus requestStatus) {
+
+       return goodsService.requestTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, requestStatus);
+   }
 
     //교환신청
     @PostMapping("/users/{goodsId}/request")
@@ -126,5 +144,36 @@ public class GoodsController {
 
         return ResponseUtils.ok(goodsService.goodsRequest(userDetails.getUser(), goodsRequestRequestDto, goodsId));
     }
+
+    // 교환요청 수락 => 채팅방 생성 ( 나한테 교환요청들어온 친구들의 goodsId 를 넘겨받기 )
+    @PostMapping("/users/accept")
+    public ApiResponse<?> goodsAccept(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                      @Valid @RequestBody RequestAcceptRequestDto requestAcceptRequestDto){
+        goodsService.goodsAccept(requestAcceptRequestDto, userDetails.getUser());
+        return ResponseUtils.okWithMessage(GOODS_ACCEPT_SUCCESS);
+    }
+
+    @PostMapping("/rating/check")
+    public ApiResponse<ResponseDto> ratingCheck(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return ResponseUtils.ok(goodsService.ratingCheck(userDetails.getUser()));
+    }
+
+
+    // 교환요청 거절(교환취소)
+    @DeleteMapping("/users/refuse")
+    public ApiResponse<?> goodsRefuse(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                      @Valid @RequestBody RequestAcceptRequestDto requestAcceptRequestDto){
+
+        goodsService.goodsRefuse(requestAcceptRequestDto, userDetails.getUser());
+        return ResponseUtils.okWithMessage(GOODS_ACCEPT_REFUSE);
+    }
+
+    // 교환요청 완료
+
+/*    @DeleteMapping("/users/{goodsId}/request")
+    public ApiResponse<?>  refuseGoods(@PathVariable Long goodsId,
+                                       @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return ResponseUtils.ok(goodsService.refuseGoods(goodsId, userDetails.getUser()));
+    }*/
 }
 

@@ -1,7 +1,6 @@
 package com.example.peeppo.domain.user.entity;
 
 import com.example.peeppo.domain.chat.entity.ChatRoom;
-import com.example.peeppo.domain.chat.entity.UserChatRoomRelation;
 import com.example.peeppo.domain.user.dto.MyPageRequestDto;
 import com.example.peeppo.domain.user.dto.SignupRequestDto;
 import jakarta.persistence.*;
@@ -39,13 +38,14 @@ public class User{
     @Column
     private String location;    //null 안되게 수정해둘것
 
-    @Column(nullable = true)
     private String userImg;
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
     private UserRoleEnum role;
 
+   // @OneToMany(mappedBy = "user")
+   // private List<ChatRoom> chatRoom;
 
     @Column
     private Long maxRatingCount = 0L;
@@ -83,11 +83,17 @@ public class User{
         this.totalPoint += userPoint;
     }
 
+    public void deleteImg(){
+        this.userImg = null;
+    }
+
     public void totalPointInit(){
         this.totalPoint = 0L;
     }
 
-
+    public void imgUpdate(String image){
+        this.userImg = image;
+    }
 
     public void userPointAdd(Long userPoint) {
         this.userPoint += userPoint;

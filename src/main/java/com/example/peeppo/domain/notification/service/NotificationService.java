@@ -1,3 +1,4 @@
+/*
 package com.example.peeppo.domain.notification.service;
 
 import com.example.peeppo.domain.notification.dto.NotificationUpdateResponseDto;
@@ -8,6 +9,8 @@ import com.example.peeppo.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
@@ -15,7 +18,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
 
     public NotificationResponseDto getNotification(User user) {
-        Notification notification = notificationRepository.findByUserUserId(user.getUserId());
+        List<Notification> notification = notificationRepository.findByUserUserId(user.getUserId());
 
         return new NotificationResponseDto(notification.getChecked());
     }
@@ -28,7 +31,7 @@ public class NotificationService {
 //    }
 
     public NotificationUpdateResponseDto getNotificationAuction(User user) {
-        Notification notification = notificationRepository.findByUserUserId(user.getUserId());
+        List<Notification> notification = notificationRepository.findByUserUserId(user.getUserId());
 
         NotificationUpdateResponseDto notificationUpdateResponseDto = new NotificationUpdateResponseDto(notification.getIsAuction(), notification.getAuctionCount());
 
@@ -78,3 +81,4 @@ public class NotificationService {
         return notificationUpdateResponseDto;
     }
 }
+*/

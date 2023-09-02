@@ -4,22 +4,26 @@ import com.example.peeppo.domain.auction.dto.*;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
+import com.example.peeppo.domain.bid.dto.BidListResponseDto;
+import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
 import com.example.peeppo.domain.bid.entity.Bid;
-import com.example.peeppo.domain.bid.repository.BidRepository;
+import com.example.peeppo.domain.bid.repository.bid.BidRepository;
 import com.example.peeppo.domain.dibs.service.DibsService;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
-import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.enums.Category;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
-import com.example.peeppo.domain.goods.repository.GoodsRepository;
+import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
+import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.domain.notification.entity.Notification;
 import com.example.peeppo.domain.notification.repository.NotificationRepository;
 import com.example.peeppo.domain.rating.entity.RatingGoods;
 import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
+import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
+import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.responseDto.PageResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -41,9 +45,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.example.peeppo.domain.auction.enums.AuctionStatus.CANCEL;
-import static com.example.peeppo.domain.auction.enums.AuctionStatus.REQUEST;
-import static com.example.peeppo.domain.bid.enums.BidStatus.FAIL;
-import static com.example.peeppo.domain.bid.enums.BidStatus.SUCCESS;
+import static com.example.peeppo.domain.bid.enums.BidStatus.*;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.ONSALE;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.SOLDOUT;
 
@@ -72,17 +74,17 @@ public class AuctionService {
         userRepository.save(user);
 
         Goods getGoods = findGoodsId(goodsId);
-        if (!(getGoods.getGoodsStatus() == ONSALE)) {
-            new IllegalArgumentException("해당 물건으로는 경매를 등록할 수 없습니다");
+        if (getGoods.getGoodsStatus() != ONSALE) {
+            throw new IllegalArgumentException("해당 물건으로는 경매를 등록할 수 없습니다");
         }
-        if (!(getGoods.getIsDeleted())) {
-            new IllegalArgumentException("해당 물건은 삭제된 물건입니다.");
+        if (getGoods.getIsDeleted()) {
+            throw new IllegalArgumentException("해당 물건은 삭제된 물건입니다.");
         }
 
         RatingGoods ratingGoods = ratingGoodsRepository.findByGoodsGoodsId(goodsId);
 
         if (ratingGoods.getRatingCount() < 3) {
-            new IllegalArgumentException("해당 물건은 3회 이상의 평가가 끝나지 않은 상태입니다.");
+            throw new IllegalArgumentException("해당 물건은 3회 이상의 평가가 끝나지 않은 상태입니다.");
         }
 
         String imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsId).getImageUrl();
@@ -91,6 +93,7 @@ public class AuctionService {
         log.info("{}", auctionEndTime);
         Auction auction = new Auction(getGoods, auctionEndTime, user, ratingGoods, auctionRequestDto.getLowPrice()); // 경매와 마감기한 생성
         auction.getGoods().changeStatus(GoodsStatus.ONAUCTION);
+        auction.changeAuctionStatus(AuctionStatus.AUCTION);
         auctionRepository.save(auction);
         return new AuctionResponseDto(auction, goodsResponseDto, user, countDownTime(auction));
     }
@@ -140,6 +143,21 @@ public class AuctionService {
             try {
                 Category category = Category.valueOf(categoryStr);
                 auctionPage = auctionRepository.findByGoodsCategory(category, pageable);
+                for (Auction auction : auctionPage) {
+                    TimeRemaining remainingTime = countDownTime(auction);
+                    if (!auction.getAuctionStatus().equals(CANCEL)) {
+                        if (remainingTime.isExpired()) {
+                            List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
+                            if (bid.isEmpty()) {//체크해보세요 안먹히는거 같아요
+                                auction.changeAuctionStatus(CANCEL);
+                                auctionRepository.save(auction);
+                            }else {
+                                auction.changeAuctionStatus(AuctionStatus.END);
+                                auctionRepository.save(auction);
+                            }
+                        }
+                    }
+                }
                 return findAllAuction(auctionPage, pageable, userDetails);
             } catch (IllegalArgumentException e) {
                 log.error("올바르지 않은 카테고리입니다.");
@@ -147,20 +165,47 @@ public class AuctionService {
             }
         } else {
             auctionPage = auctionRepository.findAll(pageable);
+            for (Auction auction : auctionPage) {
+                TimeRemaining remainingTime = countDownTime(auction);
+
+                if (remainingTime.isExpired()) {
+                    List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
+                    if (bid.isEmpty()) {
+                        auction.changeAuctionStatus(CANCEL);
+                        auctionRepository.save(auction);
+                    }
+                    auction.changeAuctionStatus(AuctionStatus.END);
+                    auctionRepository.save(auction);
+                }
+            }
             return findAllAuction(auctionPage, pageable, userDetails);
         }
     }
 
     // 경매 상세 조회
-    public AuctionResponseDto findAuctionById(Long auctionId, User user) {
+    public GetAuctionResponseDto findAuctionById(Long auctionId, User user) {
         Auction auction = findAuctionId(auctionId);
-        boolean checkSameUser = true;
-        if (auction.getUser().getUserId() != user.getUserId()) {
-            checkSameUser = false;
-        }
-        List<String> imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(auction.getGoods().getGoodsId())
+        boolean checkSameUser = auction.getUser().getUserId().equals(user.getUserId());
+
+        List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(auction.getGoods().getGoodsId())
                 .stream().map(Image::getImageUrl).collect(Collectors.toList());
-        return new AuctionResponseDto(auction, auction.getGoods(), countDownTime(auction), findBidCount(auctionId), checkSameUser, imageUrl);
+
+        List<Auction> auctionList = auctionRepository.findTop20ByAuctionStatus(AuctionStatus.AUCTION, auctionId, user.getUserId());
+        List<AuctionListResponseDto> AuctionListResponseDtos = new ArrayList<>();
+        for (Auction recommendAuction : auctionList) {
+            TimeRemaining timeRemaining = countDownTime(recommendAuction);
+            String recommendImageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(recommendAuction.getGoods().getGoodsId()).getImageUrl();
+            boolean checkDibs = dibsService.checkDibsGoods(user.getUserId(), recommendAuction.getGoods().getGoodsId());
+            AuctionListResponseDtos.add(
+                    new AuctionListResponseDto(recommendAuction,
+                            recommendImageUrl,
+                            timeRemaining,
+                            findBidCount(recommendAuction.getAuctionId()),
+                            checkDibs));
+        }
+
+        AuctionResponseDto auctionResponseDto = new AuctionResponseDto(auction, auction.getGoods(), countDownTime(auction), findBidCount(auctionId), checkSameUser, imageUrls);
+        return new GetAuctionResponseDto(AuctionListResponseDtos, auctionResponseDto);
     }
 
     // 경매 삭제 (경매 입찰 취소)
@@ -183,32 +228,45 @@ public class AuctionService {
         }
 
         checkUsername(auctionId, user);
-        auctionRepository.delete(auction);
     }
 
     // 경매 입찰 성공 ( 경매물품과 입찰물품의 상태를 둘 다 soldout으로 변경해라 )
     @Transactional
-    public void endAuction(Long auctionId, Long bidId, User user) {
+    public void endAuction(Long auctionId, User user, ChoiceRequestDto choiceRequestDto) {
         Auction auction = findAuctionId(auctionId);
+        List<Bid> bidList = bidRepository.findByAuctionAuctionId(auctionId);
 
         checkUsername(auctionId, user);
-        Bid bid = findBidId(bidId);
-        bid.changeBidStatus(SUCCESS);
 
-        Notification notification = notificationRepository.findByUserUserId(bid.getUser().getUserId());
+        if (!auction.getUser().getUserId().equals(user.getUserId())) {
+            throw new IllegalArgumentException("본인 경매가 아닙니다.");
+        }
+        for (Bid bid1 : bidList) {
+            bid1.changeBidStatus(FAIL);
+            bidRepository.save(bid1);
+        }
+        for (Long bidId : choiceRequestDto.getBidId()) {
+            Bid bid = findBidId(bidId);
+            bid.changeBidStatus(SUCCESS);
+            bidRepository.save(bid);
 
-        if (notification == null) {
-            notification = new Notification();
-            notification.setUser(user);
+            List<Notification> notificationList = notificationRepository.findByUserUserId(auction.getUser().getUserId());
+
+            for (Notification notification : notificationList) {
+                if (notification == null) {
+                    notification = new Notification();
+                    notification.setUser(user);
+                }
+
+                notification.setIsAuction(false);
+                notification.updateAuctionCount();
+                notification.Checked(false);
+
+                notificationRepository.save(notification);
+            }
+
         }
 
-        notification.setIsRequest(false);
-        notification.updateRequestCount();
-        notification.Checked(false);
-
-        notificationRepository.save(notification);
-
-        auction.changeAuctionStatus(REQUEST);
         auction.getGoods().changeStatus(SOLDOUT);
 
         user.userPointAdd(10L);
@@ -225,19 +283,49 @@ public class AuctionService {
         if (auctionStatus != null) {
             myAuctionPage = auctionRepository.findByUserUserIdAndAuctionStatus(user.getUserId(), pageable, auctionStatus);
         } else {
-            myAuctionPage = auctionRepository.findByUserUserId(user.getUserId(), pageable);
+            myAuctionPage = auctionRepository.findByUserUserIdAndAuctionStatusIsNotNull(user.getUserId(), pageable);
         }
 
-        List<TestListResponseDto> auctionResponseDtoList = myAuctionPage.stream()
-                .map(auction -> {
-                    TimeRemaining timeRemaining = countDownTime(auction);
-                    Long bidCount = findBidCount(auction.getAuctionId());
-                    return new TestListResponseDto(auction, timeRemaining, bidCount);
-                })
-                .collect(Collectors.toList());
+        List<GetAuctionBidResponseDto> auctionResponseDtoList = new ArrayList<>();
+
+        for (Auction auction : myAuctionPage) {
+            if (auction.getAuctionStatus().equals(AuctionStatus.END) ||
+                    auction.getAuctionStatus().equals(AuctionStatus.DONE)) {
+                List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndBidStatus(auction.getAuctionId(), SUCCESS);
+                List<BidListResponseDto> bidListResponseDtos = new ArrayList<>();
+                for (Bid bid : bidList) {
+                    bidListResponseDtos.add(new BidListResponseDto(bid, bid.getGoodsImg()));
+                }
+                TimeRemaining timeRemaining = countDownTime(auction);
+                Long bidCount = findBidCount(auction.getAuctionId());
+                TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount);
+                GetAuctionBidResponseDto getAuctionBidResponseDto = new GetAuctionBidResponseDto(responseDto, bidListResponseDtos);
+                auctionResponseDtoList.add(getAuctionBidResponseDto);
+            } else {
+                TimeRemaining timeRemaining = countDownTime(auction);
+                Long bidCount = findBidCount(auction.getAuctionId());
+                TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount);
+                GetAuctionBidResponseDto getAuctionBidResponseDto = new GetAuctionBidResponseDto(responseDto);
+                auctionResponseDtoList.add(getAuctionBidResponseDto);
+            }
+        }//나중에 stream 으로 처리하자, flatMap 쓰면 될듯?
 
         PageResponse response = new PageResponse<>(auctionResponseDtoList, pageable, myAuctionPage.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
+    }
+
+    public ApiResponse<?> goodsAccept(User user, ChoiceRequestDto choiceRequestDto, Long auctionId) {
+        Auction auction = auctionRepository.findByAuctionId(auctionId);
+        auction.changeAuctionStatus(AuctionStatus.DONE);
+
+        for (Long bidId : choiceRequestDto.getBidId()) {
+            Bid bid = findBidId(bidId);
+            bid.changeBidStatus(DONE);
+            bidRepository.save(bid);
+        }
+
+        ResponseDto responseDto = new ResponseDto("교환수락이 완료되었습니다.", HttpStatus.OK.value(), "OK");
+        return new ApiResponse<>(true, responseDto, null);
     }
 
     public Page<AuctionListResponseDto> findAllAuction(Page<Auction> auctionPage, Pageable pageable, UserDetailsImpl userDetails) {
@@ -248,7 +336,8 @@ public class AuctionService {
             if (null != userDetails) {
                 checkDibs = dibsService.checkDibsGoods(userDetails.getUser().getUserId(), auction.getGoods().getGoodsId());
             }
-            AuctionListResponseDto auctionListResponseDto = new AuctionListResponseDto(auction, timeRemaining, findBidCount(auction.getAuctionId()), checkDibs);
+            String imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(auction.getGoods().getGoodsId()).getImageUrl();
+            AuctionListResponseDto auctionListResponseDto = new AuctionListResponseDto(auction, imageUrl, timeRemaining, findBidCount(auction.getAuctionId()), checkDibs);
             auctionResponseDtoList.add(auctionListResponseDto);
         }
         return new PageResponse<>(auctionResponseDtoList, pageable, auctionPage.getTotalElements());

@@ -1,11 +1,9 @@
 package com.example.peeppo.domain.bid.controller;
 
+import com.example.peeppo.domain.auction.dto.GetAuctionBidResponseDto;
 import com.example.peeppo.domain.auction.dto.TestListResponseDto;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
-import com.example.peeppo.domain.bid.dto.BidGoodsListRequestDto;
-import com.example.peeppo.domain.bid.dto.BidListResponseDto;
-import com.example.peeppo.domain.bid.dto.BidTradeListResponseDto;
-import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
+import com.example.peeppo.domain.bid.dto.*;
 import com.example.peeppo.domain.bid.enums.BidStatus;
 import com.example.peeppo.domain.bid.service.BidService;
 import com.example.peeppo.domain.user.dto.ResponseDto;
@@ -19,6 +17,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -38,14 +39,19 @@ public class BidController {
     }
 
     //전체조회
-    @GetMapping("/auction/{auctionId}/bid")
-    public ApiResponse<Page<BidListResponseDto>> bidList(@PathVariable Long auctionId,
-                                                            @RequestParam("page") int page,
-                                                            @RequestParam("size") int size,
-                                                            @RequestParam("sortBy") String sortBy,
-                                                            @RequestParam("isAsc") boolean isAsc) {
+    @GetMapping("/auction/{auctionId}/bid/page/{page}")
+    public Page<BidResponseListDto> bidList(@PathVariable Long auctionId,
+                                            @PathVariable int page) {
 
-        return ResponseUtils.ok(bidService.BidList(auctionId, page - 1, size, sortBy, isAsc));
+        return bidService.BidList(auctionId, page-1);
+    }
+
+    // 상세조회
+    @GetMapping("/auction/{auctionId}/bid/{userId}")
+    public ApiResponse<List<BidDetailResponseDto>> bidList(@PathVariable Long auctionId,
+                                            @PathVariable Long userId) {
+
+        return bidService.sellectBids(auctionId, userId);
     }
 
     @PostMapping("/auction/{auctionId}/choice/bids")
@@ -66,12 +72,12 @@ public class BidController {
 
     //교환 요청 페이지(입찰 경매)
     @GetMapping("/bid/users/trade")
-    public ResponseEntity<Page<BidTradeListResponseDto>> auctionTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                                          @RequestParam("page") int page,
-                                                                          @RequestParam("size") int size,
-                                                                          @RequestParam("sortBy") String sortBy,
-                                                                          @RequestParam("isAsc") boolean isAsc,
-                                                                          @RequestParam(value = "bid status", required = false) BidStatus bidStatus) {
+    public ResponseEntity<Page<GetAuctionBidResponseDto>> auctionTradeList(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                           @RequestParam("page") int page,
+                                                                           @RequestParam("size") int size,
+                                                                           @RequestParam("sortBy") String sortBy,
+                                                                           @RequestParam("isAsc") boolean isAsc,
+                                                                           @RequestParam(value = "bidStatus", required = false) BidStatus bidStatus) {
 
         return bidService.bidTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, bidStatus);
     }

@@ -11,6 +11,7 @@ import com.example.peeppo.domain.auction.dto.AuctionResponseDto;
 import com.example.peeppo.domain.auction.dto.TestListResponseDto;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.auction.service.AuctionService;
+import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
 import com.example.peeppo.domain.bid.enums.BidStatus;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
@@ -54,19 +55,19 @@ public class AuctionController {
     }
 
     @GetMapping("/{auctionId}")
-    public ApiResponse<AuctionResponseDto> getAuction(@PathVariable("auctionId") Long auctionId,
+    public ApiResponse<GetAuctionResponseDto> getAuction(@PathVariable("auctionId") Long auctionId,
                                                       @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseUtils.ok(auctionService.findAuctionById(auctionId, userDetails.getUser()));
     }
 
     // 경매 정상 종료 -> 우선 입찰 물품 전체 보여주기 -> 입찰 물품 선택
-    @DeleteMapping("/{auctionId}/pick/{bidId}")
+    @DeleteMapping("/{auctionId}/pick/bid/list")
     public ApiResponse<?> endAuction(@PathVariable("auctionId") Long auctionId,
-                                     @PathVariable("bidId") Long bidId,
-                                     @AuthenticationPrincipal UserDetailsImpl userDetails) throws IllegalAccessException {
-        auctionService.endAuction(auctionId, bidId, userDetails.getUser());
+                                     @Valid @RequestBody ChoiceRequestDto choiceRequestDto,
+                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        auctionService.endAuction(auctionId, userDetails.getUser(), choiceRequestDto);
 
-        return ResponseUtils.ok(ResponseUtils.okWithMessage(AUCTION_END_SUCCESS));
+        return ResponseUtils.ok(ResponseUtils.okWithMessage(AUCTION_DELETE_SUCCESS));
     }
 
     // 경매 비정상 종료 ( 입찰 취소 ) -> 여기에 포인트 차감 로직 추가 필요
@@ -89,4 +90,11 @@ public class AuctionController {
         return auctionService.auctionTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, auctionStatus);
     }
 
+    // 교환요청 수락
+    @PostMapping("/users/auction/{auctionId}/accept")
+    public ApiResponse<?> goodsAccept(@PathVariable("auctionId") Long auctionId,
+                                      @Valid @RequestBody ChoiceRequestDto choiceRequestDto,
+                                      @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return auctionService.goodsAccept(userDetails.getUser(), choiceRequestDto, auctionId);
+    }
 }

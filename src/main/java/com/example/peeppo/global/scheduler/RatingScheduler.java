@@ -2,7 +2,7 @@ package com.example.peeppo.global.scheduler;
 
 
 import com.example.peeppo.domain.goods.entity.Goods;
-import com.example.peeppo.domain.goods.repository.GoodsRepository;
+import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.rating.helper.RatingHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,7 +20,7 @@ public class RatingScheduler {
 
     private final static int TRANSACTION_CHUNK_SIZE = 50;
 
-    @Scheduled(cron = "0 0 6 * * *") // 매일 새벽 6시에 가격 재설정
+    @Scheduled(cron = "0 0 2 * * *") // 매일 새벽 6시에 가격 재설정
     public void resetPrices() {
         long cursor = 0L;
         long goodsListSize = 0;

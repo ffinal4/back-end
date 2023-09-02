@@ -27,6 +27,8 @@ public class Bid extends Timestamped {
 
     private String goodsImg;
 
+    private boolean sellersPick;
+
     @Enumerated(EnumType.STRING)
     private BidStatus bidStatus;
 
@@ -42,13 +44,14 @@ public class Bid extends Timestamped {
     @JoinColumn(name = "auction_id")
     private Auction auction;
 
-    public Bid(User user, Auction auction, Goods goods, String goodsImg) {
+    public Bid(User user, Auction auction, Goods goods, String goodsImg, BidStatus bidStatus) {
         this.location = user.getLocation();
         this.title = goods.getTitle();
         this.goodsImg = goodsImg;
         this.user = user;
         this.auction = auction;
         this.goods = goods;
+        this.bidStatus = bidStatus;
     }
 
     public void update(User user, Auction auction, Goods goods, String goodsImg) {
@@ -62,5 +65,9 @@ public class Bid extends Timestamped {
 
     public void changeBidStatus(BidStatus bidStatus) {
         this.bidStatus = bidStatus;
+    }
+
+    public void select() {
+        this.sellersPick = true;
     }
 }
