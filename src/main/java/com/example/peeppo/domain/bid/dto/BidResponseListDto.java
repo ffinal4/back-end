@@ -4,10 +4,12 @@ import com.example.peeppo.domain.bid.entity.Bid;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 public class BidResponseListDto {
-    private Long bidId;
+    private List<Long> bidId;
     private Long userId;
     private String image;
     private String title;
@@ -16,8 +18,8 @@ public class BidResponseListDto {
     private boolean sellersPick;
 
 
-    public BidResponseListDto(Bid bid, String imageUrl, Long bidCount){
-        this.bidId = bid.getBidId();
+    public BidResponseListDto(List<Long> bidList, Bid bid, String imageUrl, Long bidCount) {
+        this.bidId = bidList;
         this.userId = bid.getUser().getUserId();
         this.image = imageUrl;
         this.title = bid.getTitle();

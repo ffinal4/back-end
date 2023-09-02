@@ -123,11 +123,11 @@ public class BidService {
         Page<Bid> bidPage = bidRepository.findSortedBySellersPick(auctionId, pageable);
         List<BidResponseListDto> bidResponseListDtos = new ArrayList<>();
         for(Bid bid : bidPage){
+            List<Long> bidList = bidRepository.findBidIdByUserUserIdAndAuctionAuctionId(bid.getUser().getUserId(), auctionId);
             String imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(bid.getGoods().getGoodsId()).getImageUrl();
             Long bidCount = bidRepository.countBidsByUserIdAndAuctionId(bid.getAuction().getAuctionId(), bid.getUser().getUserId());
-            bidResponseListDtos.add(new BidResponseListDto(bid, imageUrl, bidCount));
+            bidResponseListDtos.add(new BidResponseListDto(bidList, bid, imageUrl, bidCount));
         }
-
         return new PageResponse<>(bidResponseListDtos, pageable, bidPage.getTotalElements());
     }
 
