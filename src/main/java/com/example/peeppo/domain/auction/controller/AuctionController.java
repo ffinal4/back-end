@@ -61,7 +61,7 @@ public class AuctionController {
     }
 
     // 경매 정상 종료 -> 우선 입찰 물품 전체 보여주기 -> 입찰 물품 선택
-    @DeleteMapping("/{auctionId}/pick/bid/list")
+    @PostMapping("/{auctionId}/pick/bid/list")
     public ApiResponse<?> endAuction(@PathVariable("auctionId") Long auctionId,
                                      @Valid @RequestBody ChoiceRequestDto choiceRequestDto,
                                      @AuthenticationPrincipal UserDetailsImpl userDetails) {
