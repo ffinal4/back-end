@@ -1,4 +1,3 @@
-/*
 package com.example.peeppo.domain.notification.service;
 
 import com.example.peeppo.domain.notification.dto.NotificationUpdateResponseDto;
@@ -19,6 +18,10 @@ public class NotificationService {
 
     public NotificationResponseDto getNotification(User user) {
         List<Notification> notification = notificationRepository.findByUserUserId(user.getUserId());
+
+        for(Notification notification1 : notification){
+            
+        }
 
         return new NotificationResponseDto(notification.getChecked());
     }
@@ -81,4 +84,3 @@ public class NotificationService {
         return notificationUpdateResponseDto;
     }
 }
-*/

@@ -139,28 +139,6 @@ public class BidService {
         return new ApiResponse<>(true, pageResult, null);
     }
 
- /*   //임시 나중에 지울것(위에랑 동일)
-    public Page<BidListResponseDto> test(Long auctionId, int page, int size, String sortBy, boolean isAsc) {
-        Auction auction = getAuction(auctionId);
-        Page<User> userPage = userRepository.findByuserId(auction.getUser().getUserId());
-        List<GetAuctionBidResponseDto> auctionResponseDtoList = new ArrayList<>();
-
-        for (User user : userPage) {
-            List<Bid> bidList = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
-            List<BidListResponseDto> bidListResponseDtos = new ArrayList<>();
-            for (Bid bid : bidList) {
-                bidListResponseDtos.add(new BidListResponseDto(bid, bid.getGoodsImg()));
-            }
-            TimeRemaining timeRemaining = countDownTime(auction);
-            Long bidCount = findBidCount(auction.getAuctionId());
-            TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount);
-            GetAuctionBidResponseDto getAuctionBidResponseDto = new GetAuctionBidResponseDto(responseDto, bidListResponseDtos);
-            auctionResponseDtoList.add(getAuctionBidResponseDto);
-        }
-
-        return new PageResponse<>(bidList, pageable, bidPage.getTotalElements());
-    }*/
-
     //경매자가 선택
     public ResponseDto choiceBids(User user, Long auctionId, ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
         Auction auction = getAuction(auctionId);
