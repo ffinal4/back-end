@@ -29,7 +29,7 @@ public class BidRepositoryCustomImpl extends QuerydslRepositorySupport implement
         List<Bid> bidList = queryFactory.selectFrom(bid)
                 .where(bid.auction.auctionId.eq(auctionId))
                 .orderBy(bid.sellersPick.desc())
-                .groupBy(bid.user.userId)
+                //.groupBy(bid.user.userId)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();

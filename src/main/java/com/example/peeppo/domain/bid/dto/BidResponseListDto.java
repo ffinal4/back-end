@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class BidResponseListDto {
+    private Long bidId;
+    private Long userId;
     private String image;
     private String title;
     private String location;
@@ -15,6 +17,8 @@ public class BidResponseListDto {
 
 
     public BidResponseListDto(Bid bid, String imageUrl, Long bidCount){
+        this.bidId = bid.getBidId();
+        this.userId = bid.getUser().getUserId();
         this.image = imageUrl;
         this.title = bid.getTitle();
         this.location = bid.getLocation();
