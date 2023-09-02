@@ -3,10 +3,7 @@ package com.example.peeppo.domain.bid.controller;
 import com.example.peeppo.domain.auction.dto.GetAuctionBidResponseDto;
 import com.example.peeppo.domain.auction.dto.TestListResponseDto;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
-import com.example.peeppo.domain.bid.dto.BidGoodsListRequestDto;
-import com.example.peeppo.domain.bid.dto.BidListResponseDto;
-import com.example.peeppo.domain.bid.dto.BidTradeListResponseDto;
-import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
+import com.example.peeppo.domain.bid.dto.*;
 import com.example.peeppo.domain.bid.enums.BidStatus;
 import com.example.peeppo.domain.bid.service.BidService;
 import com.example.peeppo.domain.user.dto.ResponseDto;
@@ -42,11 +39,19 @@ public class BidController {
     }
 
     //전체조회
-    @GetMapping("/auction/{auctionId}/bid/{page}")
-    public ApiResponse<Page<Map<Long, List<BidListResponseDto>>>> bidList(@PathVariable Long auctionId,
-                                                                    @PathVariable int page) {
+    @GetMapping("/auction/{auctionId}/bid/page/{page}")
+    public Page<BidResponseListDto> bidList(@PathVariable Long auctionId,
+                                            @PathVariable int page) {
 
         return bidService.BidList(auctionId, page-1);
+    }
+
+    // 상세조회
+    @GetMapping("/auction/{auctionId}/bid/{userId}")
+    public ApiResponse<List<BidDetailResponseDto>> bidList(@PathVariable Long auctionId,
+                                            @PathVariable Long userId) {
+
+        return bidService.sellectBids(auctionId, userId);
     }
 
     @PostMapping("/auction/{auctionId}/choice/bids")

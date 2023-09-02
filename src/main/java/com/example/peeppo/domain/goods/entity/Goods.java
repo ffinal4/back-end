@@ -6,14 +6,12 @@ import com.example.peeppo.domain.dibs.entity.Dibs;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.dto.GoodsRequestDto;
 import com.example.peeppo.domain.goods.enums.Category;
-import com.example.peeppo.domain.goods.enums.RequestedStatus;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.utils.Timestamped;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.List;
@@ -58,17 +56,17 @@ public class Goods extends Timestamped {
     @Enumerated(EnumType.STRING)
     private GoodsStatus goodsStatus;
 
-    @Enumerated(EnumType.STRING)
-    private RequestedStatus requestedStatus;
-
     @OneToMany(mappedBy = "goods")
     private List<Dibs> dibs;
 
     @OneToMany(mappedBy = "goods")
     private List<ChatRoom> chatRooms;
 
-    @OneToMany(mappedBy = "goods")
+/*    @OneToMany(mappedBy = "goods")
     private List<RequestGoods> requestGoods;
+
+    @OneToMany(mappedBy = "goods")
+    private List<RequestGoods> requestGoods;*/
 
     public Goods(GoodsRequestDto requestDto, WantedGoods wantedGoods) {
         this.title = requestDto.getTitle();
@@ -107,7 +105,7 @@ public class Goods extends Timestamped {
         this.location = requestDto.getLocation();
     }
 
-    public void delete() {
+    public void delete(){
         this.isDeleted = true;
     }
 
@@ -121,10 +119,9 @@ public class Goods extends Timestamped {
         this.location = location;
     }
 
-    public void setRequestedStatus(RequestedStatus requestedStatus) {
+/*    public void setRequestedStatus(RequestedStatus requestedStatus) {
         this.requestedStatus = requestedStatus;
-    }
-
+    }*/
     public void changeCheck(Boolean ratingCheck) {
         this.ratingCheck = ratingCheck;
     }

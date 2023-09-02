@@ -25,13 +25,15 @@ public class RequestGoods extends Timestamped {
     @JsonBackReference
     private Goods seller;
 
-    @Enumerated(EnumType.STRING)
-    private RequestStatus requestStatus;
-
     @ManyToOne
     @JoinColumn(name = "buyerGoods_id", nullable = false)
     @JsonBackReference
-    private Goods goods;
+    private Goods buyer;
+
+    @Enumerated(EnumType.STRING)
+    private RequestStatus requestStatus;
+
+    private Long receiveUser;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -40,15 +42,16 @@ public class RequestGoods extends Timestamped {
 
     public RequestGoods(Goods urGoods, User user, Goods goods, RequestStatus requestStatus) {
         this.seller = urGoods;
+        this.receiveUser = urGoods.getUser().getUserId();
         this.user = user;
-        this.goods = goods;
+        this.buyer = goods;
         this.requestStatus = requestStatus;
     }
 
     public RequestGoods(User user, Goods urGoods, Goods goods, RequestStatus requestStatus) {
         this.user = user;
         this.seller = urGoods;
-        this.goods = goods;
+        this.buyer = goods;
         this.requestStatus = requestStatus;
     }
 

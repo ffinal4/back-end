@@ -20,7 +20,7 @@ public class RatingScheduler {
 
     private final static int TRANSACTION_CHUNK_SIZE = 50;
 
-    @Scheduled(cron = "0 0 6 * * *") // 매일 새벽 6시에 가격 재설정
+    @Scheduled(cron = "0 0 2 * * *") // 매일 새벽 6시에 가격 재설정
     public void resetPrices() {
         long cursor = 0L;
         long goodsListSize = 0;

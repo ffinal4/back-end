@@ -33,9 +33,9 @@ public class GoodsResponseListDto {
         this.urImage = imageUrl;
         this.goodsStatus = goods.getGoodsStatus();
         this.requestId = requestGoods.getRequestId();
-        this.sellerNickname = requestGoods.getGoods().getUser().getNickname();
-        this.sellerLocation = requestGoods.getGoods().getLocation();
-        this.sellerTitle = requestGoods.getGoods().getTitle();
+        this.sellerNickname = requestGoods.getSeller().getUser().getNickname();
+        this.sellerLocation = requestGoods.getSeller().getLocation();
+        this.sellerTitle = requestGoods.getSeller().getTitle();
         this.image = imageRequest;
         this.createdAt = requestGoods.getCreatedAt();
         this.modifiedAt = requestGoods.getModifiedAt();
