@@ -72,7 +72,7 @@ public class BidController {
                                                                            @RequestParam("size") int size,
                                                                            @RequestParam("sortBy") String sortBy,
                                                                            @RequestParam("isAsc") boolean isAsc,
-                                                                           @RequestParam(value = "bid status", required = false) BidStatus bidStatus) {
+                                                                           @RequestParam(value = "bidStatus", required = false) BidStatus bidStatus) {
 
         return bidService.bidTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, bidStatus);
     }

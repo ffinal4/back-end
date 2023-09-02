@@ -90,4 +90,11 @@ public class AuctionController {
         return auctionService.auctionTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, auctionStatus);
     }
 
+    // 교환요청 수락
+    @PostMapping("/users/auction/{auctionId}/accept")
+    public ApiResponse<?> goodsAccept(@PathVariable("auctionId") Long auctionId,
+                                      @Valid @RequestBody ChoiceRequestDto choiceRequestDto,
+                                      @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return auctionService.goodsAccept(userDetails.getUser(), choiceRequestDto, auctionId);
+    }
 }
