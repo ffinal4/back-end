@@ -5,19 +5,18 @@ import com.example.peeppo.domain.auction.dto.TestListResponseDto;
 import com.example.peeppo.domain.auction.dto.TimeRemaining;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
-import com.example.peeppo.domain.bid.dto.BidGoodsListRequestDto;
-import com.example.peeppo.domain.bid.dto.BidListResponseDto;
-import com.example.peeppo.domain.bid.dto.BidResponseListDto;
-import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
+import com.example.peeppo.domain.bid.dto.*;
 import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.bid.entity.Choice;
 import com.example.peeppo.domain.bid.enums.BidStatus;
 import com.example.peeppo.domain.bid.repository.ChoiceBidRepository;
 import com.example.peeppo.domain.bid.repository.QueryRepository;
 import com.example.peeppo.domain.bid.repository.bid.BidRepository;
+import com.example.peeppo.domain.dibs.repository.DibsRepository;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
+import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.domain.notification.entity.Notification;
 import com.example.peeppo.domain.notification.repository.NotificationRepository;
@@ -26,6 +25,7 @@ import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingG
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
+import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.responseDto.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -40,6 +40,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +55,7 @@ public class BidService {
     private final ChoiceBidRepository choiceBidRepository;
     private final RatingGoodsRepository ratingGoodsRepository;
     private final NotificationRepository notificationRepository;
+    private final DibsRepository dibsRepository;
 
     public ResponseDto bidding(User user, Long auctionId, BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
 
@@ -115,6 +117,7 @@ public class BidService {
         return new ResponseDto("입찰이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
+    // 입찰물품 전체조회
     public Page<BidResponseListDto> BidList(Long auctionId, int page) {
         Pageable pageable = PageRequest.of(page, 12);
         Page<Bid> bidPage = bidRepository.findSortedBySellersPick(auctionId, pageable);
@@ -126,6 +129,21 @@ public class BidService {
         }
 
         return new PageResponse<>(bidResponseListDtos, pageable, bidPage.getTotalElements());
+    }
+
+    // 입찰물품 상세조회
+    public ApiResponse<List<BidDetailResponseDto>> sellectBids(Long auctionId, Long userId) {
+        List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndUserUserId(auctionId, userId);
+        List<BidDetailResponseDto> bidDetailResponseDtos = new ArrayList<>();
+        for(Bid bid : bidList) {
+            Long dibs = dibsRepository.countByGoodsGoodsId(bid.getGoods().getGoodsId());
+            List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(bid.getGoods().getGoodsId())
+                    .stream()
+                    .map(Image::getImageUrl)
+                    .collect(Collectors.toList());
+            bidDetailResponseDtos.add(new BidDetailResponseDto(bid, dibs, imageUrls));
+        }
+        return new ApiResponse<>(true, bidDetailResponseDtos, null);
     }
 
     //경매자가 선택

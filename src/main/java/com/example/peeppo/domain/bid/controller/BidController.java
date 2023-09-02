@@ -39,11 +39,19 @@ public class BidController {
     }
 
     //전체조회
-    @GetMapping("/auction/{auctionId}/bid/{page}")
+    @GetMapping("/auction/{auctionId}/bid/page/{page}")
     public Page<BidResponseListDto> bidList(@PathVariable Long auctionId,
                                             @PathVariable int page) {
 
         return bidService.BidList(auctionId, page-1);
+    }
+
+    // 상세조회
+    @GetMapping("/auction/{auctionId}/bid/{userId}")
+    public ApiResponse<List<BidDetailResponseDto>> bidList(@PathVariable Long auctionId,
+                                            @PathVariable Long userId) {
+
+        return bidService.sellectBids(auctionId, userId);
     }
 
     @PostMapping("/auction/{auctionId}/choice/bids")
