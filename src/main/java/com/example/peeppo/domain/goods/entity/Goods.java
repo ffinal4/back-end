@@ -12,6 +12,7 @@ import com.example.peeppo.global.utils.Timestamped;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class Goods extends Timestamped {
     private String tradeType;
     @Enumerated(EnumType.STRING) // ENUM타입을 String으로 넣음
     private Category category;
+
     private Long sellerPrice;
     @Column(nullable = false)
     private Boolean isDeleted = false;
@@ -50,13 +52,13 @@ public class Goods extends Timestamped {
     @JoinColumn(name = "auction_id")
     private Auction auction;
 
-    @OneToMany(mappedBy = "goods")
+    @OneToMany(mappedBy = "goods", fetch = FetchType.EAGER)
     private List<Image> image;
 
     @Enumerated(EnumType.STRING)
     private GoodsStatus goodsStatus;
 
-    @OneToMany(mappedBy = "goods")
+    @OneToMany(mappedBy = "goods", fetch = FetchType.EAGER)
     private List<Dibs> dibs;
 
     @OneToMany(mappedBy = "goods")
@@ -87,11 +89,12 @@ public class Goods extends Timestamped {
         this.tradeType = requestDto.getTradeType();
         this.category = requestDto.getCategory();
         this.ratingCheck = requestDto.getRatingCheck();
-        if (!ratingCheck) {
+        if(!ratingCheck){
             sellerPrice = 0L;
-        } else if (null != requestDto.getSellerPrice()) {
+        } else if(null != requestDto.getSellerPrice()) {
             this.sellerPrice = requestDto.getSellerPrice();
-        } else {
+        }
+        else{
             throw new IllegalArgumentException("올바르지 않은 값입니다.");
         }
         this.wantedGoods = wantedGoods;
@@ -104,7 +107,6 @@ public class Goods extends Timestamped {
         this.content = requestDto.getContent();
         this.location = requestDto.getLocation();
     }
-
     public void delete(){
         this.isDeleted = true;
     }

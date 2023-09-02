@@ -3,6 +3,7 @@ package com.example.peeppo.global.security.jwt;
 import com.example.peeppo.domain.user.entity.UserRoleEnum;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.lib.RedisUtil;
+import com.example.peeppo.global.security.UserDetailsServiceImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -57,6 +58,8 @@ public class JwtUtil {
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
     private final RedisUtil redisUtil;
     private final UserRepository userRepository;
+    private final UserDetailsServiceImpl userDetailsServiceImpl;
+
 
     // 로그 설정
     public static final Logger logger = LoggerFactory.getLogger("JWT 관련 로그");
@@ -236,5 +239,16 @@ public class JwtUtil {
         // 현재 시간
         Long now = new Date().getTime();
         return (expiration.getTime() - now);
+    }
+
+    public String getUserMail(String token) {
+        UserDetails userDetails = userDetailsServiceImpl.loadUserByUsername(this.getUserPk(token));
+        return userDetails.getUsername();
+        //return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
+    }
+
+    public String getUserPk(String token){
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
+        //return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
 }

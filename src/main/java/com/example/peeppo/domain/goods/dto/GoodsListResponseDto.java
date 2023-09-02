@@ -1,7 +1,6 @@
 package com.example.peeppo.domain.goods.dto;
 
 import com.example.peeppo.domain.goods.entity.Goods;
-import com.example.peeppo.domain.goods.entity.RequestGoods;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.image.entity.Image;
 import lombok.Getter;
