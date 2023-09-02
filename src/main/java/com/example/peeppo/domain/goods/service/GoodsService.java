@@ -355,47 +355,6 @@ public class GoodsService {
         return new ApiResponse<>(true, new GoodsDetailResponseDto(new GoodsResponseDto(goods, imageUrls, wantedGoods), rcGoodsResponseDtoList), null);
     }
 
-  /*  //교환 요청 받은 페이지
-    public ResponseEntity<Page<GoodsResponseListDto>> requestedTradeList(User user, int page, int size, String sortBy, boolean isAsc,
-                                                                         RequestStatus requestedStatus) {
-
-        Pageable pageable = paging(page, size, sortBy, isAsc);
-        Page<Goods> myGoodsPage;
-
-
-
-        List<GoodsResponseListDto> goodsListResponseDtos = new ArrayList<>();
-
-        for (Goods goods : myGoodsPage) {
-            List<RequestGoods> requestGoodsList = new ArrayList<>();
-
-            if(goods.getRequestedStatus() == null){
-                continue;
-            }
-       if (goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)) {
-                requestGoodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.REQUEST);
-            }
-            if (goods.getRequestedStatus().equals(RequestedStatus.TRADING)) {
-                requestGoodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.TRADING);
-            }
-            if (goods.getRequestedStatus().equals(RequestedStatus.DONE)) {
-                requestGoodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.DONE);
-            }
-            if (goods.getRequestedStatus().equals(RequestedStatus.CANCEL)) {
-                requestGoodsList = requestRepository.findByGoodsGoodsIdAndRequestStatus(goods.getGoodsId(), RequestStatus.CANCEL);
-            }
-            for (RequestGoods requestGoods : requestGoodsList) {
-                Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId());
-                Image imageRequest = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(requestGoods.getGoods().getGoodsId());
-                GoodsResponseListDto goodsListResponseDto = new GoodsResponseListDto(goods, image.getImageUrl(), requestGoods, imageRequest.getImageUrl());
-                goodsListResponseDtos.add(goodsListResponseDto);
-            }
-        }
-
-        PageResponse response = new PageResponse<>(goodsListResponseDtos, pageable, myGoodsPage.getTotalElements());
-        return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-    }
-*/
     // 내가 보낸 교환요청
     public ResponseEntity<Page<GoodsRequestResponseDto>> requestTradeList(User user, int page, int size, String sortBy, boolean isAsc,
                                                                        RequestStatus requestStatus) {
@@ -424,7 +383,7 @@ public class GoodsService {
                 RequestSingleResponseDto goodsListResponseDto2 = new RequestSingleResponseDto(goods1, user.getUserId());
                 goodsListResponseDtos.add(goodsListResponseDto2);
             }
-            goodsRequestResponseDtos.add(new GoodsRequestResponseDto(requestGoods1.getRequestStatus(), goodsListResponseDto, goodsListResponseDtos));
+            goodsRequestResponseDtos.add(new GoodsRequestResponseDto(requestGoods1.getCreatedAt(), requestGoods1.getRequestStatus(), goodsListResponseDto, goodsListResponseDtos));
         }
 
         PageResponse response = new PageResponse<>(goodsRequestResponseDtos, pageable, requestGoods.getTotalElements());
@@ -460,7 +419,7 @@ public class GoodsService {
                 RequestSingleResponseDto goodsListResponseDto2 = new RequestSingleResponseDto(goods1, goods1.getUser().getUserId());
                 goodsListResponseDtos.add(goodsListResponseDto2);
             }
-            goodsRequestResponseDtos.add(new GoodsRequestResponseDto(requestGoods1.getRequestStatus(), goodsListResponseDto, goodsListResponseDtos));
+            goodsRequestResponseDtos.add(new GoodsRequestResponseDto(requestGoods1.getCreatedAt(),requestGoods1.getRequestStatus(), goodsListResponseDto, goodsListResponseDtos));
         }
 
         PageResponse response = new PageResponse<>(goodsRequestResponseDtos, pageable, requestGoods.getTotalElements() );
