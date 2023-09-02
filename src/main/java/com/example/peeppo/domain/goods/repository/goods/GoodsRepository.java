@@ -3,7 +3,6 @@ package com.example.peeppo.domain.goods.repository.goods;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.enums.Category;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
-import com.example.peeppo.domain.goods.enums.RequestedStatus;
 import com.example.peeppo.domain.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -73,9 +72,9 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
 
     Page<Goods> findAllByGoodsStatusAndIsDeletedFalse(GoodsStatus goodsStatus, Pageable Pageable);
 
-    Page<Goods> findByUserUserIdAndRequestedStatus(Long userId, Pageable pageable, RequestedStatus requestedStatus);
+   // Page<Goods> findByUserUserIdAndRequestedStatus(Long userId, Pageable pageable, RequestedStatus requestedStatus);
 
-    Page<Goods> findByUserUserIdAndRequestedStatusIsNotNull(Long userId, Pageable pageable);
+   // Page<Goods> findByUserUserIdAndRequestedStatusIsNotNull(Long userId, Pageable pageable);
 
     @Query(value = "SELECT g.* from goods g where g.is_deleted = false and g.category = category ORDER BY g.created_at desc LIMIT 20", nativeQuery = true)
     List<Goods> findByCategoryAndIsDeletedFalse(Category category);
