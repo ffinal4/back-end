@@ -22,7 +22,9 @@ repositories {
 }
 
 dependencies {
-
+    implementation 'io.springfox:springfox-swagger2:2.9.2' // 현재 버전을 확인하고 업데이트할 수 있습니다.
+    implementation 'io.springfox:springfox-swagger-ui:2.9.2' // 현재 버전을 확인하고 업데이트할 수 있습니다.
+    //apiOperation(sse)
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     // sockjs
     implementation 'org.webjars:sockjs-client:1.5.1'

@@ -3,9 +3,12 @@ package com.example.peeppo.domain.notification.entity;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.user.entity.User;
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import static lombok.AccessLevel.PROTECTED;
 
@@ -36,6 +39,41 @@ public class Notification {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_Id")
     private User user;
+
+//    @Embedded
+//    private NotificationContent content;
+//
+//    @Embedded
+//    private RelatedURL url;
+//
+//    @Column(nullable = false)
+//    private Boolean isRead;
+//
+//    @Enumerated(EnumType.STRING)
+//    @Column(nullable = false)
+//    private NotificationType notificationType;
+//
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "user_id")
+//    @OnDelete(action = OnDeleteAction.CASCADE)
+//    private User receiver;
+//
+//    @Builder
+//    public Notification(User receiver, NotificationType notificationType, String content, String url, Boolean isRead) {
+//        this.receiver = receiver;
+//        this.notificationType = notificationType;
+//        this.content = new NotificationContent(content);
+//        this.url = new RelatedURL(url);
+//        this.isRead = isRead;
+//    }
+//
+//    public String getContent() {
+//        return content.getContent();
+//    }
+//
+//    public String getUrl() {
+//        return url.getUrl();
+//    }
 
     public void setIsAuction(Boolean isAuction) {
         this.isAuction = isAuction;
