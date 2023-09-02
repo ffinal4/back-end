@@ -152,6 +152,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                                                 "/",
                                                 "/api/auction/{auctionId}",
                                                 "/api/auction/{auctionId}/bid",
+                                                "/api/auction/{auctionId}/bid/page/{page}",
                                                 "/api/goods","/api/goods/{goodsId}",
                                                 "/api/goods/pocket/{nickname}",
                                                 "/api/home",
