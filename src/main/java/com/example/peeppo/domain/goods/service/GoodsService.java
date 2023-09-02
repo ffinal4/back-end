@@ -491,31 +491,6 @@ public class GoodsService {
         return new ResponseDto("교환신청이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
-
-//    public ApiResponse<ResponseDto> goodsAccept(Long requestId, User user){
-//        RequestGoods requestGoods = requestRepository.findById(requestId).orElseThrow();
-//        if(!requestGoods.getSeller().getUser().getUserId().equals(user.getUserId())){
-//            throw new IllegalArgumentException("물품 교환 요청 수락은 본인만 가능합니다.");
-//        }
-//        requestGoods.changeStatus(RequestStatus.DONE);
-//        requestRepository.save(requestGoods);
-//
-//        ResponseDto responseDto = new ResponseDto("교환수락이 완료되었습니다.", HttpStatus.OK.value(), "OK");
-//        return new ApiResponse<>(true, responseDto, null);
-//    }
-//
-//    public ApiResponse<ResponseDto> goodsRefuse(Long requestId, User user){
-//        RequestGoods requestGoods = requestRepository.findById(requestId).orElseThrow();
-//        if(!requestGoods.getSeller().getUser().getUserId().equals(user.getUserId())){
-//            throw new IllegalArgumentException("물품 교환 요청 수락은 본인만 가능합니다.");
-//        }
-//        requestGoods.changeStatus(RequestStatus.CANCEL);
-//        requestRepository.save(requestGoods);
-//
-//        ResponseDto responseDto = new ResponseDto("교환수락이 완료되었습니다.", HttpStatus.OK.value(), "OK");
-//        return new ApiResponse<>(true, responseDto, null);
-//    }
-
     public Page<GoodsListResponseDto> allGoods(Page<Goods> goodsPage, Pageable pageable, User user) {
 
         List<GoodsListResponseDto> goodsResponseList = new ArrayList<>();
