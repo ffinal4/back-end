@@ -1,7 +1,5 @@
 package com.example.peeppo.domain.user.entity;
 
-import com.example.peeppo.domain.chat.entity.ChatRoom;
-import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.user.dto.MyPageRequestDto;
 import com.example.peeppo.domain.user.dto.SignupRequestDto;
 import jakarta.persistence.*;
@@ -9,8 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.DynamicUpdate;
-
-import java.util.List;
 
 import static lombok.AccessLevel.PROTECTED;
 
@@ -38,7 +34,7 @@ public class User {
     @Column
     private String location;    //null 안되게 수정해둘것
 
-    private String userImg;
+//    private String userImg;
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
@@ -65,10 +61,9 @@ public class User {
         this.location = requestDto.getLocation();
     }
 
-    public void upload(MyPageRequestDto myPageRequestDto, String userImg, String encodedPassword) {
+    public void upload(MyPageRequestDto myPageRequestDto, String encodedPassword) {
         this.nickname = myPageRequestDto.getNickname();
         this.location = myPageRequestDto.getLocation();
-        this.userImg = userImg;
         this.password = encodedPassword;
     }
 
@@ -83,16 +78,8 @@ public class User {
         this.totalPoint += userPoint;
     }
 
-    public void deleteImg(){
-        this.userImg = null;
-    }
-
     public void totalPointInit(){
         this.totalPoint = 0L;
-    }
-
-    public void imgUpdate(String image){
-        this.userImg = image;
     }
 
     public void userPointAdd(Long userPoint) {
