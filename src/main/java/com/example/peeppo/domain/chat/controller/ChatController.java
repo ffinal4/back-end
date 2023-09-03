@@ -25,6 +25,7 @@ public class ChatController { //채팅을 수신하고 송신하기 위한 컨�
      * websocket "/pub/chatroom/{id}"로 들어오는 메시징을 처리한다.
      */
 
+    // 메세지 보내기
     @MessageMapping("/chatroom/{chatroomId}")
     public void sendMessage(@DestinationVariable("chatroomId") String id, @Payload ChatMessageRequestDto chat,
                             @Header("AccessToken") String token) {

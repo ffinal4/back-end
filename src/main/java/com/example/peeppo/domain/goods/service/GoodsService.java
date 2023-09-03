@@ -359,19 +359,21 @@ public class GoodsService {
         return new ApiResponse<>(true, new GoodsDetailResponseDto(new GoodsResponseDto(goods, imageUrls, wantedGoods), rcGoodsResponseDtoList), null);
     }
 
+
+
     // 내가 보낸 교환요청
     public ResponseEntity<Page<GoodsRequestResponseDto>> requestTradeList(User user, int page, int size, String sortBy, boolean isAsc,
-                                                                       RequestStatus requestStatus) {
+                                                                       String requestStatusStr) {
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Goods> requestGoods;
-
+        RequestStatus requestStatus1;
         List<GoodsRequestResponseDto> goodsRequestResponseDtos = new ArrayList<>();
-
-        if (requestStatus == null) {
+        if (requestStatusStr != null) {
             //1) requestgoods 테이블에서 seller goods 전부 찾아오기 => DTO 변환해주기
-            requestGoods = requestRepository.findSellerByUserId(user.getUserId(), pageable);
+            requestStatus1 = RequestStatus.valueOf(requestStatusStr);
+            requestGoods = requestRepository.findSellerByUserIdAndRequestStatus(user.getUserId(), requestStatus1, pageable);
         } else {
-            requestGoods = requestRepository.findSellerByUserIdAndRequestStatus(user.getUserId(), requestStatus, pageable);
+            requestGoods = requestRepository.findSellerByUserId(user.getUserId(), pageable);
         }
 
         //2) requestGoods 순회하면서 buyerGoods 찾아오기
@@ -396,18 +398,20 @@ public class GoodsService {
     }
 
     //내가 받은 교환요청
-    public ResponseEntity<Page<GoodsRequestResponseDto>> receiveTradeList(User user, int page, int size, String sortBy, boolean isAsc, RequestStatus requestStatus) {
+    public ResponseEntity<Page<GoodsRequestResponseDto>> receiveTradeList(User user, int page, int size, String sortBy, boolean isAsc, String requestStatusStr) {
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Goods> requestGoods;
+        RequestStatus requestStatus1;
 
         List<GoodsRequestResponseDto> goodsRequestResponseDtos = new ArrayList<>();
 
-        if(requestStatus == null) {
+        if(requestStatusStr != null) {
             //1) requestgoods 테이블에서 seller goods 전부 찾아오기 => DTO 변환해주기
-            requestGoods = requestRepository.findSellerByReceiveUser(user.getUserId(), pageable);
+            requestStatus1 = RequestStatus.valueOf(requestStatusStr);
+            requestGoods = requestRepository.findSellerByReceiveUserAndRequestStatus(user.getUserId(), requestStatus1, pageable);
         } else {
-            requestGoods = requestRepository.findSellerByReceiveUserAndRequestStatus(user.getUserId(), requestStatus, pageable);
+            requestGoods = requestRepository.findSellerByReceiveUser(user.getUserId(), pageable);
         }
 
         //2) requestGoods 순회하면서 buyerGoods 찾아오기

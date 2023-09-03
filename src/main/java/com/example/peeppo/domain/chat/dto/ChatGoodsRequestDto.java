@@ -4,9 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class ChatRoomRequestDto {
-   private Long goodsId;  // 물품이름으로 될것 !
+public class ChatGoodsRequestDto {
+    private Long sellerGoodsId;
 }
