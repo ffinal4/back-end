@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 public class BidListResponseDto {
     private Long bidId;
-
+    private Long userId;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
     private String goodsImg;
@@ -27,6 +27,7 @@ public class BidListResponseDto {
         this.location = bid.getUser().getLocation();
         this.bidStatus = bid.getBidStatus();
         this.sellersPick = bid.isSellersPick();
+        this.userId = bid.getUser().getUserId();
     }
     public BidListResponseDto(Bid bid) {
         this.bidId = bid.getBidId();

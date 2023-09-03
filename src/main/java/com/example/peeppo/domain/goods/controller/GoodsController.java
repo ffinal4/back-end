@@ -160,7 +160,7 @@ public class GoodsController {
 
 
     // 교환요청 거절(교환취소)
-    @DeleteMapping("/users/refuse")
+    @PostMapping("/users/refuse")
     public ApiResponse<?> goodsRefuse(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                       @Valid @RequestBody RequestAcceptRequestDto requestAcceptRequestDto){
 

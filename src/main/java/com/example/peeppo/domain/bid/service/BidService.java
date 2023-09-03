@@ -59,10 +59,12 @@ public class BidService {
 
     public ResponseDto bidding(User user, Long auctionId, BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
 
-        if (getAuction(auctionId).getUser().getUserId().equals(user.getUserId())) {
+        Auction auction = getAuction(auctionId);
+        List<Bid> bids = bidRepository.findByUserUserId(user.getUserId());
+        if (!bids.isEmpty()) {
             throw new IllegalAccessException("이미 참여중인 경매입니다.");
         }
-        Auction auction = getAuction(auctionId);
+
         List<Bid> bidList = new ArrayList<>();
         Double totalPrice = 0D;
 
@@ -96,20 +98,17 @@ public class BidService {
             }
         }
 
-        List<Notification> notificationList = notificationRepository.findByUserUserId(auction.getUser().getUserId());
+/*        Notification notificationList = notificationRepository.findByUserUserId(auction.getUser().getUserId());
 
-        for (Notification notification : notificationList) {
-            if (notification == null) {
-                notification = new Notification();
-                notification.setUser(user);
-            }
-
-            notification.setIsAuction(false);
-            notification.updateAuctionCount();
-            notification.Checked(false);
-
-            notificationRepository.save(notification);
+        if (notification == null) {
+            notification = new Notification(user);
         }
+
+        notification.setIsAuction(false);
+        notification.updateAuctionCount();
+        notification.Checked(false);
+
+        notificationRepository.save(notification);*/
 
 
         bidRepository.saveAll(bidList);
@@ -122,7 +121,7 @@ public class BidService {
         Pageable pageable = PageRequest.of(page, 12);
         Page<Bid> bidPage = bidRepository.findSortedBySellersPick(auctionId, pageable);
         List<BidResponseListDto> bidResponseListDtos = new ArrayList<>();
-        for(Bid bid : bidPage){
+        for (Bid bid : bidPage) {
             List<Long> bidList = bidRepository.findBidIdByUserUserIdAndAuctionAuctionId(bid.getUser().getUserId(), auctionId);
             String imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(bid.getGoods().getGoodsId()).getImageUrl();
             Long bidCount = bidRepository.countBidsByUserIdAndAuctionId(bid.getAuction().getAuctionId(), bid.getUser().getUserId());
@@ -135,7 +134,7 @@ public class BidService {
     public ApiResponse<List<BidDetailResponseDto>> sellectBids(Long auctionId, Long userId) {
         List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndUserUserId(auctionId, userId);
         List<BidDetailResponseDto> bidDetailResponseDtos = new ArrayList<>();
-        for(Bid bid : bidList) {
+        for (Bid bid : bidList) {
             Long dibs = dibsRepository.countByGoodsGoodsId(bid.getGoods().getGoodsId());
             List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(bid.getGoods().getGoodsId())
                     .stream()
@@ -196,13 +195,15 @@ public class BidService {
     }
 
     public ResponseEntity<Page<GetAuctionBidResponseDto>> bidTradeList(User user, int page, int size, String sortBy, boolean isAsc,
-                                                                       BidStatus bidStatus) {
+                                                                       String bidStatus1) {
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Auction> myAuctionPage;
         List<GetAuctionBidResponseDto> auctionResponseDtoList = new ArrayList<>();
+        BidStatus bidStatus;
 
-        if (bidStatus != null) {
+        if (bidStatus1 != null) {
+            bidStatus = BidStatus.valueOf(bidStatus1);
             myAuctionPage = auctionRepository.findAuctionListByUserUserIdAndBidStatus(user.getUserId(), pageable, bidStatus);
         } else {
             myAuctionPage = auctionRepository.findAuctionListByUserUserId(user.getUserId(), pageable);
