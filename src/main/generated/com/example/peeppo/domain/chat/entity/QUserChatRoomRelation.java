@@ -30,8 +30,6 @@ public class QUserChatRoomRelation extends EntityPathBase<UserChatRoomRelation> 
 
     public final com.example.peeppo.domain.user.entity.QUser seller;
 
-    public final StringPath sessionId = createString("sessionId");
-
     public QUserChatRoomRelation(String variable) {
         this(UserChatRoomRelation.class, forVariable(variable), INITS);
     }
