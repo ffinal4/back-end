@@ -31,6 +31,12 @@ public class ChatRoomController {
         return chatService.findAllRoom(userDetails.getUser());
     }
 
+    @PostMapping("/{chatId}")
+    public ChatRoom addUser( @PathVariable("chatId") String roomId,
+                            @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return chatService.addUserToChatRoom(roomId, userDetails.getUser());
+    }
+
     //채팅방 메세지 조회 ( 상세 조회 )
     @GetMapping("/room/{chatId}")
     public List<ChatMessageResponseDto> findChatRoom(@PathVariable("chatId") String roomId,

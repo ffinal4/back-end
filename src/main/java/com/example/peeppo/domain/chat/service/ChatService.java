@@ -195,6 +195,14 @@ public class ChatService {
         }
         redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
     }
+
+    public ChatRoom addUserToChatRoom(String roomId, User user) {
+        User enterUser = userRepository.findById(user.getUserId()).orElseThrow(()->new IllegalArgumentException("해당하는 사용자는 없습니다"));
+        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId);
+        UserChatRoomRelation userChatRoomRelation = new UserChatRoomRelation(enterUser, chatRoom);
+        userChatRoomRelationRepository.save(userChatRoomRelation);
+        return chatRoom;
+    }
 }
 
 

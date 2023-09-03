@@ -2,6 +2,7 @@ package com.example.peeppo.domain.chat.handler;
 
 import com.example.peeppo.domain.chat.entity.ChatMessage;
 import com.example.peeppo.domain.chat.entity.ChatRoom;
+import com.example.peeppo.domain.chat.entity.UserChatRoomRelation;
 import com.example.peeppo.domain.chat.service.ChatService;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
@@ -37,8 +38,6 @@ public class StompHandler implements ChannelInterceptor {
         System.out.println("웹소켓에 신호 들어옴");
         StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message); // 각종 웹소켓 정보 가져올 수 있다
 
-
-
         if (StompCommand.CONNECT == accessor.getCommand()) { // websocket 연결요청
             System.out.println("웹소켓 연결 요청");
             String jwtToken = accessor.getFirstNativeHeader("AccessToken");
@@ -55,6 +54,8 @@ public class StompHandler implements ChannelInterceptor {
             String sessionId = (String) message.getHeaders().get("simpSessionId");
             System.out.println("요청한 session ID :"+ sessionId);
 
+            //채팅방 조회
+            ChatRoom chatRoom = chatService.findRoomById(roomId);
             System.out.println("입장 요청, 유저정보 셋팅 요청");
             chatService.setUserEnterInfo(sessionId, roomId);
 
@@ -69,10 +70,13 @@ public class StompHandler implements ChannelInterceptor {
             String token = authorizationHeader.substring(BEARER_PREFIX.length());
             String email = jwtUtil.getUserMail(token);
             User user = userRepository.findByEmail(email).orElse(null);
-            ChatRoom chatRoom = chatService.findRoomById(roomId);
+
             chatService.sendChatMessage(ChatMessage.builder().type(ChatMessage.MessageType.ENTER).chatRoom(chatRoom).userId(user.getUserId()).build());
 
             System.out.println("발송 요청");
+            user.setSessionId(sessionId);
+            userRepository.save(user);
+
             log.info("SUBSCRIBED {}, {}", user.getNickname(), roomId);
 
         } else if (StompCommand.DISCONNECT == accessor.getCommand()) { // Websocket 연결 종료
