@@ -7,6 +7,7 @@ import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.bid.dto.BidListResponseDto;
 import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
 import com.example.peeppo.domain.bid.entity.Bid;
+import com.example.peeppo.domain.bid.enums.BidStatus;
 import com.example.peeppo.domain.bid.repository.bid.BidRepository;
 import com.example.peeppo.domain.dibs.service.DibsService;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
@@ -151,7 +152,7 @@ public class AuctionService {
                             if (bid.isEmpty()) {//체크해보세요 안먹히는거 같아요
                                 auction.changeAuctionStatus(CANCEL);
                                 auctionRepository.save(auction);
-                            }else {
+                            } else {
                                 auction.changeAuctionStatus(AuctionStatus.END);
                                 auctionRepository.save(auction);
                             }
@@ -238,11 +239,11 @@ public class AuctionService {
 
         checkUsername(auctionId, user);
 
-        if(auction.getAuctionStatus().equals(AuctionStatus.END) ||
-                auction.getAuctionStatus().equals(CANCEL)){
-            throw new IllegalArgumentException("이미 입찰을 선택하신 경매입니다.");
-        }
         for (Bid bid1 : bidList) {
+            if (bid1.getBidStatus().equals(SUCCESS) ||
+                    bid1.getBidStatus().equals(FAIL)) {
+                throw new IllegalArgumentException("이미 입찰을 선택하신 경매입니다.");
+            }
             bid1.changeBidStatus(FAIL);
             bidRepository.save(bid1);
         }
