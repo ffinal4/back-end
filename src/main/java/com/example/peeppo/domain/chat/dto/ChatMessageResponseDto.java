@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 public class ChatMessageResponseDto {
 
     private String nickname;
-    private String userImageUrl;
     private String message;
 
     public ChatMessageResponseDto(ChatMessage chatMessage) {
@@ -21,7 +20,6 @@ public class ChatMessageResponseDto {
 
     public ChatMessageResponseDto(ChatMessage chatMessage, User messageUser) {
         this.message = chatMessage.getMessage();
-        this.userImageUrl = messageUser.getUserImg();
         this.nickname = messageUser.getNickname();
     }
 }
