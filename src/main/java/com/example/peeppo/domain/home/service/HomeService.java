@@ -12,7 +12,9 @@ import com.example.peeppo.domain.goods.dto.GoodsListResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.home.dto.HomeResponseDto;
+import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.image.repository.ImageRepository;
+import com.example.peeppo.domain.image.repository.UserImageRepository;
 import com.example.peeppo.domain.user.dto.RatingUserResponseDto;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.security.UserDetailsImpl;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +35,7 @@ public class HomeService {
     private final AuctionService auctionService;
     private final UserRepository userRepository;
     private final ImageRepository imageRepository;
+    private final UserImageRepository userImageRepository;
 
     //@Cacheable(value = "homeCache", cacheManager = "cacheManager")
     public HomeResponseDto peeppoHome(UserDetailsImpl user) {
@@ -50,8 +54,16 @@ public class HomeService {
 
         List<RatingUserResponseDto> ratingUserListResponseDto = userRepository.findTopUsersByMaxRatingCount(3)
                 .stream()
-                .map(ratingUser -> new RatingUserResponseDto(ratingUser.getUserImg(), ratingUser.getNickname(), ratingUser.getMaxRatingCount()))
-                .collect(Collectors.toList());
+                .map(ratingUser -> {
+                    String userImageUrl = null;
+                    UserImage userImage = userImageRepository.findByUserUserId(ratingUser.getUserId())
+                            .orElse(null);
+                    if (Objects.nonNull(userImage)) {
+                        userImageUrl = userImage.getImageUrl();
+                    }
+                    return new RatingUserResponseDto(
+                            userImageUrl, ratingUser.getNickname(), ratingUser.getMaxRatingCount());
+                }).collect(Collectors.toList());
 
         List<Auction> auctionList = findTopAuctionByCount();
         List<AuctionListResponseDto> auctionResponseDtos = new ArrayList<>();

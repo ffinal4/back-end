@@ -14,6 +14,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Where;
 
 import java.util.List;
 
@@ -22,6 +23,7 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @DynamicUpdate
+//@Where(clause = "is_deleted = false") //이거 사용하면 isDeleted 체크안해도됩니다.
 public class Goods extends Timestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

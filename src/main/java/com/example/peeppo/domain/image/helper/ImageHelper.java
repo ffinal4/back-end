@@ -9,7 +9,6 @@ import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.domain.image.repository.UserImageRepository;
 import com.example.peeppo.domain.user.entity.User;
-import com.example.peeppo.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,10 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -30,9 +26,11 @@ import java.util.UUID;
 public class ImageHelper {
     private final ImageRepository imageRepository;
     private final UserImageRepository userImageRepository;
+    private final AmazonS3 amazonS3;
+    private final String bucket;
 
     @Transactional
-    public List<Image> saveImagesToS3AndRepository(List<MultipartFile> images, AmazonS3 amazonS3, String bucket, Goods goods) {
+    public List<Image> saveImagesToS3AndRepository(List<MultipartFile> images, Goods goods) {
         for (MultipartFile image : images) {
             if (!validateFile(image)) {
                 throw new IllegalStateException("파일 검증 실패");
@@ -73,7 +71,7 @@ public class ImageHelper {
     }
 
     @Transactional
-    public String saveUserImages(MultipartFile image, AmazonS3 amazonS3, String bucket, User user) {
+    public UserImage saveUserImages(MultipartFile image, User user) {
         if (!validateFile(image)) {
             throw new IllegalStateException("파일 검증 실패");
         }
@@ -101,13 +99,10 @@ public class ImageHelper {
 
         userImageRepository.save(img);
 
-        return amazonS3.getUrl(bucket, imageUuid).toString();
+        return img;
     }
+    
 
-    @Transactional
-    public void deleteFileFromS3(String imageUuid, AmazonS3 amazonS3, String bucket) {
-        amazonS3.deleteObject(bucket, imageUuid);
-    }
 
     @Transactional
     public void repositoryImageDelete(List<Image> imageList) {
@@ -146,4 +141,16 @@ public class ImageHelper {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
 
+    public void deleteImageAmazonS3(String imageKey) {
+        amazonS3.deleteObject(bucket, imageKey);
+    }
+
+    @Transactional
+    public void deleteUserImages(User user) {
+        Optional<UserImage> userImage = userImageRepository.findByUserUserId(user.getUserId());
+        if (userImage.isPresent()) {
+            userImageRepository.deleteUserImageByImageKeyQuery(userImage.get().getImageKey());
+            deleteImageAmazonS3(userImage.get().getImageKey());
+        }
+    }
 }
