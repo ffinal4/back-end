@@ -16,29 +16,26 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChatRoomResponseDto {
-    private String roomId; // 채팅방 Id
+    private Long id;
+    private String roomId;
+    private String nickname; // 상대방 닉네임
+    private String imageUrl; //물품이미지
+    //private String userimageUrl; // 사는 사람 , 사려고 하는 사람 나눠서 받아야함 => service 단에서 로직 추가 필요
 
-    private Long sellerGoodsId;
-    private String sellerNickname; //
-    private String sellerGoodsImage; // 파는사람의 물품이미지
-   // private String sellerImageUrl; // 사는 사람 , 사려고 하는 사람 나눠서 받아야함 => service 단에서 로직 추가 필요
-
-    private Long buyerGoodsId;
-    private String buyerNickname;
-    private String buyerGoodsImage; //사는 사람의 물품이미지
-   // private String buyerImageUrl; // 사는 사람 , 사려고 하는 사람 나눠서 받아야함 => service 단에서 로직 추가 필요
-
-
-
-    public ChatRoomResponseDto(ChatRoom chatRoom, Goods goods, User enterUser, RequestGoods requestGoods) {
+    public ChatRoomResponseDto(ChatRoom chatRoom, User user) {
+        this.id = chatRoom.getId();
         this.roomId = chatRoom.getRoomId();
-        this.sellerGoodsId = goods.getGoodsId();
-        this.sellerGoodsImage = goods.getImage().stream().map(Image::getImageUrl).collect(Collectors.toList()).get(0);
-        this.sellerNickname = enterUser.getNickname();
-        this.buyerGoodsId = requestGoods.getBuyer().getGoodsId();
-        this.buyerNickname = requestGoods.getBuyer().getUser().getNickname();
-        this.buyerGoodsImage = requestGoods.getBuyer().getImage().stream().map(Image::getImageUrl).collect(Collectors.toList()).get(0);
+        this.nickname = user.getNickname();
+        // this.userimageUrl = user.getUserImg();
+        this.imageUrl = chatRoom.getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
     }
 
+    public ChatRoomResponseDto(UserChatRoomRelation userChatRoom, User user) {
+        this.id = userChatRoom.getId();
+        this.roomId = userChatRoom.getChatRoom().getRoomId();
+        this.imageUrl = userChatRoom.getChatRoom().getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
+        this.nickname = user.getNickname();
+        // this.userimageUrl = user.getUserImg();
 
+    }
 }

@@ -21,14 +21,14 @@ public class ChatRoomController {
 
     //채팅방 생성
     @PostMapping
-    public ChatRoomResponseDto createRoom(@RequestBody ChatGoodsRequestDto chatGoodsRequestDto,
+    public ChatRoomResponseDto createRoom(@PathVariable("goodsId") Long goodsId,
                                           @AuthenticationPrincipal UserDetailsImpl userDetails){
-        return chatService.createRoom(chatGoodsRequestDto,  userDetails.getUser());
+        return chatService.createRoom(goodsId,  userDetails.getUser());
     }
 
     //채팅방 전체 조회 => 내 채팅방 전체 조회여야한다 !
     @GetMapping
-    public List<ChatRoomDto> findAllRoom(@AuthenticationPrincipal UserDetailsImpl userDetails){
+    public List<ChatRoomResponseDto> findAllRoom(@AuthenticationPrincipal UserDetailsImpl userDetails){
         return chatService.findAllRoom(userDetails.getUser());
     }
 

@@ -32,9 +32,9 @@ public class UserChatRoomRelation {
 
 
 
-    public UserChatRoomRelation(ChatRoom chatRoom, Goods goods, RequestGoods requestGoods) {
+    public UserChatRoomRelation(User user, ChatRoom chatRoom, Goods goods) {
         this.chatRoom = chatRoom;
         this.seller = goods.getUser();
-        this.buyer = requestGoods.getUser();
+        this.buyer = user;
     }
 }
