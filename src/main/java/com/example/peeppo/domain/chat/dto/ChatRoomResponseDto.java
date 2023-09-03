@@ -22,7 +22,7 @@ public class ChatRoomResponseDto {
         this.id = chatRoom.getId();
         this.roomId = chatRoom.getRoomId();
         this.nickname = user.getNickname();
-        this.userimageUrl = user.getUserImg();
+ //       this.userimageUrl = user.getUserImg();
         this.imageUrl = chatRoom.getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
     }
 
@@ -31,7 +31,7 @@ public class ChatRoomResponseDto {
         this.roomId = userChatRoom.getChatRoom().getRoomId();
         this.imageUrl = userChatRoom.getChatRoom().getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
         this.nickname = user.getNickname();
-        this.userimageUrl = user.getUserImg();
+//        this.userimageUrl = user.getUserImg();
 
     }
 

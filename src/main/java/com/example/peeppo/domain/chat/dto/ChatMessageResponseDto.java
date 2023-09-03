@@ -21,7 +21,7 @@ public class ChatMessageResponseDto {
 
     public ChatMessageResponseDto(ChatMessage chatMessage, User messageUser) {
         this.message = chatMessage.getMessage();
-        this.userImageUrl = messageUser.getUserImg();
+ //       this.userImageUrl = messageUser.getUserImg();
         this.nickname = messageUser.getNickname();
     }
 }
