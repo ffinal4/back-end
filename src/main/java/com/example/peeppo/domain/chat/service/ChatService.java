@@ -1,8 +1,6 @@
 package com.example.peeppo.domain.chat.service;
 
-import com.example.peeppo.domain.chat.dto.ChatMessageRequestDto;
-import com.example.peeppo.domain.chat.dto.ChatMessageResponseDto;
-import com.example.peeppo.domain.chat.dto.ChatRoomResponseDto;
+import com.example.peeppo.domain.chat.dto.*;
 import com.example.peeppo.domain.chat.entity.ChatMessage;
 import com.example.peeppo.domain.chat.entity.ChatRoom;
 import com.example.peeppo.domain.chat.entity.UserChatRoomRelation;
@@ -10,8 +8,9 @@ import com.example.peeppo.domain.chat.repository.ChatMessageRepository;
 import com.example.peeppo.domain.chat.repository.ChatRoomRepository;
 import com.example.peeppo.domain.chat.repository.UserChatRoomRelationRepository;
 import com.example.peeppo.domain.goods.entity.Goods;
+import com.example.peeppo.domain.goods.entity.RequestGoods;
 import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
-import com.example.peeppo.domain.goods.service.GoodsService;
+import com.example.peeppo.domain.goods.repository.request.RequestRepository;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.security.jwt.JwtUtil;
@@ -44,6 +43,7 @@ public class ChatService {
     private final GoodsRepository goodsRepository;
     private final UserChatRoomRelationRepository userChatRoomRelationRepository;
     private final UserRepository userRepository;
+    private final RequestRepository requestRepository;
     private Map<String, ChatRoom> chatRooms;
     private final JwtUtil jwtUtil;
 
@@ -66,25 +66,23 @@ public class ChatService {
     } //순서대로 저장메서드
 
 
-//     채팅방 생성 : 서버간 채팅방 공유를 위해 redis hash에 저장한다. -> 이것으로 채팅방은 지워지지 않음
+// 채팅방 생성 : 서버간 채팅방 공유를 위해 redis hash에 저장한다. -> 이것으로 채팅방은 지워지지 않음
+    // 물건Id랑 user로 저장한다
     @Transactional
-    public ChatRoomResponseDto createRoom(Long goodsId, User user){
+    public ChatRoom createRoom (Long goodsId, User user){
         String randomId = UUID.randomUUID().toString();
-
         Goods goods = goodsRepository.findById(goodsId).orElseThrow(() ->
                 new NullPointerException("해당 게시글은 존재하지 않습니다."));
-
         User enterUser = userRepository.findById(user.getUserId()).orElseThrow(()->new IllegalArgumentException("해당하는 사용자는 없습니다"));
+        //seller의 goods로 채팅방 만들어
         ChatRoom chatRoom = new ChatRoom(goods, randomId);
         chatRoomRepository.save(chatRoom);
-        hashOpsChatRoom.put(CHAT_ROOMS, randomId, new ChatRoomResponseDto(chatRoom, enterUser));
-        UserChatRoomRelation userChatRoomRelation = new UserChatRoomRelation(enterUser, chatRoom, goods);
+        hashOpsChatRoom.put(CHAT_ROOMS, randomId, new ChatRoomResponseDto(chatRoom));
+        UserChatRoomRelation userChatRoomRelation = new UserChatRoomRelation(enterUser, chatRoom);
         userChatRoomRelationRepository.save(userChatRoomRelation);
        System.out.println(hashOpsChatRoom.get(CHAT_ROOMS, randomId));
-       return new ChatRoomResponseDto(chatRoom, enterUser);
+        return chatRoom;
     }
-    //채팅방 아이디는 랜덤 !
-
     /**
      * destination정보에서 roomId 추출
      */
@@ -131,21 +129,12 @@ public class ChatService {
 
     //전체 채팅방 조회 => 사용자 마다 !
     public List<ChatRoomResponseDto> findAllRoom(User user){
-        // 채팅방 생성 순서를 최근순으로 반환
-        //List chatRoomList = new ArrayList<>(chatRooms.values());
-       // Collections.reverse(chatRoomList);
-        List<UserChatRoomRelation> userChatRoomRelation = userChatRoomRelationRepository.findAllBySellerUserIdOrBuyerUserId(user.getUserId(), user.getUserId());
+        List<UserChatRoomRelation> userChatRoomRelation = userChatRoomRelationRepository.findAllByBuyerUserId(user.getUserId());
         List<ChatRoomResponseDto> chatRoomResponseDto = new ArrayList<>();
         for(UserChatRoomRelation userChatRoom : userChatRoomRelation){
-            //userChatRoom.getChatRoom().getGoods().get
-            if(user.getUserId() == userChatRoom.getBuyer().getUserId()) {
-                ChatRoomResponseDto chatRoomResponseDto1 = new ChatRoomResponseDto(userChatRoom, userChatRoom.getSeller());
-                chatRoomResponseDto.add(chatRoomResponseDto1);
-            }
-            if(user.getUserId() == userChatRoom.getSeller().getUserId()){
-                ChatRoomResponseDto chatRoomResponseDto1 = new ChatRoomResponseDto(userChatRoom, userChatRoom.getBuyer());
-                chatRoomResponseDto.add(chatRoomResponseDto1);
-            }
+            ChatMessage chatMessage = chatMessageRepository.findByChatRoomId(userChatRoom.getChatRoom().getId());
+            ChatRoomResponseDto chatRoomResponseDto1 = new ChatRoomResponseDto(userChatRoom, chatMessage);
+            chatRoomResponseDto.add(chatRoomResponseDto1);
         }
         return chatRoomResponseDto;
     }

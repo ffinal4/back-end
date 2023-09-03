@@ -3,6 +3,7 @@ package com.example.peeppo.domain.chat.controller;
 
 import com.example.peeppo.domain.chat.dto.ChatMessageResponseDto;
 import com.example.peeppo.domain.chat.dto.ChatRoomResponseDto;
+import com.example.peeppo.domain.chat.entity.ChatRoom;
 import com.example.peeppo.domain.chat.service.ChatService;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
@@ -18,10 +19,10 @@ public class ChatRoomController {
     private final ChatService chatService;
 
     //채팅방 생성
-    @PostMapping("/room/{goodsId}")
-    public ChatRoomResponseDto createRoom(@PathVariable("goodsId") Long goodsId,
-                                          @AuthenticationPrincipal UserDetailsImpl userDetails){
-        return chatService.createRoom(goodsId, userDetails.getUser());
+    @PostMapping("/{goodsId}")
+    public ChatRoom createRoom(@PathVariable("goodsId") Long goodsId,
+                               @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return chatService.createRoom(goodsId,  userDetails.getUser());
     }
 
     //채팅방 전체 조회 => 내 채팅방 전체 조회여야한다 !
