@@ -15,8 +15,10 @@ import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.goods.repository.request.RequestRepository;
 import com.example.peeppo.domain.goods.repository.wantedGoods.WantedGoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
+import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.image.helper.ImageHelper;
 import com.example.peeppo.domain.image.repository.ImageRepository;
+import com.example.peeppo.domain.image.repository.UserImageRepository;
 import com.example.peeppo.domain.rating.entity.RatingGoods;
 import com.example.peeppo.domain.rating.helper.RatingHelper;
 import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
@@ -54,11 +56,10 @@ public class GoodsService {
     private final ImageRepository imageRepository;
     private final WantedGoodsRepository wantedGoodsRepository;
     private final ImageHelper imageHelper;
-    private final AmazonS3 amazonS3;
-    private final String bucket;
     private final UserRepository userRepository;
     private final RatingGoodsRepository ratingGoodsRepository;
     private final RequestRepository requestRepository;
+    private final UserImageRepository userImageRepository;
 
     private final RatingHelper ratingHelper;
     private final DibsService dibsService;
@@ -89,10 +90,10 @@ public class GoodsService {
         wantedGoodsRepository.save(wantedGoods);
 
         List<String> imageUrls = imageHelper
-                .saveImagesToS3AndRepository(images, amazonS3, bucket, goods)
+                .saveImagesToS3AndRepository(images, goods)
                 .stream()
                 .map(Image::getImageUrl)
-                .collect(Collectors.toList());
+                .toList();
 
         return new ApiResponse<>(true, new MsgResponseDto("게시글이 등록되었습니다."), null);
     }
@@ -210,11 +211,11 @@ public class GoodsService {
 
         // s3 이미지 삭제
         for (Image image : imageList) {
-            imageHelper.deleteFileFromS3(image.getImageKey(), amazonS3, bucket);
+            imageHelper.deleteImageAmazonS3(image.getImageKey());
         }
 
         // 이미지 업로드
-        List<String> imageUrls = imageHelper.saveImagesToS3AndRepository(images, amazonS3, bucket, goods)
+        List<String> imageUrls = imageHelper.saveImagesToS3AndRepository(images, goods)
                 .stream()
                 .map(Image::getImageUrl)
                 .collect(Collectors.toList());
@@ -261,12 +262,12 @@ public class GoodsService {
                                                       int size, String sortBy, boolean isAsc) {
         User user = userRepository.findUserByNickname(nickname);
         if (userDetails != null) { // 로그인 된 경우다 !!
-            if (user.getUserId() == userDetails.getUser().getUserId()) {
+            if (Objects.equals(user.getUserId(), userDetails.getUser().getUserId())) {
                 throw new IllegalArgumentException("같은 사용자입니다 ");
             }
         }
         if (userDetails != null) { // 로그인 된 경우다 !!
-            if (user.getUserId() == userDetails.getUser().getUserId()) {
+            if (Objects.equals(user.getUserId(), userDetails.getUser().getUserId())) {
                 throw new IllegalArgumentException("같은 사용자입니다 ");
             }
         }
@@ -283,8 +284,8 @@ public class GoodsService {
 
             myGoods.add(new GoodsListResponseDto(goods, firstImage.getImageUrl(), checkDibs));
         }
-
-        UrPocketResponseDto urPocketResponseDto = new UrPocketResponseDto(user, myGoods);
+        UserImage userImage = userImageRepository.findByUserUserId(user.getUserId()).orElse(null);
+        UrPocketResponseDto urPocketResponseDto = new UrPocketResponseDto(user, myGoods, userImage);
 
         return new ApiResponse<>(true, urPocketResponseDto, null);
 //        return getGoodsResponseDtos(user);
@@ -317,7 +318,7 @@ public class GoodsService {
         List<Goods> goodsList = goodsRepository.findByCategoryAndIsDeletedFalse(goods.getCategory());
         List<RcGoodsResponseDto> rcGoodsResponseDtoList = new ArrayList<>();
         for(Goods goods1 : goodsList){
-            if(goods1.getGoodsId() != goods.getGoodsId()){
+            if(!Objects.equals(goods1.getGoodsId(), goods.getGoodsId())){
                 RcGoodsResponseDto rcGoodsResponseDto = new RcGoodsResponseDto(goods1);
                 rcGoodsResponseDtoList.add(rcGoodsResponseDto);
             }
@@ -329,7 +330,7 @@ public class GoodsService {
         List<Goods> goodsList = goodsRepository.findByCategoryAndIsDeletedFalse(goods.getCategory());
         List<RcGoodsResponseDto> rcGoodsResponseDtoList = new ArrayList<>();
         for(Goods goods1 : goodsList){
-            if(((goods1.getGoodsId() != goods.getGoodsId()) && (user.getUserId() != goods1.getUser().getUserId()))){
+            if(((!Objects.equals(goods1.getGoodsId(), goods.getGoodsId())) && (!Objects.equals(user.getUserId(), goods1.getUser().getUserId())))){
                 boolean checkDibs = false;
                 checkDibs = dibsService.checkDibsGoods(user.getUserId(), goods1.getGoodsId());
                 RcGoodsResponseDto rcGoodsResponseDto = new RcGoodsResponseDto(goods1, checkDibs);
@@ -472,8 +473,15 @@ public class GoodsService {
                     return new PocketListResponseDto(goods, firstImage.getImageUrl(), ratingPrice);
                 }).collect(Collectors.toList());
 
+        String imageUrl = null;
+        UserImage image = userImageRepository.findByUserUserId(user.getUserId())
+                .orElse(null);
+        if (Objects.nonNull(image)) {
+            imageUrl = image.getImageUrl();
+        }
+
         return new ApiResponse<>(true, new PocketResponseDto(user,
-                new PageImpl<>(myGoods, pageable, goodsList.getTotalElements())), null);
+                new PageImpl<>(myGoods, pageable, goodsList.getTotalElements()), imageUrl), null);
     }
 
 
@@ -487,12 +495,12 @@ public class GoodsService {
     }
 
     public Goods findGoods(Long goodsId) {
-        Goods goods = goodsRepository.findById(goodsId).orElseThrow(() ->
+        return goodsRepository.findById(goodsId).orElseThrow(() ->
                 new NullPointerException("해당 게시글은 존재하지 않습니다."));
-        if (goods.getIsDeleted()) {
-            throw new IllegalStateException("삭제된 게시글입니다.");
-        }
-        return goods;
+//        if (goods.getIsDeleted()) {
+//            throw new IllegalStateException("삭제된 게시글입니다.");
+//        }
+//        return goods;
     }
 
     public WantedGoods findWantedGoods(Long wantedId) {
