@@ -7,6 +7,7 @@ import com.example.peeppo.domain.chat.entity.ChatRoom;
 import com.example.peeppo.domain.chat.repository.ChatMessageRepository;
 import com.example.peeppo.domain.chat.repository.ChatRoomRepository;
 import com.example.peeppo.domain.goods.entity.Goods;
+import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.goods.service.GoodsService;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
@@ -35,7 +36,7 @@ public class ChatService {
     private final ChannelTopic channelTopic;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
-    private final GoodsService goodsService;
+    private final GoodsRepository goodsRepository;
     private final UserRepository userRepository;
     private Map<String, ChatRoom> chatRooms;
 
@@ -60,9 +61,12 @@ public class ChatService {
 
 //     채팅방 생성 : 서버간 채팅방 공유를 위해 redis hash에 저장한다. -> 이것으로 채팅방은 지워지지 않음
     @Transactional
-    public ChatRoomResponseDto createRoom(Long id, User user){
+    public ChatRoomResponseDto createRoom(Long goodsId, User user){
         String randomId = UUID.randomUUID().toString();
-        Goods goods = goodsService.findGoods(id);
+
+        Goods goods = goodsRepository.findById(goodsId).orElseThrow(() ->
+                new NullPointerException("해당 게시글은 존재하지 않습니다."));
+
         User enterUser = userRepository.findById(user.getUserId()).orElseThrow(()->new IllegalArgumentException("해당하는 사용자는 없습니다"));
         ChatRoom chatRoom = ChatRoom.builder()
                 .roomId(randomId)
