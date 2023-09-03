@@ -3,11 +3,13 @@ package com.example.peeppo.domain.chat.entity;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.utils.Timestamped;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -25,8 +27,8 @@ public class ChatRoom extends Timestamped implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String roomId; //채팅방 아이디
-
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "goods_id", nullable = false)
     private Goods goods;
 

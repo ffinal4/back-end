@@ -28,8 +28,6 @@ public class QUserChatRoomRelation extends EntityPathBase<UserChatRoomRelation> 
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final com.example.peeppo.domain.user.entity.QUser seller;
-
     public QUserChatRoomRelation(String variable) {
         this(UserChatRoomRelation.class, forVariable(variable), INITS);
     }
@@ -50,7 +48,6 @@ public class QUserChatRoomRelation extends EntityPathBase<UserChatRoomRelation> 
         super(type, metadata, inits);
         this.buyer = inits.isInitialized("buyer") ? new com.example.peeppo.domain.user.entity.QUser(forProperty("buyer")) : null;
         this.chatRoom = inits.isInitialized("chatRoom") ? new QChatRoom(forProperty("chatRoom"), inits.get("chatRoom")) : null;
-        this.seller = inits.isInitialized("seller") ? new com.example.peeppo.domain.user.entity.QUser(forProperty("seller")) : null;
     }
 
 }
