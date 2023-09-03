@@ -39,11 +39,11 @@ public class BidRepositoryCustomImpl extends QuerydslRepositorySupport implement
 
     @Override
     public Long countBidsByUserIdAndAuctionId(Long auctionId, Long userId) {
-
         return queryFactory
-                .selectFrom(bid)
+                .select(bid.count())
+                .from(bid)
                 .where(bid.user.userId.eq(userId)
                         .and(bid.auction.auctionId.eq(auctionId)))
-                .fetchCount();
+                .fetchOne();
     }
 }

@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,7 +17,9 @@ public class GoodsRecentDto {
     private String image;
 
     public GoodsRecentDto(Goods goods) {
-        this.id = goods.getGoodsId();
-        this.image = goods.getImage().stream().map(Image::getImageUrl).toList().get(0);
+        if (Objects.nonNull(goods)) {
+            this.id = goods.getGoodsId();
+            this.image = goods.getImage().stream().map(Image::getImageUrl).toList().get(0);
+        }
     }
 }

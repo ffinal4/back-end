@@ -1,5 +1,6 @@
 package com.example.peeppo.domain.user.dto;
 
+import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.user.entity.User;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -15,8 +16,8 @@ public class MyPageResponseDto {
     private String location;
     private Long userPoint;
 
-    public MyPageResponseDto(User user) {
-        this.image = user.getUserImg();
+    public MyPageResponseDto(User user, String image) {
+        this.image = image;
         this.nickname = user.getNickname();
         this.email = user.getEmail();
         this.password = user.getPassword();

@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.goods.dto;
 
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
+import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.user.entity.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,14 +14,14 @@ import java.util.List;
 public class PocketResponseDto {
     private Long userId;
     private String nickName;
-    private String getUserImg;
+    private String userImg;
     private String location;
     private Page<PocketListResponseDto> goodsListResponseDto;
 
-    public PocketResponseDto(User user, Page<PocketListResponseDto> pocketListResponseDtos) {
+    public PocketResponseDto(User user, Page<PocketListResponseDto> pocketListResponseDtos, String userImg) {
         this.userId = user.getUserId();
         this.nickName = user.getNickname();
-        this.getUserImg = user.getUserImg();
+        this.userImg = userImg;
         this.goodsListResponseDto = pocketListResponseDtos;
     }
 }

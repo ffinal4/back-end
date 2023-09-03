@@ -39,4 +39,10 @@ public interface RequestRepository extends JpaRepository<RequestGoods, Long> {
 
     @Query("SELECT DISTINCT r.seller FROM RequestGoods r WHERE r.receiveUser = :user_id and r.requestStatus= :request_status")
     Page<Goods> findSellerByReceiveUserAndRequestStatus(@Param("user_id") Long userId, @Param("request_status")  RequestStatus requestStatus, Pageable pageable);
+
+    @Query("SELECT r FROM RequestGoods r WHERE r.seller.goodsId = :seller_goods_id and r.user.userId = :user_id ")
+    List<RequestGoods> findAllBySellerGoodsIdAndUserId(@Param("seller_goods_id") Long goodsId, @Param("user_id") Long userId);
+
+    @Query("SELECT r FROM RequestGoods r WHERE r.seller.goodsId = :seller_goods_id and r.receiveUser = :user_id ")
+    List<RequestGoods> findAllByBuyerGoodsIdAndUserId(@Param("seller_goods_id") Long goodsId, @Param("user_id") Long userId);
 }

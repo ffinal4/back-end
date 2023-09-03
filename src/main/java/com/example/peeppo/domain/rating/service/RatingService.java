@@ -2,6 +2,8 @@ package com.example.peeppo.domain.rating.service;
 
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
+import com.example.peeppo.domain.image.entity.UserImage;
+import com.example.peeppo.domain.image.repository.UserImageRepository;
 import com.example.peeppo.domain.rating.dto.RatingRequestDto;
 import com.example.peeppo.domain.rating.dto.RatingResponseDto;
 import com.example.peeppo.domain.rating.dto.RatingScoreResponseDto;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class RatingService {
+    private final UserImageRepository userImageRepository;
 
     private final RatingRepository ratingRepository;
     private final GoodsRepository goodsRepository;
@@ -33,7 +36,12 @@ public class RatingService {
     public ApiResponse<List<RatingUserResponseDto>> ratingTopFiveUsers() {
         List<RatingUserResponseDto> responseDtoList = userRepository.findTopUsersByMaxRatingCount(5)
                 .stream()
-                .map(user -> new RatingUserResponseDto(user.getUserImg(), user.getNickname(), user.getMaxRatingCount()))
+                .map(user -> {
+                    UserImage userImage = userImageRepository.findByUserUserId(user.getUserId())
+                            .orElse(null);
+                    String imageUrl = (userImage != null) ? userImage.getImageUrl() : null;
+                    return new RatingUserResponseDto(imageUrl, user.getNickname(), user.getMaxRatingCount());
+                })
                 .collect(Collectors.toList());
 
         return new ApiResponse<>(true, responseDtoList, null);

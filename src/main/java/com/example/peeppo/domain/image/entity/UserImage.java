@@ -29,4 +29,9 @@ public class UserImage {
         this.imageUrl = image;
         this.user = user;
     }
+    public UserImage(UserImage userImage){
+        this.imageKey = userImage.getImageKey();
+        this.imageUrl = userImage.imageUrl;
+        this.user = userImage.getUser();
+    }
 }
