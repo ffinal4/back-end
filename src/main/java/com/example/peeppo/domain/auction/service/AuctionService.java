@@ -240,6 +240,7 @@ public class AuctionService {
         checkUsername(auctionId, user);
 
         for (Bid bid1 : bidList) {
+            bid1.getGoods().changeStatus(ONSALE);
             if (bid1.getBidStatus().equals(SUCCESS) ||
                     bid1.getBidStatus().equals(FAIL)) {
                 throw new IllegalArgumentException("이미 입찰을 선택하신 경매입니다.");
@@ -248,7 +249,9 @@ public class AuctionService {
             bidRepository.save(bid1);
         }
         for (Long bidId : choiceRequestDto.getBidId()) {
+
             Bid bid = findBidId(bidId);
+            bid.getGoods().changeStatus(ONSALE);
             bid.changeBidStatus(SUCCESS);
             bidRepository.save(bid);
 
