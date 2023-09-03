@@ -67,6 +67,7 @@ public class ChatService {
 
 
 // 채팅방 생성 : 서버간 채팅방 공유를 위해 redis hash에 저장한다. -> 이것으로 채팅방은 지워지지 않음
+    // 물건Id랑 user로 저장한다
     @Transactional
     public ChatRoomResponseDto createRoom (Long goodsId, User user){
         String randomId = UUID.randomUUID().toString();
@@ -76,14 +77,12 @@ public class ChatService {
         //seller의 goods로 채팅방 만들어
         ChatRoom chatRoom = new ChatRoom(goods, randomId);
         chatRoomRepository.save(chatRoom);
-        hashOpsChatRoom.put(CHAT_ROOMS, randomId, new ChatRoomResponseDto(chatRoom, enterUser));
+        hashOpsChatRoom.put(CHAT_ROOMS, randomId, new ChatRoomResponseDto(chatRoom));
         UserChatRoomRelation userChatRoomRelation = new UserChatRoomRelation(enterUser, chatRoom, goods);
         userChatRoomRelationRepository.save(userChatRoomRelation);
        System.out.println(hashOpsChatRoom.get(CHAT_ROOMS, randomId));
         return new ChatRoomResponseDto(chatRoom, enterUser);
     }
-    //채팅방 아이디는 랜덤 !
-
     /**
      * destination정보에서 roomId 추출
      */

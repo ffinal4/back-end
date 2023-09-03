@@ -38,4 +38,7 @@ public class ChatRoomResponseDto {
         // this.userimageUrl = user.getUserImg();
 
     }
+
+    public ChatRoomResponseDto(ChatRoom chatRoom) {
+    }
 }
