@@ -82,6 +82,7 @@ public class GoodsService {
             throw new IllegalArgumentException("물품 이미지가 꼭 필요합니다.");
         }
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
+        System.out.println("실행체크");
         Goods goods = new Goods(goodsRequestDto, wantedGoods, user, GoodsStatus.ONSALE);
         RatingGoods ratingGoods = new RatingGoods(goods);
 
@@ -376,7 +377,7 @@ public class GoodsService {
             Goods goods = goodsRepository.findByGoodsId(requestGood.getGoodsId()).orElse(null);// sellergoods가 뭔지 찾았다 !
             RequestGoods requestGoods1 = requestRepository.findBySellerGoodsId(goods.getGoodsId());
             RequestSingleResponseDto goodsListResponseDto = new RequestSingleResponseDto(goods, goods.getUser().getUserId());
-            List<RequestGoods> buyerGoodsList = requestRepository.findAllBySellerGoodsId(goods.getGoodsId());
+            List<RequestGoods> buyerGoodsList = requestRepository.findAllBySellerGoodsIdAndUserId(goods.getGoodsId(), user.getUserId());
             List<RequestSingleResponseDto> goodsListResponseDtos = new ArrayList<>();
             // 3) requestGoods 순회하며 buyerGoods 물품 정보 가져오기 => dto 로 변환하기
             for (RequestGoods buyerGoods : buyerGoodsList) {
@@ -412,7 +413,7 @@ public class GoodsService {
             Goods goods = goodsRepository.findByGoodsId(requestGood.getGoodsId()).orElse(null);// sellergoods가 뭔지 찾았다 !
             RequestGoods requestGoods1 = requestRepository.findBySellerGoodsId(goods.getGoodsId());
             RequestSingleResponseDto goodsListResponseDto = new RequestSingleResponseDto(goods, user.getUserId());
-            List<RequestGoods> buyerGoodsList = requestRepository.findAllBySellerGoodsId(goods.getGoodsId());
+            List<RequestGoods> buyerGoodsList = requestRepository.findAllByBuyerGoodsIdAndUserId(goods.getGoodsId(), user.getUserId());
             List<RequestSingleResponseDto> goodsListResponseDtos = new ArrayList<>();
             // 3) requestGoods 순회하며 buyerGoods 물품 정보 가져오기 => dto 로 변환하기
             for(RequestGoods buyerGoods : buyerGoodsList){

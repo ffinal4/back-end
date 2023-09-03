@@ -190,7 +190,7 @@ public class AuctionService {
         List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(auction.getGoods().getGoodsId())
                 .stream().map(Image::getImageUrl).collect(Collectors.toList());
 
-        List<Auction> auctionList = auctionRepository.findTop20ByAuctionStatus(AuctionStatus.AUCTION, auctionId, user.getUserId());
+        List<Auction> auctionList = auctionRepository.findTop20ByAuctionStatus(AuctionStatus.AUCTION);
         List<AuctionListResponseDto> AuctionListResponseDtos = new ArrayList<>();
         for (Auction recommendAuction : auctionList) {
             TimeRemaining timeRemaining = countDownTime(recommendAuction);
@@ -238,8 +238,9 @@ public class AuctionService {
 
         checkUsername(auctionId, user);
 
-        if (!auction.getUser().getUserId().equals(user.getUserId())) {
-            throw new IllegalArgumentException("본인 경매가 아닙니다.");
+        if(auction.getAuctionStatus().equals(AuctionStatus.END) ||
+                auction.getAuctionStatus().equals(CANCEL)){
+            throw new IllegalArgumentException("이미 입찰을 선택하신 경매입니다.");
         }
         for (Bid bid1 : bidList) {
             bid1.changeBidStatus(FAIL);
@@ -266,8 +267,6 @@ public class AuctionService {
             }
 
         }
-
-        auction.getGoods().changeStatus(SOLDOUT);
 
         user.userPointAdd(10L);
         userRepository.save(user);

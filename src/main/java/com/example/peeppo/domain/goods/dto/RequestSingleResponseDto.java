@@ -25,7 +25,7 @@ public class RequestSingleResponseDto {
     }
 
     public RequestSingleResponseDto(Goods goods, Long userId) {
-        this.userId = userId;
+        this.userId = goods.getUser().getUserId();
         this.goodsId = goods.getGoodsId();
         this.imageUrl = goods.getImage().stream().map(Image::getImageUrl).collect(Collectors.toList()).get(0);
         this.title = goods.getTitle();
