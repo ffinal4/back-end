@@ -18,10 +18,9 @@ public class SpringChatConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry){
         // stomp 접속 주소 url => /ws-stomp
         registry.addEndpoint("/stomp/chat") //연결될 엔드포인트 (엔드 포인트 : 통신의 도착지점 , 즉 이 엔드포인트에 특정한 통신이 도착하면 어떤 행위를 하게 만든다 )
-                .setAllowedOriginPatterns("*");
+                .setAllowedOriginPatterns("**");
                 //.withSockJS();
                 //socketJs를 연결한다는 설정 => 폴백을 통해 애플리케이션은 WebSocket API를 사용할 수 있지만 런타임에 필요할 때 WebSocket이 아닌 대안으로 적절하게 저하된다
-                //setAllowedOriginPatterns("*")
     }
 
     @Override //상위 클래스 메서드 재정의
