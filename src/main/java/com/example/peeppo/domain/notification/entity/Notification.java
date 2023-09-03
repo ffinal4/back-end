@@ -1,20 +1,17 @@
 package com.example.peeppo.domain.notification.entity;
 
-import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.user.entity.User;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.ColumnDefault;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
-import static lombok.AccessLevel.PROTECTED;
 
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Notification {
 
     @Id
@@ -22,13 +19,13 @@ public class Notification {
     @Column(name = "notification_id")
     private Long notificationId;
 
-    private Boolean checked;
+    private Boolean checked = false;
 
-    private Boolean isRequest;
+    private Boolean isRequest = false;
 
-    private Boolean isAuction;
+    private Boolean isAuction = false;
 
-    private Boolean isMessage;
+    private Boolean isMessage = false;
 
     private Long messageCount = 0L;
 
@@ -36,44 +33,9 @@ public class Notification {
 
     private Long requestCount = 0L;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_Id")
     private User user;
-
-//    @Embedded
-//    private NotificationContent content;
-//
-//    @Embedded
-//    private RelatedURL url;
-//
-//    @Column(nullable = false)
-//    private Boolean isRead;
-//
-//    @Enumerated(EnumType.STRING)
-//    @Column(nullable = false)
-//    private NotificationType notificationType;
-//
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "user_id")
-//    @OnDelete(action = OnDeleteAction.CASCADE)
-//    private User receiver;
-//
-//    @Builder
-//    public Notification(User receiver, NotificationType notificationType, String content, String url, Boolean isRead) {
-//        this.receiver = receiver;
-//        this.notificationType = notificationType;
-//        this.content = new NotificationContent(content);
-//        this.url = new RelatedURL(url);
-//        this.isRead = isRead;
-//    }
-//
-//    public String getContent() {
-//        return content.getContent();
-//    }
-//
-//    public String getUrl() {
-//        return url.getUrl();
-//    }
 
     public void setIsAuction(Boolean isAuction) {
         this.isAuction = isAuction;
@@ -111,7 +73,11 @@ public class Notification {
         this.requestCount += 1;
     }
 
-    public void setUser(User user) {
+    public void updateMessageCount() {
+        this.messageCount += 1;
+    }
+
+    public Notification(User user) {
         this.user = user;
     }
 }

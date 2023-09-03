@@ -33,6 +33,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,6 +64,7 @@ public class GoodsService {
 
     private final RatingHelper ratingHelper;
     private final DibsService dibsService;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final DibsRepository dibsRepository;
     private static final String RECENT_GOODS = "goods";

@@ -24,7 +24,7 @@ public interface BidRepository extends JpaRepository<Bid, Long>, BidRepositoryCu
     List<Bid> findByAuctionAuctionIdAndBidStatus(Long auctionId, BidStatus bidStatus);
     List<Bid> findByUserUserId(Long userId, Pageable pageable);
 
-    Bid findByUserUserId(Long userId);
+    List<Bid> findByUserUserId(Long userId);
 
    @Query(value = "select a.* from auction a inner join (SELECT b.auction_id, COUNT(b.bid_id) AS bidCount FROM bid b GROUP BY b.auction_id ORDER BY bidCount DESC LIMIT 3) as top3auction on a.auction_id= top3auction.auction_id", nativeQuery = true)
     List<Auction> findTop3Auction();
