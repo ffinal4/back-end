@@ -3,7 +3,6 @@ package com.example.peeppo.domain.auction.service;
 import com.example.peeppo.domain.auction.dto.*;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
-import com.example.peeppo.domain.auction.event.AuctionEvent;
 import com.example.peeppo.domain.auction.helper.AuctionHelper;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.bid.dto.BidListResponseDto;
@@ -12,8 +11,9 @@ import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.bid.enums.BidStatus;
 import com.example.peeppo.domain.bid.repository.bid.BidRepository;
 import com.example.peeppo.domain.dibs.repository.DibsRepository;
-import com.example.peeppo.domain.dibs.service.DibsService;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
+import com.example.peeppo.domain.goods.dto.MsgResponseDto;
+import com.example.peeppo.domain.goods.dto.RequestAcceptRequestDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.enums.Category;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
@@ -26,6 +26,7 @@ import com.example.peeppo.domain.rating.entity.RatingGoods;
 import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
+import com.example.peeppo.domain.user.helper.UserRatingHelper;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.responseDto.PageResponse;
@@ -44,13 +45,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.example.peeppo.domain.auction.enums.AuctionStatus.*;
-import static com.example.peeppo.domain.bid.enums.BidStatus.*;
+import static com.example.peeppo.domain.bid.enums.BidStatus.FAIL;
+import static com.example.peeppo.domain.bid.enums.BidStatus.SUCCESS;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.ONSALE;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.SOLDOUT;
 
@@ -70,9 +72,11 @@ public class AuctionService {
     private final ImageRepository imageRepository;
     private final AuctionHelper auctionHelper;
     private final ApplicationEventPublisher eventPublisher;
+    private final UserRatingHelper userRatingHelper;
 
     @Transactional
     public AuctionResponseDto createAuction(Long goodsId, AuctionRequestDto auctionRequestDto, User user) {
+        userRatingHelper.getUser(user.getUserId());
         checkGoodsUsername(goodsId, user);
         if (user.getUserPoint() < 10) {
             throw new IllegalArgumentException("경매 등록에는 10p가 필요합니다. 현재" + user.getUserPoint() + "포인트를 가지고 있습니다.");
@@ -174,7 +178,7 @@ public class AuctionService {
                 }
             }
             auctionRepository.saveAll(auctionPage);
-          
+
             return findAllAuction(auctionPage, pageable, userDetails);
         }
     }
@@ -182,6 +186,7 @@ public class AuctionService {
     // 경매 상세 조회
     public GetAuctionResponseDto findAuctionById(Long auctionId, User user) {
         Auction auction = findAuctionId(auctionId);
+        userRatingHelper.getUser(user.getUserId());
         boolean checkSameUser = auction.getUser().getUserId().equals(user.getUserId());
 
         List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(auction.getGoods().getGoodsId())
@@ -212,6 +217,7 @@ public class AuctionService {
             throw new IllegalArgumentException("경매 취소에는 10p가 필요합니다. 현재" + user.getUserPoint() + "포인트를 가지고 있습니다.");
         }
 
+        userRatingHelper.getUser(user.getUserId());
         user.userPointSubtract(10L);
         userRepository.save(user);
 
@@ -261,6 +267,21 @@ public class AuctionService {
         }).collect(Collectors.toList());
         bidRepository.saveAll(saveBidList);
 
+//            List<Notification> notificationList = notificationRepository.findByUserUserId(auction.getUser().getUserId());
+//
+//            for (Notification notification : notificationList) {
+//                if (notification == null) {
+//                    notification = new Notification();
+//                    notification.setUser(user);
+//                }
+//
+//                notification.setIsAuction(false);
+//                notification.updateAuctionCount();
+//                notification.Checked(false);
+//
+//                notificationRepository.save(notification);
+//            }
+
         Notification notification = notificationRepository.findByUserUserId(auction.getUser().getUserId());
 
         if (notification == null) {
@@ -280,6 +301,7 @@ public class AuctionService {
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Auction> myAuctionPage;
         AuctionStatus auctionStatus;
+        userRatingHelper.getUser(user.getUserId());
 
         if (auctionStatusStr != null) {
             try {
@@ -299,8 +321,8 @@ public class AuctionService {
                     Long bidCount = findBidCount(auction.getAuctionId());
                     TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount, auctionCount, auctionEndCount);
 
-                    if (auction.getAuctionStatus() == AuctionStatus.END ||
-                            auction.getAuctionStatus() == AuctionStatus.DONE) {
+                    if ((auction.getAuctionStatus() == AuctionStatus.END) ||
+                            (auction.getAuctionStatus() == AuctionStatus.DONE)) {
                         List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndBidStatus(auction.getAuctionId(), SUCCESS);
                         List<BidListResponseDto> bidListResponseDtos = bidList.stream()
                                 .map(bid -> new BidListResponseDto(bid, bid.getGoodsImg()))
@@ -318,7 +340,8 @@ public class AuctionService {
 
     @Transactional
     public ApiResponse<?> goodsAccept(User user, ChoiceRequestDto choiceRequestDto, Long auctionId) {
-        Auction auction = auctionRepository.findByAuctionId(auctionId);
+        Auction auction = auctionRepository.findByAuctionId(auctionId)
+                .orElseThrow(() -> new NullPointerException("존재하지 않는 경매입니다."));
         if (!user.getUserId().equals(auction.getUser().getUserId())) {
             throw new IllegalArgumentException("경매 등록자가 아닙니다.");
         }
@@ -400,5 +423,62 @@ public class AuctionService {
         return PageRequest.of(page, size, sort);
     }
 
+    public ApiResponse<?> tradeCompleted(Long auctionId, RequestAcceptRequestDto requestAcceptRequestDto, UserDetailsImpl userDetails) {
+        Auction auction = auctionRepository.findByAuctionId(auctionId)
+                .orElseThrow(() -> new NullPointerException("존재하지 않는 경매입니다."));
 
+        List<Bid> bidList = bidRepository.findAllById(requestAcceptRequestDto.getRequestId());
+
+        Long userId = userDetails.getUser().getUserId();
+
+        // 입찰자가 교환 완료를 눌렀을 시
+        if (Objects.equals(userId, bidList.get(0).getUser().getUserId())) {
+            for (Bid bid : bidList) {
+                if (Objects.equals(userId, bid.getUser().getUserId())) {
+                    throw new IllegalArgumentException("자신의 물건이 아닌 물품이 존재합니다");
+                }
+                if (!bid.getBidStatus().equals(BidStatus.SUCCESS)) {
+                    throw new IllegalArgumentException("정상적인 접근이 아닙니다.");
+                }
+                bid.changeBidStatus(BidStatus.TRADING);
+                bidList.add(bid);
+            }
+            bidRepository.saveAll(bidList);
+        }
+
+        // 경매 등록자가 교환 완료를 눌렀을 시
+        else if (Objects.equals(userId, auction.getUser().getUserId())) {
+            if (!auction.getAuctionStatus().equals(AuctionStatus.END)) {
+                throw new IllegalArgumentException("경매가 종료된 후에 교환요청이 가능합니다.");
+            }
+            auction.changeAuctionStatus(AuctionStatus.TRADING);
+            auctionRepository.save(auction);
+        } else {
+            throw new IllegalArgumentException("물품 등록자만 거래진행이 가능합니다.");
+        }
+
+        if (bidList.get(0).getBidStatus().equals(BidStatus.TRADING) &&
+                auction.getAuctionStatus().equals(AuctionStatus.TRADING)) {
+
+            auction.changeAuctionStatus(AuctionStatus.DONE);
+            auctionRepository.save(auction);
+
+            List<Goods> goodsList = bidList.stream()
+                    .peek(bid -> bid.changeBidStatus(BidStatus.DONE))
+                    .map(Bid::getGoods)
+                    .peek(goods -> {
+                        if (!goods.getGoodsStatus().equals(GoodsStatus.TRADING)) {
+                            throw new RuntimeException("상품이 거래중이 아닙니다.");
+                        }
+                        goods.changeStatus(SOLDOUT);
+                    })
+                    .collect(Collectors.toList());
+
+            goodsRepository.saveAll(goodsList);
+            bidRepository.saveAll(bidList);
+
+            return new ApiResponse<>(true, new MsgResponseDto("교환 완료!"), null);
+        }
+        return new ApiResponse<>(true, new MsgResponseDto("상대방의 교환완료를 기다리는중..."), null);
+    }
 }

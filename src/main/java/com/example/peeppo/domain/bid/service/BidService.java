@@ -24,6 +24,7 @@ import com.example.peeppo.domain.rating.entity.RatingGoods;
 import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
+import com.example.peeppo.domain.user.helper.UserRatingHelper;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.responseDto.PageResponse;
@@ -56,10 +57,12 @@ public class BidService {
     private final RatingGoodsRepository ratingGoodsRepository;
     private final NotificationRepository notificationRepository;
     private final DibsRepository dibsRepository;
+    private final UserRatingHelper userRatingHelper;
 
     public ResponseDto bidding(User user, Long auctionId, BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
 
         Auction auction = getAuction(auctionId);
+        userRatingHelper.getUser(user.getUserId());
         List<Bid> bids = bidRepository.findByAuctionAuctionIdAndUserUserId(user.getUserId(), auctionId);
 
         for (Bid bid : bids) {
@@ -154,6 +157,7 @@ public class BidService {
     //경매자가 선택
     public ResponseDto choiceBids(User user, Long auctionId, ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
         Auction auction = getAuction(auctionId);
+        userRatingHelper.getUser(user.getUserId());
         if (!auction.getUser().getUserId().equals(user.getUserId())) {
             throw new IllegalAccessException("잘못된 접근입니다. 다시 시도해주세요.");
         }
@@ -171,6 +175,7 @@ public class BidService {
     //경매자가 선택 바꾸는 기능
     public ResponseDto choiceUpdateBids(User user, Long auctionId, ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
         Auction auction = getAuction(auctionId);
+        userRatingHelper.getUser(user.getUserId());
         List<Choice> bidsList = new ArrayList<>();
         List<Choice> findAllChoice = queryRepository.findChoice(auctionId);
 

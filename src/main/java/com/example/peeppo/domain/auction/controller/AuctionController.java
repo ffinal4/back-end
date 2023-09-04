@@ -13,6 +13,7 @@ import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.auction.service.AuctionService;
 import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
 import com.example.peeppo.domain.bid.enums.BidStatus;
+import com.example.peeppo.domain.goods.dto.RequestAcceptRequestDto;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import com.example.peeppo.global.utils.ResponseUtils;
@@ -96,5 +97,14 @@ public class AuctionController {
                                       @Valid @RequestBody ChoiceRequestDto choiceRequestDto,
                                       @AuthenticationPrincipal UserDetailsImpl userDetails){
         return auctionService.goodsAccept(userDetails.getUser(), choiceRequestDto, auctionId);
+    }
+    // 교환완료 요청
+    @PostMapping("{auctionId}/users/accept/completed")
+    public ApiResponse<?> tradeCompleted(
+            @PathVariable("auctionId") Long auctionId,
+            @Valid @RequestBody RequestAcceptRequestDto requestAcceptRequestDto,
+            @AuthenticationPrincipal UserDetailsImpl userDetails){
+
+        return auctionService.tradeCompleted(auctionId, requestAcceptRequestDto, userDetails);
     }
 }

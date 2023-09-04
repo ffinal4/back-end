@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AuctionRepository extends JpaRepository<Auction, Long>{
     Page<Auction> findByUserUserIdAndAuctionStatus(Long userId, Pageable pageable, AuctionStatus auctionStatus);
@@ -24,7 +25,7 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>{
 
     Page<Auction> findByUserUserId(Long userId, Pageable pageable);
 
-    Auction findByAuctionId(Long auctionId);
+    Optional<Auction> findByAuctionId(Long auctionId);
 
     Page<Auction> findByGoodsCategory(Category category, Pageable pageable);
 
