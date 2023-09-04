@@ -1,12 +1,15 @@
 package com.example.peeppo.domain.user.service;
 
+import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.image.helper.ImageHelper;
 import com.example.peeppo.domain.image.repository.UserImageRepository;
 import com.example.peeppo.domain.user.dto.*;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.entity.UserRoleEnum;
+import com.example.peeppo.domain.user.helper.UserRatingHelper;
 import com.example.peeppo.domain.user.repository.UserRepository;
+import com.example.peeppo.global.exception.CustomTokenException;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,6 +39,7 @@ public class UserService {
     private final RedisTemplate redisTemplate;
     private final ImageHelper imageHelper;
     private final UserImageRepository userImageRepository;
+    private final UserRatingHelper userRatingHelper;
 
     public ResponseDto signup(SignupRequestDto signupRequestDto) {
 
@@ -96,6 +100,7 @@ public class UserService {
 
     //회원정보 페이지
     public MyPageResponseDto myPage(User user) {
+        userRatingHelper.getUser(user.getUserId());
         Optional<UserImage> userImage = userImageRepository.findByUserUserId(user.getUserId());
         String imageUrl = userImage.map(UserImage::getImageUrl).orElse(null);
 
@@ -105,6 +110,7 @@ public class UserService {
     @Transactional
     public ApiResponse<ResponseDto> updateMyPage(MyPageRequestDto myPageRequestDto, MultipartFile multipartFile, User user) throws IOException {
 
+        userRatingHelper.getUser(user.getUserId());
         if (!passwordEncoder.matches(myPageRequestDto.getOriginPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }

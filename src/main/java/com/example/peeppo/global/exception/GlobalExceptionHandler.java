@@ -18,11 +18,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-
     public ResponseEntity handleIllegalArgumentException(Exception ex) {
         log.error("IllegalArgumentException error: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
-
     }
 
     @ExceptionHandler(IllegalAccessException.class)
@@ -34,6 +32,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity handleIllegalStateException(Exception ex) {
         log.error("IllegalAccessException error: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CustomTokenException.class)
+    public ResponseEntity handleCustomTokenException(CustomTokenException ex) {
+        log.error("CustomTokenException error: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
