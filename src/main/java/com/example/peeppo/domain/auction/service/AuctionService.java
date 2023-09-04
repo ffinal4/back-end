@@ -321,8 +321,8 @@ public class AuctionService {
                     Long bidCount = findBidCount(auction.getAuctionId());
                     TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount, auctionCount, auctionEndCount);
 
-                    if (auction.getAuctionStatus() == AuctionStatus.END ||
-                            auction.getAuctionStatus() == AuctionStatus.DONE) {
+                    if ((auction.getAuctionStatus() == AuctionStatus.END) ||
+                            (auction.getAuctionStatus() == AuctionStatus.DONE)) {
                         List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndBidStatus(auction.getAuctionId(), SUCCESS);
                         List<BidListResponseDto> bidListResponseDtos = bidList.stream()
                                 .map(bid -> new BidListResponseDto(bid, bid.getGoodsImg()))
