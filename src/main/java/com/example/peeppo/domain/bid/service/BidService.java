@@ -60,7 +60,7 @@ public class BidService {
     public ResponseDto bidding(User user, Long auctionId, BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
 
         Auction auction = getAuction(auctionId);
-        List<Bid> bids = bidRepository.findByUserUserId(user.getUserId());
+        List<Bid> bids = bidRepository.findByAuctionAuctionIdAndUserUserId(user.getUserId(), auctionId);
         if (!bids.isEmpty()) {
             throw new IllegalAccessException("이미 참여중인 경매입니다.");
         }
