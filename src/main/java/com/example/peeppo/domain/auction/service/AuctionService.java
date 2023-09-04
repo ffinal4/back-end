@@ -317,15 +317,25 @@ public class AuctionService {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
+    @Transactional
     public ApiResponse<?> goodsAccept(User user, ChoiceRequestDto choiceRequestDto, Long auctionId) {
         Auction auction = auctionRepository.findByAuctionId(auctionId);
+        if(!user.getUserId().equals(auction.getUser().getUserId())){
+          throw new IllegalArgumentException("경매 등록자가 아닙니다.");
+        }
         auction.changeAuctionStatus(AuctionStatus.DONE);
+        Goods auctionGoods = goodsRepository.findByAuctionAuctionId(auction.getAuctionId());
+        auctionGoods.changeStatus(SOLDOUT);
 
         for (Long bidId : choiceRequestDto.getBidId()) {
             Bid bid = findBidId(bidId);
             bid.changeBidStatus(DONE);
+            bid.getGoods().changeStatus(SOLDOUT);
             bidRepository.save(bid);
         }
+
+        auctionRepository.save(auction);
+        goodsRepository.save(auctionGoods);
 
         ResponseDto responseDto = new ResponseDto("교환수락이 완료되었습니다.", HttpStatus.OK.value(), "OK");
         return new ApiResponse<>(true, responseDto, null);
