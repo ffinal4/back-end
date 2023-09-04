@@ -38,7 +38,6 @@ public class ChatRoomResponseDto {
         this.id = userChatRoom.getId();
         this.roomId = userChatRoom.getChatRoom().getRoomId();
         this.imageUrl = userChatRoom.getChatRoom().getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
-
         this.nickname = userChatRoom.getBuyer().getNickname();
         this.recentMessage = chatMessage.getMessage();
         this.recentMessageTime = chatMessage.getTime();

@@ -80,15 +80,15 @@ public class ChatService {
         Goods goods = goodsRepository.findById(goodsId).orElseThrow(() ->
                 new NullPointerException("해당 게시글은 존재하지 않습니다."));
         User enterUser = userRepository.findById(user.getUserId()).orElseThrow(()->new IllegalArgumentException("해당하는 사용자는 없습니다"));
+        User buyerUser = userRepository.findById(chatRoomRequestDto.getBuyerId()).orElseThrow(()->new IllegalArgumentException("해당하는 사용자는 없습니다"));
         //seller의 goods로 채팅방 만들어
         ChatRoom chatRoom = new ChatRoom(goods, randomId);
         chatRoomRepository.save(chatRoom);
         hashOpsChatRoom.put(CHAT_ROOMS, randomId, new ChatRoomResponseDto(chatRoom));
-        UserChatRoomRelation userChatRoomRelation = new UserChatRoomRelation(enterUser, chatRoom);
+        UserChatRoomRelation userChatRoomRelation = new UserChatRoomRelation(enterUser, chatRoom, buyerUser);
         userChatRoomRelationRepository.save(userChatRoomRelation);
-        User buyerUser = userRepository.findById(chatRoomRequestDto.getBuyerId()).orElseThrow(()->new IllegalArgumentException("해당하는 사용자는 없습니다"));
-       UserChatRoomRelation userChatRoomRelation2 = new UserChatRoomRelation(buyerUser, chatRoom);
-       userChatRoomRelationRepository.save(userChatRoomRelation2);
+//       UserChatRoomRelation userChatRoomRelation2 = new UserChatRoomRelation(buyerUser, chatRoom);
+//       userChatRoomRelationRepository.save(userChatRoomRelation2);
        ChatMessage chatMessage = new ChatMessage(ChatMessage.MessageType.ENTER, chatRoom,user.getUserId(),"물물교환 신청이 수락되었습니다", String.valueOf(chatRoom.getCreatedAt()));
        chatMessageRepository.save(chatMessage);
        System.out.println(hashOpsChatRoom.get(CHAT_ROOMS, randomId));
@@ -140,7 +140,7 @@ public class ChatService {
 
     //전체 채팅방 조회 => 사용자 마다 !
     public ResponseEntity<List<ChatRoomResponseDto>> findAllRoom(User user){
-        List<UserChatRoomRelation> userChatRoomRelation = userChatRoomRelationRepository.findAllByBuyerUserId(user.getUserId());
+        List<UserChatRoomRelation> userChatRoomRelation = userChatRoomRelationRepository.findAllBySellerUserIdOrBuyerUserId(user.getUserId(), user.getUserId());
         List<ChatRoomResponseDto> chatRoomResponseDto = new ArrayList<>();
         for(UserChatRoomRelation userChatRoom : userChatRoomRelation){
             ChatMessage chatMessage = chatMessageRepository.findChatRoomId(userChatRoom.getChatRoom().getId());
@@ -161,8 +161,12 @@ public class ChatService {
         List<ChatMessage> chatMessageList = chatMessageRepository.findAllChatRoomId(chatRoom.getId());
         List<ChatMessageResponseDto> chatMessageResponseDtos = new ArrayList<>();
         for(ChatMessage chatMessage : chatMessageList){
+            boolean checkUser = false;
             User messageUser = userRepository.findById(chatMessage.getSenderId()).orElse(null);
-            ChatMessageResponseDto chatMessageResponseDto = new ChatMessageResponseDto(chatMessage, messageUser);
+            if(chatMessage.getSenderId() == user.getUserId()){
+                checkUser = true;
+            }
+            ChatMessageResponseDto chatMessageResponseDto = new ChatMessageResponseDto(chatMessage, messageUser, checkUser);
             chatMessageResponseDtos.add(chatMessageResponseDto);
         }
         return chatMessageResponseDtos;
