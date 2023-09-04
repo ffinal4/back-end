@@ -119,7 +119,7 @@ public class GoodsController {
                                                                           @RequestParam("size") int size,
                                                                           @RequestParam("sortBy") String sortBy,
                                                                           @RequestParam("isAsc") boolean isAsc,
-                                                                          @RequestParam(value = "status", required = false) RequestStatus requestStatus) {
+                                                                          @RequestParam(value = "status", required = false) String requestStatus) {
 
         return goodsService.receiveTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, requestStatus);
     }
@@ -131,7 +131,7 @@ public class GoodsController {
                                                                        @RequestParam("size") int size,
                                                                        @RequestParam("sortBy") String sortBy,
                                                                        @RequestParam("isAsc") boolean isAsc,
-                                                                       @RequestParam(value = "status", required = false) RequestStatus requestStatus) {
+                                                                       @RequestParam(value = "status", required = false) String requestStatus) {
 
        return goodsService.requestTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, requestStatus);
    }

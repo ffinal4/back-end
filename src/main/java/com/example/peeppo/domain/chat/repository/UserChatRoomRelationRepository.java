@@ -7,5 +7,7 @@ import java.util.List;
 
 public interface UserChatRoomRelationRepository extends JpaRepository<UserChatRoomRelation, Long> {
   //  List<UserChatRoomRelation> findAllBySellerIdAndBuyerId(Long userId);
-    List<UserChatRoomRelation> findAllBySellerUserIdOrBuyerUserId(Long userId, Long id);
+ //   List<UserChatRoomRelation> findAllBySellerUserIdOrBuyerUserId(Long userId, Long id);
+
+  List<UserChatRoomRelation> findAllByBuyerUserId(Long userId);
 }

@@ -3,6 +3,7 @@ package com.example.peeppo.domain.auction.service;
 import com.example.peeppo.domain.auction.dto.*;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
+import com.example.peeppo.domain.auction.event.AuctionEvent;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.bid.dto.BidListResponseDto;
 import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
@@ -29,6 +30,7 @@ import com.example.peeppo.global.responseDto.PageResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -45,7 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.example.peeppo.domain.auction.enums.AuctionStatus.CANCEL;
+import static com.example.peeppo.domain.auction.enums.AuctionStatus.*;
 import static com.example.peeppo.domain.bid.enums.BidStatus.*;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.ONSALE;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.SOLDOUT;
@@ -64,6 +66,7 @@ public class AuctionService {
     private final DibsService dibsService;
     private final NotificationRepository notificationRepository;
     private final ImageRepository imageRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public AuctionResponseDto createAuction(Long goodsId, AuctionRequestDto auctionRequestDto, User user) {
@@ -222,11 +225,14 @@ public class AuctionService {
         Auction auction = findAuctionId(auctionId);
         auction.getGoods().changeStatus(ONSALE);
         auction.changeAuctionStatus(CANCEL);
+        auctionRepository.save(auction);
+
         List<Bid> bidList = bidRepository.findBidByAuctionAuctionId(auctionId);
         for (Bid bid : bidList) {
             bid.changeBidStatus(FAIL);
             bid.getGoods().changeStatus(ONSALE);
         }
+        bidRepository.saveAll(bidList);
 
         checkUsername(auctionId, user);
     }
@@ -246,49 +252,62 @@ public class AuctionService {
                 throw new IllegalArgumentException("이미 입찰을 선택하신 경매입니다.");
             }
             bid1.changeBidStatus(FAIL);
-            bidRepository.save(bid1);
+            bid1.getGoods().changeStatus(ONSALE);
         }
+        bidRepository.saveAll(bidList);
+
         for (Long bidId : choiceRequestDto.getBidId()) {
 
             Bid bid = findBidId(bidId);
             bid.getGoods().changeStatus(ONSALE);
             bid.changeBidStatus(SUCCESS);
+            bid.getGoods().changeStatus(GoodsStatus.BIDDING);
             bidRepository.save(bid);
 
-            List<Notification> notificationList = notificationRepository.findByUserUserId(auction.getUser().getUserId());
-
-            for (Notification notification : notificationList) {
-                if (notification == null) {
-                    notification = new Notification();
-                    notification.setUser(user);
-                }
-
-                notification.setIsAuction(false);
-                notification.updateAuctionCount();
-                notification.Checked(false);
-
-                notificationRepository.save(notification);
-            }
-
+//            List<Notification> notificationList = notificationRepository.findByUserUserId(auction.getUser().getUserId());
+//
+//            for (Notification notification : notificationList) {
+//                if (notification == null) {
+//                    notification = new Notification();
+//                    notification.setUser(user);
+//                }
+//
+//                notification.setIsAuction(false);
+//                notification.updateAuctionCount();
+//                notification.Checked(false);
+//
+//                notificationRepository.save(notification);
+//            }
         }
+        Notification notification = notificationRepository.findByUserUserId(auction.getUser().getUserId());
+
+        if (notification == null) {
+            notification = new Notification(user);
+        }
+        notificationRepository.save(notification);
 
         user.userPointAdd(10L);
         userRepository.save(user);
+
+//        eventPublisher.publishEvent(new AuctionEvent(auction.getGoods(), auc));
 
         auction.changeDeleteStatus(true);
     }
 
     public ResponseEntity<Page<TestListResponseDto>> auctionTradeList(User user, int page, int size, String sortBy, boolean isAsc,
-                                                                      AuctionStatus auctionStatus) {
+                                                                      String auctionStatus1) {
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Auction> myAuctionPage;
+        AuctionStatus auctionStatus;
 
-        if (auctionStatus != null) {
+        if (auctionStatus1 != null) {
+            auctionStatus = AuctionStatus.valueOf(auctionStatus1);
             myAuctionPage = auctionRepository.findByUserUserIdAndAuctionStatus(user.getUserId(), pageable, auctionStatus);
         } else {
             myAuctionPage = auctionRepository.findByUserUserIdAndAuctionStatusIsNotNull(user.getUserId(), pageable);
         }
-
+        Long auctionCount = auctionRepository.countByUserUserIdAndAuctionStatus(user.getUserId(), AUCTION);
+        Long auctionEndCount = auctionRepository.countByUserUserIdAndAuctionStatus(user.getUserId(), END);
         List<GetAuctionBidResponseDto> auctionResponseDtoList = new ArrayList<>();
 
         for (Auction auction : myAuctionPage) {
@@ -301,13 +320,13 @@ public class AuctionService {
                 }
                 TimeRemaining timeRemaining = countDownTime(auction);
                 Long bidCount = findBidCount(auction.getAuctionId());
-                TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount);
+                TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount, auctionCount, auctionEndCount);
                 GetAuctionBidResponseDto getAuctionBidResponseDto = new GetAuctionBidResponseDto(responseDto, bidListResponseDtos);
                 auctionResponseDtoList.add(getAuctionBidResponseDto);
             } else {
                 TimeRemaining timeRemaining = countDownTime(auction);
                 Long bidCount = findBidCount(auction.getAuctionId());
-                TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount);
+                TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount, auctionCount, auctionEndCount);
                 GetAuctionBidResponseDto getAuctionBidResponseDto = new GetAuctionBidResponseDto(responseDto);
                 auctionResponseDtoList.add(getAuctionBidResponseDto);
             }
@@ -329,8 +348,9 @@ public class AuctionService {
 
         for (Long bidId : choiceRequestDto.getBidId()) {
             Bid bid = findBidId(bidId);
-            bid.changeBidStatus(DONE);
+
             bid.getGoods().changeStatus(SOLDOUT);
+            bid.changeBidStatus(BidStatus.DONE);
             bidRepository.save(bid);
         }
 

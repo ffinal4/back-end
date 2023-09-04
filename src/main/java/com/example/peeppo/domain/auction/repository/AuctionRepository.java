@@ -42,4 +42,5 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>{
     @Query(value = "SELECT a.* FROM auction a WHERE a.auction_Status = auction_Status", nativeQuery = true)
     List<Auction> findByAuctionStatus(AuctionStatus auction);
 
+    Long countByUserUserIdAndAuctionStatus(Long userId, AuctionStatus auctionStatus);
 }
