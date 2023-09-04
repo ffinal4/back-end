@@ -79,4 +79,5 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
     @Query(value = "SELECT g.* from goods g where g.is_deleted = false and g.category = category ORDER BY g.created_at desc LIMIT 20", nativeQuery = true)
     List<Goods> findByCategoryAndIsDeletedFalse(Category category);
 
+    Goods findByAuctionAuctionId(Long auctionId);
 }

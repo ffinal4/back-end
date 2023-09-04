@@ -48,6 +48,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.example.peeppo.domain.goods.enums.GoodsStatus.SOLDOUT;
+import static com.example.peeppo.domain.goods.enums.GoodsStatus.TRADING;
+import static com.example.peeppo.domain.goods.enums.RequestStatus.DONE;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -157,7 +161,7 @@ public class GoodsService {
 
     public ApiResponse<GoodsDetailResponseDto> getGoods(Long goodsId, User user) {
         Goods goods = findGoods(goodsId);
-        List<RcGoodsResponseDto> rcGoodsResponseDtoList = getSameCategoryGoodsWithUser(goods,user);
+        List<RcGoodsResponseDto> rcGoodsResponseDtoList = getSameCategoryGoodsWithUser(goods, user);
         boolean checkSameUser = goods.getUser().getUserId() == user.getUserId();
         WantedGoods wantedGoods = findWantedGoods(goodsId);
         List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(goodsId)
@@ -315,11 +319,11 @@ public class GoodsService {
         return new ApiResponse<>(true, goodsListResponseDtos, null);
     }
 
-    public List<RcGoodsResponseDto> getSameCategoryGoods(Goods goods){
+    public List<RcGoodsResponseDto> getSameCategoryGoods(Goods goods) {
         List<Goods> goodsList = goodsRepository.findByCategoryAndIsDeletedFalse(goods.getCategory());
         List<RcGoodsResponseDto> rcGoodsResponseDtoList = new ArrayList<>();
-        for(Goods goods1 : goodsList){
-            if(!Objects.equals(goods1.getGoodsId(), goods.getGoodsId())){
+        for (Goods goods1 : goodsList) {
+            if (!Objects.equals(goods1.getGoodsId(), goods.getGoodsId())) {
                 RcGoodsResponseDto rcGoodsResponseDto = new RcGoodsResponseDto(goods1);
                 rcGoodsResponseDtoList.add(rcGoodsResponseDto);
             }
@@ -327,11 +331,11 @@ public class GoodsService {
         return rcGoodsResponseDtoList;
     }
 
-    public List<RcGoodsResponseDto> getSameCategoryGoodsWithUser(Goods goods, User user){
+    public List<RcGoodsResponseDto> getSameCategoryGoodsWithUser(Goods goods, User user) {
         List<Goods> goodsList = goodsRepository.findByCategoryAndIsDeletedFalse(goods.getCategory());
         List<RcGoodsResponseDto> rcGoodsResponseDtoList = new ArrayList<>();
-        for(Goods goods1 : goodsList){
-            if(((!Objects.equals(goods1.getGoodsId(), goods.getGoodsId())) && (!Objects.equals(user.getUserId(), goods1.getUser().getUserId())))){
+        for (Goods goods1 : goodsList) {
+            if (((!Objects.equals(goods1.getGoodsId(), goods.getGoodsId())) && (!Objects.equals(user.getUserId(), goods1.getUser().getUserId())))) {
                 boolean checkDibs = false;
                 checkDibs = dibsService.checkDibsGoods(user.getUserId(), goods1.getGoodsId());
                 RcGoodsResponseDto rcGoodsResponseDto = new RcGoodsResponseDto(goods1, checkDibs);
@@ -359,7 +363,7 @@ public class GoodsService {
 
     // 내가 보낸 교환요청
     public ResponseEntity<Page<GoodsRequestResponseDto>> requestTradeList(User user, int page, int size, String sortBy, boolean isAsc,
-                                                                       RequestStatus requestStatus) {
+                                                                          RequestStatus requestStatus) {
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Goods> requestGoods;
 
@@ -401,7 +405,7 @@ public class GoodsService {
 
         List<GoodsRequestResponseDto> goodsRequestResponseDtos = new ArrayList<>();
 
-        if(requestStatus == null) {
+        if (requestStatus == null) {
             //1) requestgoods 테이블에서 seller goods 전부 찾아오기 => DTO 변환해주기
             requestGoods = requestRepository.findSellerByReceiveUser(user.getUserId(), pageable);
         } else {
@@ -409,22 +413,22 @@ public class GoodsService {
         }
 
         //2) requestGoods 순회하면서 buyerGoods 찾아오기
-        for(Goods requestGood : requestGoods){
+        for (Goods requestGood : requestGoods) {
             Goods goods = goodsRepository.findByGoodsId(requestGood.getGoodsId()).orElse(null);// sellergoods가 뭔지 찾았다 !
             RequestGoods requestGoods1 = requestRepository.findBySellerGoodsId(goods.getGoodsId());
             RequestSingleResponseDto goodsListResponseDto = new RequestSingleResponseDto(goods, user.getUserId());
             List<RequestGoods> buyerGoodsList = requestRepository.findAllByBuyerGoodsIdAndUserId(goods.getGoodsId(), user.getUserId());
             List<RequestSingleResponseDto> goodsListResponseDtos = new ArrayList<>();
             // 3) requestGoods 순회하며 buyerGoods 물품 정보 가져오기 => dto 로 변환하기
-            for(RequestGoods buyerGoods : buyerGoodsList){
+            for (RequestGoods buyerGoods : buyerGoodsList) {
                 Goods goods1 = goodsRepository.findByGoodsId(buyerGoods.getBuyer().getGoodsId()).orElse(null);// buyerGoods 찾기
                 RequestSingleResponseDto goodsListResponseDto2 = new RequestSingleResponseDto(goods1, goods1.getUser().getUserId());
                 goodsListResponseDtos.add(goodsListResponseDto2);
             }
-            goodsRequestResponseDtos.add(new GoodsRequestResponseDto(requestGoods1.getCreatedAt(),requestGoods1.getRequestStatus(), goodsListResponseDto, goodsListResponseDtos));
+            goodsRequestResponseDtos.add(new GoodsRequestResponseDto(requestGoods1.getCreatedAt(), requestGoods1.getRequestStatus(), goodsListResponseDto, goodsListResponseDtos));
         }
 
-        PageResponse response = new PageResponse<>(goodsRequestResponseDtos, pageable, requestGoods.getTotalElements() );
+        PageResponse response = new PageResponse<>(goodsRequestResponseDtos, pageable, requestGoods.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
@@ -496,12 +500,12 @@ public class GoodsService {
     }
 
     public Goods findGoods(Long goodsId) {
-        return goodsRepository.findById(goodsId).orElseThrow(() ->
+        Goods goods = goodsRepository.findById(goodsId).orElseThrow(() ->
                 new NullPointerException("해당 게시글은 존재하지 않습니다."));
-//        if (goods.getIsDeleted()) {
-//            throw new IllegalStateException("삭제된 게시글입니다.");
-//        }
-//        return goods;
+        if (goods.getIsDeleted()) {
+            throw new IllegalStateException("삭제된 게시글입니다.");
+        }
+        return goods;
     }
 
     public WantedGoods findWantedGoods(Long wantedId) {
@@ -527,15 +531,16 @@ public class GoodsService {
 
     // 승인 => 교환중으로 상태 변경
     public void goodsAccept(RequestAcceptRequestDto requestAcceptRequestDto, User user) {
-        for(Long goodsId : requestAcceptRequestDto.getRequestId()){
+        for (Long goodsId : requestAcceptRequestDto.getRequestId()) {
             RequestGoods requestGoods = requestRepository.findByBuyerGoodsId(goodsId);
-            if(!requestGoods.getSeller().getUser().getUserId().equals(user.getUserId())){
+            if (!requestGoods.getSeller().getUser().getUserId().equals(user.getUserId())) {
                 throw new IllegalArgumentException("물품 교환 요청 수락은 본인만 가능합니다.");
             }
             requestGoods.changeStatus(RequestStatus.TRADING);
             requestRepository.save(requestGoods);
         }
     }
+
     // 요청 -> 거절
     public void goodsRefuse(RequestAcceptRequestDto requestAcceptRequestDto, User user) {
         for (Long goodsId : requestAcceptRequestDto.getRequestId()) {
@@ -547,6 +552,69 @@ public class GoodsService {
             requestRepository.save(requestGoods);
         }
     }
+
+    // 교환 완료
+    @Transactional
+    public ApiResponse<MsgResponseDto> tradeCompleted(RequestAcceptRequestDto requestAcceptRequestDto,
+                                                      UserDetailsImpl userDetails) {
+        List<RequestGoods> requestGoodsList = new ArrayList<>();
+        List<Long> buyerGoodsIds = new ArrayList<>();
+        Long userId = userDetails.getUser().getUserId();
+
+        for (int i = 0; i < requestAcceptRequestDto.getRequestId().size(); i++) {
+            RequestGoods requestGoods = requestRepository.findById(requestAcceptRequestDto.getRequestId().get(i))
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
+            if (!requestGoods.getRequestStatus().equals(RequestStatus.TRADING)) {
+                throw new IllegalArgumentException("정상적인 접근이 아닙니다.");
+            }
+            if(!requestGoods.getUser().getUserId().equals(userId) ||
+            !requestGoods.getBuyer().getUser().getUserId().equals(userId)){
+                throw new IllegalArgumentException("물품 주인이 아니라면 거래를 진행할 수 있습니다..");
+            }
+            requestGoodsList.add(requestGoods);
+            buyerGoodsIds.add(requestGoods.getBuyer().getGoodsId());
+        }
+        Goods buyerGoods = requestGoodsList.get(0).getBuyer();
+        Goods sellerGoods = requestGoodsList.get(0).getSeller();
+
+        if (buyerGoods.getUser().getUserId().equals(userId)) {
+            List<Goods> buyerGoodsList = buyerGoodsListStatusChange(buyerGoodsIds, TRADING);
+            goodsRepository.saveAll(buyerGoodsList);
+        } else if (sellerGoods.getUser().getUserId().equals(userId)) {
+            sellerGoods.changeStatus(TRADING);
+            goodsRepository.save(buyerGoods);
+        }
+
+        if (buyerGoods.getGoodsStatus().equals(TRADING) &&
+                sellerGoods.getGoodsStatus().equals(TRADING)) {
+            List<Goods> GoodsList = buyerGoodsListStatusChange(buyerGoodsIds, SOLDOUT);
+            sellerGoods.changeStatus(SOLDOUT);
+            GoodsList.add(sellerGoods);
+            goodsRepository.saveAll(GoodsList);
+
+            for (RequestGoods requestGoods : requestGoodsList) {
+                requestGoods.changeStatus(DONE);
+            }
+            requestRepository.saveAll(requestGoodsList);
+            return new ApiResponse<>(true, new MsgResponseDto("교환 완료!"), null);
+        }
+
+        return new ApiResponse<>(true, new MsgResponseDto("상대방의 교환완료를 기다리는중..."), null);
+    }
+
+    private List<Goods> buyerGoodsListStatusChange(List<Long> requestIds, GoodsStatus goodsStatus) {
+        List<Goods> buyerGoodsList = new ArrayList<>();
+        for (Long goodsId : requestIds) {
+            Goods goods = findGoods(goodsId);
+            goods.changeStatus(goodsStatus);
+            buyerGoodsList.add(goods);
+        }
+        return buyerGoodsList;
+    }
+
+    // 요청 -> 수락
+//    goodsStadus: soldout
+//    requestStatus: done // 물품교환요청
 
 
 
