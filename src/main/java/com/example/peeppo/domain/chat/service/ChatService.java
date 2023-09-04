@@ -11,6 +11,8 @@ import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.entity.RequestGoods;
 import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.goods.repository.request.RequestRepository;
+import com.example.peeppo.domain.image.entity.UserImage;
+import com.example.peeppo.domain.image.repository.UserImageRepository;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.security.jwt.JwtUtil;
@@ -41,6 +43,8 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final GoodsRepository goodsRepository;
+
+    private final UserImageRepository userImageRepository;
     private final UserChatRoomRelationRepository userChatRoomRelationRepository;
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;
