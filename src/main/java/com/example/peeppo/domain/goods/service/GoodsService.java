@@ -462,11 +462,9 @@ public class GoodsService {
                     () -> new IllegalArgumentException("존재하지 않는 goodsId 입니다.")); // 내 물건
             goods.changeStatus(TRADING);
             goodsList.add(goods);
-            RequestGoods requestGoods1 = requestRepository.findByBuyerGoodsId(goods.getGoodsId())
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
 
             if (!(urGoods.getUser().equals(goods.getUser()))) {
-                if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE) && (requestGoods1 == null)) {// ||goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)
+                if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {// ||goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)
                     requestGoods.add(new RequestGoods(urGoods, user, goods, RequestStatus.REQUEST));
                 } else {
                     throw new IllegalArgumentException("해당 물품은 다른 곳에 사용되거나 판매중 상태가 아닙니다.");
