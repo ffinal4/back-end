@@ -58,4 +58,6 @@ public class RequestGoods extends Timestamped {
     public void changeStatus(RequestStatus requestStatus) {
         this.requestStatus = requestStatus;
     }
+
+
 }
