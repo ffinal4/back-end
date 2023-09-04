@@ -152,16 +152,16 @@ public class AuctionService {
                     if (!auction.getAuctionStatus().equals(CANCEL)) {
                         if (remainingTime.isExpired()) {
                             List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
-                            if (bid.isEmpty()) {//체크해보세요 안먹히는거 같아요
+                            if (bid.isEmpty()) {    //체크해보세요 안먹히는거 같아요
                                 auction.changeAuctionStatus(CANCEL);
-                                auctionRepository.save(auction);
                             } else {
                                 auction.changeAuctionStatus(AuctionStatus.END);
-                                auctionRepository.save(auction);
                             }
                         }
                     }
                 }
+                auctionRepository.saveAll(auctionPage);
+
                 return findAllAuction(auctionPage, pageable, userDetails);
             } catch (IllegalArgumentException e) {
                 log.error("올바르지 않은 카테고리입니다.");
@@ -176,12 +176,13 @@ public class AuctionService {
                     List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
                     if (bid.isEmpty()) {
                         auction.changeAuctionStatus(CANCEL);
-                        auctionRepository.save(auction);
+                    } else {
+                        auction.changeAuctionStatus(AuctionStatus.END);
                     }
-                    auction.changeAuctionStatus(AuctionStatus.END);
-                    auctionRepository.save(auction);
                 }
             }
+            auctionRepository.saveAll(auctionPage);
+
             return findAllAuction(auctionPage, pageable, userDetails);
         }
     }
