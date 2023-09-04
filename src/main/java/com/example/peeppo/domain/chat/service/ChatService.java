@@ -52,7 +52,7 @@ public class ChatService {
     public static final String USER_COUNT = "USER_COUNT"; // 채팅룸에 입장한 클라이언트수 저장
     public static final String ENTER_INFO = "ENTER_INFO"; // 채팅룸에 입장한 클라이언트의 sessionId와 채팅룸 id를 맵핑한 정보 저장
 
-    @Resource(name = "redisTemplate")
+    @Resource(name = "chatRoomRedisTemplate")
     private HashOperations<String, String, ChatRoomResponseDto> hashOpsChatRoom;
     @Resource(name = "redisTemplate")
     private HashOperations<String, String, String> hashOpsEnterInfo;
@@ -193,6 +193,7 @@ public class ChatService {
             chatMessage.sendMessage("물건 거래가 종료되었습니다.");
             System.out.println(chatMessage);
         }
+        chatMessageRepository.save(chatMessage);
         redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
     }
 }

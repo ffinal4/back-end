@@ -31,6 +31,7 @@ public class ChatMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Enumerated(EnumType.STRING)
     private MessageType type; //메시지 타입
     @ManyToOne
     @JoinColumn(name = "chatRoom_id")
