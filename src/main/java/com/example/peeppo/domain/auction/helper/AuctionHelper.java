@@ -9,6 +9,7 @@ import java.time.temporal.ChronoUnit;
 
 @Service
 public class AuctionHelper {
+    // 남은 시간 카운트다운 계산
     public TimeRemaining countDownTime(Auction auction) {
         LocalDateTime now = LocalDateTime.now();
         long days = ChronoUnit.DAYS.between(now, auction.getAuctionEndTime());
