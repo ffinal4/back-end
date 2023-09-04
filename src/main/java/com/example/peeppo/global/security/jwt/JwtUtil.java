@@ -2,6 +2,7 @@ package com.example.peeppo.global.security.jwt;
 
 import com.example.peeppo.domain.user.entity.UserRoleEnum;
 import com.example.peeppo.domain.user.repository.UserRepository;
+import com.example.peeppo.global.exception.CustomTokenException;
 import com.example.peeppo.global.lib.RedisUtil;
 import com.example.peeppo.global.security.UserDetailsServiceImpl;
 import io.jsonwebtoken.*;
@@ -127,14 +128,14 @@ public class JwtUtil {
             if (redisUtil.hasKeyBlackList(token)) {
                 throw new RuntimeException("logout된 아이디입니다.");
             }
-
             return true;
         } catch (SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
+            throw new CustomTokenException("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");
         } catch (ExpiredJwtException e) {
             if (req.getHeader(REFRESH_TOKEN).isEmpty()) {
                 log.error("Expired JWT token, 만료된 JWT token 입니다.");
-                throw new RuntimeException();
+                throw new CustomTokenException("Expired JWT token, 만료된 JWT token 입니다.");
             } else {
                 String RefreshToken = req.getHeader(REFRESH_TOKEN);
                 String newAccessToken = regenerateAccessToken(RefreshToken);
@@ -144,8 +145,10 @@ public class JwtUtil {
             }
         } catch (UnsupportedJwtException e) {
             log.info("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
+            throw new CustomTokenException("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
         } catch (IllegalArgumentException e) {
             log.info("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
+            throw new CustomTokenException("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
         }
         return false;
     }

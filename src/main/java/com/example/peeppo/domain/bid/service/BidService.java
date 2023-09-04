@@ -126,6 +126,7 @@ public class BidService {
     public Page<BidResponseListDto> BidList(Long auctionId, int page) {
         Pageable pageable = PageRequest.of(page, 12);
         Page<Bid> bidPage = bidRepository.findSortedBySellersPick(auctionId, pageable);
+
         List<BidResponseListDto> bidResponseListDtos = new ArrayList<>();
         for (Bid bid : bidPage) {
             List<Long> bidList = bidRepository.findBidIdByUserUserIdAndAuctionAuctionId(bid.getUser().getUserId(), auctionId);
@@ -139,15 +140,17 @@ public class BidService {
     // 입찰물품 상세조회
     public ApiResponse<List<BidDetailResponseDto>> sellectBids(Long auctionId, Long userId) {
         List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndUserUserId(auctionId, userId);
-        List<BidDetailResponseDto> bidDetailResponseDtos = new ArrayList<>();
-        for (Bid bid : bidList) {
-            Long dibs = dibsRepository.countByGoodsGoodsId(bid.getGoods().getGoodsId());
-            List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(bid.getGoods().getGoodsId())
-                    .stream()
-                    .map(Image::getImageUrl)
-                    .collect(Collectors.toList());
-            bidDetailResponseDtos.add(new BidDetailResponseDto(bid, dibs, imageUrls));
-        }
+        List<BidDetailResponseDto> bidDetailResponseDtos = bidList.stream()
+                .map(bid -> {
+                    Long dibs = dibsRepository.countByGoodsGoodsId(bid.getGoods().getGoodsId());
+                    List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(bid.getGoods().getGoodsId())
+                            .stream()
+                            .map(Image::getImageUrl)
+                            .collect(Collectors.toList());
+                    return new BidDetailResponseDto(bid, dibs, imageUrls);
+                })
+                .collect(Collectors.toList());
+
         return new ApiResponse<>(true, bidDetailResponseDtos, null);
     }
 

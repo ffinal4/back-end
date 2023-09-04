@@ -89,7 +89,6 @@ public class GoodsService {
         if (images == null) {
             throw new IllegalArgumentException("물품 이미지가 꼭 필요합니다.");
         }
-        userRatingHelper.getUser(user.getUserId());
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
         System.out.println("실행체크");
         Goods goods = new Goods(goodsRequestDto, wantedGoods, user, GoodsStatus.ONSALE);
@@ -463,7 +462,8 @@ public class GoodsService {
                     () -> new IllegalArgumentException("존재하지 않는 goodsId 입니다.")); // 내 물건
             goods.changeStatus(TRADING);
             goodsList.add(goods);
-            RequestGoods requestGoods1 = requestRepository.findByBuyerGoodsId(goods.getGoodsId());
+            RequestGoods requestGoods1 = requestRepository.findByBuyerGoodsId(goods.getGoodsId())
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
 
             if (!(urGoods.getUser().equals(goods.getUser()))) {
                 if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE) && (requestGoods1 == null)) {// ||goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)
@@ -559,7 +559,8 @@ public class GoodsService {
     // 승인 => 교환중으로 상태 변경
     public void goodsAccept(RequestAcceptRequestDto requestAcceptRequestDto, User user) {
         for (Long goodsId : requestAcceptRequestDto.getRequestId()) {
-            RequestGoods requestGoods = requestRepository.findByBuyerGoodsId(goodsId);
+            RequestGoods requestGoods = requestRepository.findByBuyerGoodsId(goodsId)
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
             if (!requestGoods.getSeller().getUser().getUserId().equals(user.getUserId())) {
                 throw new IllegalArgumentException("물품 교환 요청 수락은 본인만 가능합니다.");
             }
@@ -571,7 +572,8 @@ public class GoodsService {
     // 요청 -> 거절
     public void goodsRefuse(RequestAcceptRequestDto requestAcceptRequestDto, User user) {
         for (Long goodsId : requestAcceptRequestDto.getRequestId()) {
-            RequestGoods requestGoods = requestRepository.findByBuyerGoodsId(goodsId);
+            RequestGoods requestGoods = requestRepository.findByBuyerGoodsId(goodsId)
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
             if (!requestGoods.getSeller().getUser().getUserId().equals(user.getUserId())) {
                 throw new IllegalArgumentException("물품 교환 요청 수락은 본인만 가능합니다.");
             }
@@ -587,9 +589,8 @@ public class GoodsService {
         List<RequestGoods> requestGoodsList = new ArrayList<>();
         List<Long> buyerGoodsIds = new ArrayList<>();
         Long userId = userDetails.getUser().getUserId();
-
         for (int i = 0; i < requestAcceptRequestDto.getRequestId().size(); i++) {
-            RequestGoods requestGoods = requestRepository.findById(requestAcceptRequestDto.getRequestId().get(i))
+            RequestGoods requestGoods = requestRepository.findByBuyerGoodsId(requestAcceptRequestDto.getRequestId().get(i))
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
             if (!requestGoods.getRequestStatus().equals(RequestStatus.TRADING)) {
                 throw new IllegalArgumentException("정상적인 접근이 아닙니다.");
@@ -629,9 +630,9 @@ public class GoodsService {
         return new ApiResponse<>(true, new MsgResponseDto("상대방의 교환완료를 기다리는중..."), null);
     }
 
-    private List<Goods> buyerGoodsListStatusChange(List<Long> requestIds, GoodsStatus goodsStatus) {
+    private List<Goods> buyerGoodsListStatusChange(List<Long> buyerGoodsIds, GoodsStatus goodsStatus) {
         List<Goods> buyerGoodsList = new ArrayList<>();
-        for (Long goodsId : requestIds) {
+        for (Long goodsId : buyerGoodsIds) {
             Goods goods = findGoods(goodsId);
             goods.changeStatus(goodsStatus);
             buyerGoodsList.add(goods);
