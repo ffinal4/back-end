@@ -127,6 +127,7 @@ public class JwtUtil {
             if (redisUtil.hasKeyBlackList(token)) {
                 throw new RuntimeException("logout된 아이디입니다.");
             }
+
             return true;
         } catch (SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.");

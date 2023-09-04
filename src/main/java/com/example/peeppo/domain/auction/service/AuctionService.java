@@ -24,6 +24,7 @@ import com.example.peeppo.domain.rating.entity.RatingGoods;
 import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
+import com.example.peeppo.domain.user.helper.UserRatingHelper;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.responseDto.PageResponse;
@@ -67,9 +68,11 @@ public class AuctionService {
     private final NotificationRepository notificationRepository;
     private final ImageRepository imageRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final UserRatingHelper userRatingHelper;
 
     @Transactional
     public AuctionResponseDto createAuction(Long goodsId, AuctionRequestDto auctionRequestDto, User user) {
+        userRatingHelper.getUser(user.getUserId());
         checkGoodsUsername(goodsId, user);
         if (user.getUserPoint() < 10) {
             throw new IllegalArgumentException("경매 등록에는 10p가 필요합니다. 현재" + user.getUserPoint() + "포인트를 가지고 있습니다.");
@@ -190,6 +193,7 @@ public class AuctionService {
     // 경매 상세 조회
     public GetAuctionResponseDto findAuctionById(Long auctionId, User user) {
         Auction auction = findAuctionId(auctionId);
+        userRatingHelper.getUser(user.getUserId());
         boolean checkSameUser = auction.getUser().getUserId().equals(user.getUserId());
 
         List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(auction.getGoods().getGoodsId())
@@ -220,6 +224,7 @@ public class AuctionService {
             throw new IllegalArgumentException("경매 취소에는 10p가 필요합니다. 현재" + user.getUserPoint() + "포인트를 가지고 있습니다.");
         }
 
+        userRatingHelper.getUser(user.getUserId());
         user.userPointSubtract(10L);
         userRepository.save(user);
 
@@ -242,6 +247,7 @@ public class AuctionService {
     @Transactional
     public void endAuction(Long auctionId, User user, ChoiceRequestDto choiceRequestDto) {
         Auction auction = findAuctionId(auctionId);
+        userRatingHelper.getUser(user.getUserId());
         List<Bid> bidList = bidRepository.findByAuctionAuctionId(auctionId);
 
         checkUsername(auctionId, user);
@@ -300,6 +306,7 @@ public class AuctionService {
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Auction> myAuctionPage;
         AuctionStatus auctionStatus;
+        userRatingHelper.getUser(user.getUserId());
 
         if (auctionStatus1 != null) {
             auctionStatus = AuctionStatus.valueOf(auctionStatus1);
@@ -340,6 +347,7 @@ public class AuctionService {
     @Transactional
     public ApiResponse<?> goodsAccept(User user, ChoiceRequestDto choiceRequestDto, Long auctionId) {
         Auction auction = auctionRepository.findByAuctionId(auctionId);
+        userRatingHelper.getUser(user.getUserId());
         if(!user.getUserId().equals(auction.getUser().getUserId())){
           throw new IllegalArgumentException("경매 등록자가 아닙니다.");
         }
@@ -418,6 +426,4 @@ public class AuctionService {
 
         return PageRequest.of(page, size, sort);
     }
-
-
 }

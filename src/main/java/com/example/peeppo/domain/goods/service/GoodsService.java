@@ -24,6 +24,7 @@ import com.example.peeppo.domain.rating.helper.RatingHelper;
 import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
+import com.example.peeppo.domain.user.helper.UserRatingHelper;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.responseDto.PageResponse;
@@ -65,6 +66,7 @@ public class GoodsService {
     private final RatingGoodsRepository ratingGoodsRepository;
     private final RequestRepository requestRepository;
     private final UserImageRepository userImageRepository;
+    private final UserRatingHelper userRatingHelper;
 
     private final RatingHelper ratingHelper;
     private final DibsService dibsService;
@@ -87,6 +89,7 @@ public class GoodsService {
         if (images == null) {
             throw new IllegalArgumentException("물품 이미지가 꼭 필요합니다.");
         }
+        userRatingHelper.getUser(user.getUserId());
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
         System.out.println("실행체크");
         Goods goods = new Goods(goodsRequestDto, wantedGoods, user, GoodsStatus.ONSALE);
@@ -113,6 +116,7 @@ public class GoodsService {
         }
 
         User user = userDetails.getUser();
+        userRatingHelper.getUser(user.getUserId());
         Page<Goods> goodsPage;
         if (categoryStr != null) {
             try {
@@ -162,6 +166,7 @@ public class GoodsService {
 
 
     public ApiResponse<GoodsDetailResponseDto> getGoods(Long goodsId, User user) {
+        userRatingHelper.getUser(user.getUserId());
         Goods goods = findGoods(goodsId);
         List<RcGoodsResponseDto> rcGoodsResponseDtoList = getSameCategoryGoodsWithUser(goods, user);
         boolean checkSameUser = goods.getUser().getUserId() == user.getUserId();
@@ -190,6 +195,7 @@ public class GoodsService {
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
         User user = findUser(userId);
+        userRatingHelper.getUser(user.getUserId());
         GoodsStatus goodsStatus;
         if (goodsStatusStr != null) {
             try {
@@ -234,6 +240,7 @@ public class GoodsService {
 
     @Transactional
     public ApiResponse<DeleteResponseDto> deleteGoods(Long goodsId, Long userId) throws IllegalAccessException {
+        userRatingHelper.getUser(userId);
         Goods goods = findGoods(goodsId);
         if (Objects.equals(userId, goods.getUser().getUserId())) {
             goods.delete();
@@ -268,6 +275,7 @@ public class GoodsService {
     public ApiResponse<UrPocketResponseDto> getPocket(String nickname, UserDetailsImpl userDetails, int page,
                                                       int size, String sortBy, boolean isAsc) {
         User user = userRepository.findUserByNickname(nickname);
+        userRatingHelper.getUser(user.getUserId());
         if (userDetails != null) { // 로그인 된 경우다 !!
             if (Objects.equals(user.getUserId(), userDetails.getUser().getUserId())) {
                 throw new IllegalArgumentException("같은 사용자입니다 ");
@@ -299,6 +307,7 @@ public class GoodsService {
     }
 
     private List<GoodsResponseDto> getGoodsResponseDtos(User user) {
+        userRatingHelper.getUser(user.getUserId());
         List<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalseAndGoodsStatus(user, GoodsStatus.ONSALE);
         List<GoodsResponseDto> goodsResponseDtoList = new ArrayList<>();
         for (Goods goods : goodsList) {
@@ -334,6 +343,7 @@ public class GoodsService {
     }
 
     public List<RcGoodsResponseDto> getSameCategoryGoodsWithUser(Goods goods, User user) {
+        userRatingHelper.getUser(user.getUserId());
         List<Goods> goodsList = goodsRepository.findByCategoryAndIsDeletedFalse(goods.getCategory());
         List<RcGoodsResponseDto> rcGoodsResponseDtoList = new ArrayList<>();
         for (Goods goods1 : goodsList) {
@@ -408,6 +418,7 @@ public class GoodsService {
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Goods> requestGoods;
         RequestStatus requestStatus1;
+        userRatingHelper.getUser(user.getUserId());
 
         List<GoodsRequestResponseDto> goodsRequestResponseDtos = new ArrayList<>();
 
@@ -445,9 +456,13 @@ public class GoodsService {
         Goods urGoods = goodsRepository.findByGoodsId(urGoodsId) // sellergoods(남의 물건)
                 .orElseThrow(() -> new NullPointerException("해당 상품이 존재하지 않습니다."));
         List<RequestGoods> requestGoods = new ArrayList<>();
+        List<Goods> goodsList = new ArrayList<>();
+
         for (Long goodsId : goodsRequestRequestDto.getGoodsId()) {
             Goods goods = goodsRepository.findById(goodsId).orElseThrow(
                     () -> new IllegalArgumentException("존재하지 않는 goodsId 입니다.")); // 내 물건
+            goods.changeStatus(TRADING);
+            goodsList.add(goods);
             RequestGoods requestGoods1 = requestRepository.findByBuyerGoodsId(goods.getGoodsId());
 
             if (!(urGoods.getUser().equals(goods.getUser()))) {
@@ -460,6 +475,7 @@ public class GoodsService {
                 throw new IllegalArgumentException("내 물건은 교환할 수 없습니다.");
             }
         }
+        goodsRepository.saveAll(goodsList);
         requestRepository.saveAll(requestGoods);
         return new ResponseDto("교환신청이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
@@ -467,6 +483,7 @@ public class GoodsService {
     public Page<GoodsListResponseDto> allGoods(Page<Goods> goodsPage, Pageable pageable, User user) {
 
         List<GoodsListResponseDto> goodsResponseList = new ArrayList<>();
+        userRatingHelper.getUser(user.getUserId());
 
         for (Goods goods : goodsPage.getContent()) {
             boolean checkSameUser = Objects.equals(goods.getUser().getUserId(), user.getUserId());
@@ -479,6 +496,7 @@ public class GoodsService {
     }
 
     private ApiResponse<PocketResponseDto> getMyGoods(Page<Goods> goodsList, User user, Pageable pageable) {
+        userRatingHelper.getUser(user.getUserId());
         List<PocketListResponseDto> myGoods = goodsList.stream()
                 .map(goods -> {
                     long ratingPrice = (long) ratingHelper.getAvgPriceByGoodsId(goods.getGoodsId());
@@ -499,6 +517,7 @@ public class GoodsService {
 
 
     public ResponseDto ratingCheck(User user) {
+        userRatingHelper.getUser(user.getUserId());
         Goods goods = goodsRepository.findByUserUserId(user.getUserId());
         goods.changeCheck(true);
         goodsRepository.save(goods);
