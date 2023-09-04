@@ -153,6 +153,15 @@ public class GoodsController {
         return ResponseUtils.okWithMessage(GOODS_ACCEPT_SUCCESS);
     }
 
+    // 교환완료 요청
+    @PostMapping("/users/accept/completed")
+    public ApiResponse<?> tradeCompleted(
+            @Valid @RequestBody RequestAcceptRequestDto requestAcceptRequestDto,
+                                         @AuthenticationPrincipal UserDetailsImpl userDetails){
+
+        return goodsService.tradeCompleted(requestAcceptRequestDto, userDetails);
+    }
+
     @PostMapping("/rating/check")
     public ApiResponse<ResponseDto> ratingCheck(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseUtils.ok(goodsService.ratingCheck(userDetails.getUser()));
