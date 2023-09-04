@@ -589,10 +589,10 @@ public class GoodsService {
         for(Long requestGoodsId : requestAcceptRequestDto.getRequestId()){
 
             RequestGoods requestGoods = requestRepository.findBuyerGoodsId(requestGoodsId);
-            if(!requestGoods.getRequestStatus().equals(RequestStatus.TRADING)){
+            if(!(requestGoods.getRequestStatus().equals(RequestStatus.TRADING))){
                 throw new IllegalArgumentException("정상적인 접근이 아닙니다.");
             }
-            if(!requestGoods.getSeller().getUser().equals(userDetails.getUser())){
+            if(!(Objects.equals(requestGoods.getSeller().getUser(),userDetails.getUser()))){
                 throw new IllegalArgumentException("판매 물품의 주인이 아니라면 교환 완료를 진행할 수 없습니다...");
             }
             buyerAndSellerList.add(requestGoods.getBuyer());
