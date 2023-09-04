@@ -453,16 +453,30 @@ public class AuctionService {
             }
             auction.changeAuctionStatus(AuctionStatus.TRADING);
             auctionRepository.save(auction);
+        } else {
+            throw new IllegalArgumentException("물품 등록자만 거래진행이 가능합니다.");
         }
 
         if (bidList.get(0).getBidStatus().equals(BidStatus.TRADING) &&
                 auction.getAuctionStatus().equals(AuctionStatus.TRADING)) {
+
             auction.changeAuctionStatus(AuctionStatus.DONE);
-            for (Bid bid : bidList) {
-                bid.changeBidStatus(BidStatus.DONE);
-            }
             auctionRepository.save(auction);
+
+            List<Goods> goodsList = bidList.stream()
+                    .peek(bid -> bid.changeBidStatus(BidStatus.DONE))
+                    .map(Bid::getGoods)
+                    .peek(goods -> {
+                        if (!goods.getGoodsStatus().equals(GoodsStatus.TRADING)) {
+                            throw new RuntimeException("상품이 거래중이 아닙니다.");
+                        }
+                        goods.changeStatus(SOLDOUT);
+                    })
+                    .collect(Collectors.toList());
+
+            goodsRepository.saveAll(goodsList);
             bidRepository.saveAll(bidList);
+
             return new ApiResponse<>(true, new MsgResponseDto("교환 완료!"), null);
         }
         return new ApiResponse<>(true, new MsgResponseDto("상대방의 교환완료를 기다리는중..."), null);

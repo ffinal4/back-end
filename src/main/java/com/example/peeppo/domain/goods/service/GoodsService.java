@@ -580,8 +580,36 @@ public class GoodsService {
         }
     }
 
-    // 교환 완료
+    // 교환 완료 => 우선적으로 받은 쪽에서만 진행하는거로 !
     @Transactional
+    public ApiResponse<MsgResponseDto> tradeCompleted(RequestAcceptRequestDto requestAcceptRequestDto,
+                                                      UserDetailsImpl userDetails){
+        List<Goods> buyerAndSellerList = new ArrayList<>();
+        List<RequestGoods> requestGoodsList = new ArrayList<>();
+        for(Long requestGoodsId : requestAcceptRequestDto.getRequestId()){
+
+            RequestGoods requestGoods = requestRepository.findByBuyerGoodsId(requestGoodsId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
+            if(!requestGoods.getRequestStatus().equals(RequestStatus.TRADING)){
+                throw new IllegalArgumentException("정상적인 접근이 아닙니다.");
+            }
+            if(!requestGoods.getSeller().getUser().equals(userDetails.getUser())){
+                throw new IllegalArgumentException("판매 물품의 주인이 아니라면 교환 완료를 진행할 수 없습니다...");
+            }
+            buyerAndSellerList.add(requestGoods.getBuyer());
+            buyerAndSellerList.add(requestGoods.getSeller());
+
+            requestGoods.getBuyer().changeStatus(SOLDOUT);
+            requestGoods.getSeller().changeStatus(SOLDOUT);
+            requestGoods.changeStatus(DONE);
+
+            requestGoodsList.add(requestGoods);
+        }
+        goodsRepository.saveAll(buyerAndSellerList);
+        requestRepository.saveAll(requestGoodsList);
+        return new ApiResponse<>(true, new MsgResponseDto("상대방의 교환완료를 기다리는중..."), null);
+    }
+
+  /*  @Transactional
     public ApiResponse<MsgResponseDto> tradeCompleted(RequestAcceptRequestDto requestAcceptRequestDto,
                                                       UserDetailsImpl userDetails) {
         List<RequestGoods> requestGoodsList = new ArrayList<>();
@@ -627,7 +655,7 @@ public class GoodsService {
 
         return new ApiResponse<>(true, new MsgResponseDto("상대방의 교환완료를 기다리는중..."), null);
     }
-
+*/
     private List<Goods> buyerGoodsListStatusChange(List<Long> buyerGoodsIds, GoodsStatus goodsStatus) {
         List<Goods> buyerGoodsList = new ArrayList<>();
         for (Long goodsId : buyerGoodsIds) {

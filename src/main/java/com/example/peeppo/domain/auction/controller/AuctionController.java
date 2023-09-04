@@ -98,6 +98,7 @@ public class AuctionController {
                                       @AuthenticationPrincipal UserDetailsImpl userDetails){
         return auctionService.goodsAccept(userDetails.getUser(), choiceRequestDto, auctionId);
     }
+    // 교환완료 요청
     @PostMapping("{auctionId}/users/accept/completed")
     public ApiResponse<?> tradeCompleted(
             @PathVariable("auctionId") Long auctionId,
