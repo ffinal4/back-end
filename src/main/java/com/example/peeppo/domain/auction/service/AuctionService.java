@@ -140,7 +140,7 @@ public class AuctionService {
                 Category category = Category.valueOf(categoryStr);
                 auctionPage = auctionRepository.findByGoodsCategory(category, pageable);
                 for (Auction auction : auctionPage) {
-                    TimeRemaining remainingTime = countDownTime(auction);
+                    TimeRemaining remainingTime = auctionHelper.countDownTime(auction);
                     if (!auction.getAuctionStatus().equals(CANCEL)) {
                         if (remainingTime.isExpired()) {
                             List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
