@@ -21,7 +21,7 @@ public class ChatRoomController {
     private final ChatService chatService;
 
     //채팅방 생성
-    @PostMapping("/{sellerGoodsId}")
+    @PostMapping("/room/{sellerGoodsId}")
     public ChatRoom createRoom(@PathVariable("sellerGoodsId") Long goodsId,
                                @RequestBody ChatRoomRequestDto chatRoomRequestDto,
                                @AuthenticationPrincipal UserDetailsImpl userDetails){

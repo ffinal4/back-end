@@ -83,10 +83,10 @@ public class ChatService {
         chatRoomRepository.save(chatRoom);
         hashOpsChatRoom.put(CHAT_ROOMS, randomId, new ChatRoomResponseDto(chatRoom));
         UserChatRoomRelation userChatRoomRelation = new UserChatRoomRelation(enterUser, chatRoom);
-        User buyerUser = userRepository.findById(user.getUserId()).orElseThrow(()->new IllegalArgumentException("해당하는 사용자는 없습니다"));
-        UserChatRoomRelation userChatRoomRelation2 = new UserChatRoomRelation(buyerUser, chatRoom);
         userChatRoomRelationRepository.save(userChatRoomRelation);
-        userChatRoomRelationRepository.save(userChatRoomRelation2);
+        User buyerUser = userRepository.findById(chatRoomRequestDto.getBuyerId()).orElseThrow(()->new IllegalArgumentException("해당하는 사용자는 없습니다"));
+       UserChatRoomRelation userChatRoomRelation2 = new UserChatRoomRelation(buyerUser, chatRoom);
+       userChatRoomRelationRepository.save(userChatRoomRelation2);
        System.out.println(hashOpsChatRoom.get(CHAT_ROOMS, randomId));
         return chatRoom;
     }
