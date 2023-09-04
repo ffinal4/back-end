@@ -367,7 +367,7 @@ public class GoodsService {
 
     // 내가 보낸 교환요청
     public ResponseEntity<Page<GoodsRequestResponseDto>> requestTradeList(User user, int page, int size, String sortBy, boolean isAsc,
-                                                                          RequestStatus requestStatus) {
+                                                                          String requestStatusStr) {
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<Goods> requestGoods;
