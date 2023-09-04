@@ -34,4 +34,6 @@ public interface BidRepository extends JpaRepository<Bid, Long>, BidRepositoryCu
 
     @Query(value = "select b.bidId from Bid b where b.user.userId = :user_id and b.auction.auctionId = :auction_id")
     List<Long> findBidIdByUserUserIdAndAuctionAuctionId(@Param("user_id")Long userId, @Param("auction_id") Long auctionId);
+
+    List<Bid> findByAuctionAndUserUserId(Long userId, Auction auction);
 }
