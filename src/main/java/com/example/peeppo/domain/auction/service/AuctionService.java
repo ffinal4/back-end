@@ -3,7 +3,6 @@ package com.example.peeppo.domain.auction.service;
 import com.example.peeppo.domain.auction.dto.*;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
-import com.example.peeppo.domain.auction.event.AuctionEvent;
 import com.example.peeppo.domain.auction.helper.AuctionHelper;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.bid.dto.BidListResponseDto;
@@ -12,8 +11,9 @@ import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.bid.enums.BidStatus;
 import com.example.peeppo.domain.bid.repository.bid.BidRepository;
 import com.example.peeppo.domain.dibs.repository.DibsRepository;
-import com.example.peeppo.domain.dibs.service.DibsService;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
+import com.example.peeppo.domain.goods.dto.MsgResponseDto;
+import com.example.peeppo.domain.goods.dto.RequestAcceptRequestDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.enums.Category;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;
@@ -44,13 +44,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.example.peeppo.domain.auction.enums.AuctionStatus.*;
-import static com.example.peeppo.domain.bid.enums.BidStatus.*;
+import static com.example.peeppo.domain.bid.enums.BidStatus.FAIL;
+import static com.example.peeppo.domain.bid.enums.BidStatus.SUCCESS;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.ONSALE;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.SOLDOUT;
 
@@ -174,7 +175,7 @@ public class AuctionService {
                 }
             }
             auctionRepository.saveAll(auctionPage);
-          
+
             return findAllAuction(auctionPage, pageable, userDetails);
         }
     }
@@ -318,7 +319,8 @@ public class AuctionService {
 
     @Transactional
     public ApiResponse<?> goodsAccept(User user, ChoiceRequestDto choiceRequestDto, Long auctionId) {
-        Auction auction = auctionRepository.findByAuctionId(auctionId);
+        Auction auction = auctionRepository.findByAuctionId(auctionId)
+                .orElseThrow(() -> new NullPointerException("존재하지 않는 경매입니다."));
         if (!user.getUserId().equals(auction.getUser().getUserId())) {
             throw new IllegalArgumentException("경매 등록자가 아닙니다.");
         }
@@ -401,4 +403,48 @@ public class AuctionService {
     }
 
 
+    public ApiResponse<?> tradeCompleted(Long auctionId, RequestAcceptRequestDto requestAcceptRequestDto, UserDetailsImpl userDetails) {
+        Auction auction = auctionRepository.findByAuctionId(auctionId)
+                .orElseThrow(() -> new NullPointerException("존재하지 않는 경매입니다."));
+
+        List<Bid> bidList = bidRepository.findAllById(requestAcceptRequestDto.getRequestId());
+
+        Long userId = userDetails.getUser().getUserId();
+
+        // 입찰자가 교환 완료를 눌렀을 시
+        if (Objects.equals(userId, bidList.get(0).getUser().getUserId())) {
+            for (Bid bid : bidList) {
+                if (Objects.equals(userId, bid.getUser().getUserId())) {
+                    throw new IllegalArgumentException("자신의 물건이 아닌 물품이 존재합니다");
+                }
+                if (!bid.getBidStatus().equals(BidStatus.SUCCESS)) {
+                    throw new IllegalArgumentException("정상적인 접근이 아닙니다.");
+                }
+                bid.changeBidStatus(BidStatus.TRADING);
+                bidList.add(bid);
+            }
+            bidRepository.saveAll(bidList);
+        }
+
+        // 경매 등록자가 교환 완료를 눌렀을 시
+        else if (Objects.equals(userId, auction.getUser().getUserId())) {
+            if (!auction.getAuctionStatus().equals(AuctionStatus.END)) {
+                throw new IllegalArgumentException("경매가 종료된 후에 교환요청이 가능합니다.");
+            }
+            auction.changeAuctionStatus(AuctionStatus.TRADING);
+            auctionRepository.save(auction);
+        }
+
+        if (bidList.get(0).getBidStatus().equals(BidStatus.TRADING) &&
+                auction.getAuctionStatus().equals(AuctionStatus.TRADING)) {
+            auction.changeAuctionStatus(AuctionStatus.DONE);
+            for (Bid bid : bidList) {
+                bid.changeBidStatus(BidStatus.DONE);
+            }
+            auctionRepository.save(auction);
+            bidRepository.saveAll(bidList);
+            return new ApiResponse<>(true, new MsgResponseDto("교환 완료!"), null);
+        }
+        return new ApiResponse<>(true, new MsgResponseDto("상대방의 교환완료를 기다리는중..."), null);
+    }
 }

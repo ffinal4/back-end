@@ -8,7 +8,8 @@ public enum BidStatus {
     BIDDING("bidding"),
     DONE("trading complete"),
     FAIL("bidding fail"),
-    SUCCESS("bidding success");
+    SUCCESS("bidding success"),
+    TRADING("trading");
 
     private final String status;
 
