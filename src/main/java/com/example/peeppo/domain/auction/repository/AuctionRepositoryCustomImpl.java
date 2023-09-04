@@ -4,6 +4,9 @@ import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -17,14 +20,28 @@ public class AuctionRepositoryCustomImpl implements AuctionRepositoryCustom {
         this.queryFactory = new JPAQueryFactory(em);
     }
 
+//    @Override
+//    public List<Auction> findTop20ByAuctionStatus(AuctionStatus auctionStatus, Long auctionId, Long userId) {
+//        return queryFactory.selectFrom(auction)
+//                .where(auction.auctionStatus.eq(auctionStatus)
+//                        .and(auction.auctionId.ne(auctionId))
+//                        .and(auction.user.userId.ne(userId)))
+//                .orderBy(auction.auctionEndTime.asc())
+//                .limit(20)
+//                .fetch();
+//    }
+
     @Override
-    public List<Auction> findTop20ByAuctionStatus(AuctionStatus auctionStatus, Long auctionId, Long userId) {
+    public List<Auction> findAllByAuctionStatusAndIsDeletedFalseAndUserIdEquals(AuctionStatus auctionStatus, Long userId, Pageable pageable){
         return queryFactory.selectFrom(auction)
                 .where(auction.auctionStatus.eq(auctionStatus)
-                        .and(auction.auctionId.ne(auctionId))
-                        .and(auction.user.userId.ne(userId)))
+                        .and(auction.user.userId.eq(userId))
+                        .and(auction.isDeleted.eq(false)))
                 .orderBy(auction.auctionEndTime.asc())
-                .limit(20)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
                 .fetch();
+
     }
+
 }
