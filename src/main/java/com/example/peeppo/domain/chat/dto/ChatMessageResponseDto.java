@@ -13,13 +13,12 @@ public class ChatMessageResponseDto {
 
     private String nickname;
     private String message;
+    private String time;
 
-    public ChatMessageResponseDto(ChatMessage chatMessage) {
-        this.message = chatMessage.getMessage();
-    }
 
     public ChatMessageResponseDto(ChatMessage chatMessage, User messageUser) {
         this.message = chatMessage.getMessage();
         this.nickname = messageUser.getNickname();
+        this.time = chatMessage.getTime();
     }
 }

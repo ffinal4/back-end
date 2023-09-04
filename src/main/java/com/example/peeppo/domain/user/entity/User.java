@@ -53,10 +53,11 @@ public class User{
     private Long currentRatingCount = 0L;
     // 한 게임에서 얻은 총 포인트
     private Long totalPoint = 0L;
-
-
     @Column
     private Long userPoint = 0L;
+
+    @Column
+    private String sessionId;
 
     public User(SignupRequestDto requestDto, String encodedPassword, UserRoleEnum role) {
         this.nickname = requestDto.getNickname();
@@ -94,4 +95,7 @@ public class User{
         this.userPoint -= userPoint;
     }
 
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
 }

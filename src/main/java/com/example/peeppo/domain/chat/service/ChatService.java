@@ -69,7 +69,7 @@ public class ChatService {
 // 채팅방 생성 : 서버간 채팅방 공유를 위해 redis hash에 저장한다. -> 이것으로 채팅방은 지워지지 않음
     // 물건Id랑 user로 저장한다
     @Transactional
-    public ChatRoom createRoom (Long goodsId, User user){
+    public ChatRoom createRoom (Long goodsId , ChatRoomRequestDto chatRoomRequestDto, User user){
         String randomId = UUID.randomUUID().toString();
         Goods goods = goodsRepository.findById(goodsId).orElseThrow(() ->
                 new NullPointerException("해당 게시글은 존재하지 않습니다."));
@@ -79,7 +79,10 @@ public class ChatService {
         chatRoomRepository.save(chatRoom);
         hashOpsChatRoom.put(CHAT_ROOMS, randomId, new ChatRoomResponseDto(chatRoom));
         UserChatRoomRelation userChatRoomRelation = new UserChatRoomRelation(enterUser, chatRoom);
+        User buyerUser = userRepository.findById(user.getUserId()).orElseThrow(()->new IllegalArgumentException("해당하는 사용자는 없습니다"));
+        UserChatRoomRelation userChatRoomRelation2 = new UserChatRoomRelation(buyerUser, chatRoom);
         userChatRoomRelationRepository.save(userChatRoomRelation);
+        userChatRoomRelationRepository.save(userChatRoomRelation2);
        System.out.println(hashOpsChatRoom.get(CHAT_ROOMS, randomId));
         return chatRoom;
     }
@@ -132,7 +135,7 @@ public class ChatService {
         List<UserChatRoomRelation> userChatRoomRelation = userChatRoomRelationRepository.findAllByBuyerUserId(user.getUserId());
         List<ChatRoomResponseDto> chatRoomResponseDto = new ArrayList<>();
         for(UserChatRoomRelation userChatRoom : userChatRoomRelation){
-            ChatMessage chatMessage = chatMessageRepository.findByChatRoomId(userChatRoom.getChatRoom().getId());
+            ChatMessage chatMessage = chatMessageRepository.findChatRoomId(userChatRoom.getChatRoom().getId());
             ChatRoomResponseDto chatRoomResponseDto1 = new ChatRoomResponseDto(userChatRoom, chatMessage);
             chatRoomResponseDto.add(chatRoomResponseDto1);
         }
@@ -147,7 +150,7 @@ public class ChatService {
     //roomId 기준으로 채팅방 메시지 내용 찾기
     public List<ChatMessageResponseDto> findMessageById(String roomId, User user) {
         ChatRoom chatRoom = findRoomById(roomId);
-        List<ChatMessage> chatMessageList = chatMessageRepository.findAllByChatRoomId(chatRoom.getId());
+        List<ChatMessage> chatMessageList = chatMessageRepository.findAllChatRoomId(chatRoom.getId());
         List<ChatMessageResponseDto> chatMessageResponseDtos = new ArrayList<>();
         for(ChatMessage chatMessage : chatMessageList){
             User messageUser = userRepository.findById(chatMessage.getSenderId()).orElse(null);
@@ -195,6 +198,14 @@ public class ChatService {
         }
         chatMessageRepository.save(chatMessage);
         redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
+    }
+
+    public ChatRoom addUserToChatRoom(String roomId, User user) {
+        User enterUser = userRepository.findById(user.getUserId()).orElseThrow(()->new IllegalArgumentException("해당하는 사용자는 없습니다"));
+        ChatRoom chatRoom = chatRoomRepository.findByRoomId(roomId);
+        UserChatRoomRelation userChatRoomRelation = new UserChatRoomRelation(enterUser, chatRoom);
+        userChatRoomRelationRepository.save(userChatRoomRelation);
+        return chatRoom;
     }
 }
 
