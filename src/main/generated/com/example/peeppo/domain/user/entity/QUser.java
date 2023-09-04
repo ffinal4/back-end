@@ -33,6 +33,8 @@ public class QUser extends EntityPathBase<User> {
 
     public final EnumPath<UserRoleEnum> role = createEnum("role", UserRoleEnum.class);
 
+    public final StringPath sessionId = createString("sessionId");
+
     public final NumberPath<Long> totalPoint = createNumber("totalPoint", Long.class);
 
     public final NumberPath<Long> userId = createNumber("userId", Long.class);

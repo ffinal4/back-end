@@ -132,7 +132,7 @@ public class ChatService {
         List<UserChatRoomRelation> userChatRoomRelation = userChatRoomRelationRepository.findAllByBuyerUserId(user.getUserId());
         List<ChatRoomResponseDto> chatRoomResponseDto = new ArrayList<>();
         for(UserChatRoomRelation userChatRoom : userChatRoomRelation){
-            ChatMessage chatMessage = chatMessageRepository.findByChatRoomId(userChatRoom.getChatRoom().getId());
+            ChatMessage chatMessage = chatMessageRepository.findChatRoomId(userChatRoom.getChatRoom().getId());
             ChatRoomResponseDto chatRoomResponseDto1 = new ChatRoomResponseDto(userChatRoom, chatMessage);
             chatRoomResponseDto.add(chatRoomResponseDto1);
         }
@@ -147,7 +147,7 @@ public class ChatService {
     //roomId 기준으로 채팅방 메시지 내용 찾기
     public List<ChatMessageResponseDto> findMessageById(String roomId, User user) {
         ChatRoom chatRoom = findRoomById(roomId);
-        List<ChatMessage> chatMessageList = chatMessageRepository.findAllByChatRoomId(chatRoom.getId());
+        List<ChatMessage> chatMessageList = chatMessageRepository.findAllChatRoomId(chatRoom.getId());
         List<ChatMessageResponseDto> chatMessageResponseDtos = new ArrayList<>();
         for(ChatMessage chatMessage : chatMessageList){
             User messageUser = userRepository.findById(chatMessage.getSenderId()).orElse(null);
