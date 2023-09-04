@@ -412,10 +412,10 @@ public class GoodsService {
     }
 
     //내가 받은 교환요청
-    public ResponseEntity<Page<GoodsRequestResponseDto>> receiveTradeList(User user, int page, int size, String sortBy, boolean isAsc, String requestStatusStr) {
+  /*  public ResponseEntity<Page<GoodsRequestResponseDto>> receiveTradeList(User user, int page, int size, String sortBy, boolean isAsc, String requestStatusStr) {
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
-        Page<Goods> requestGoods;
+        Page<User> requestGoods;
         RequestStatus requestStatus1;
         userRatingHelper.getUser(user.getUserId());
 
@@ -427,19 +427,18 @@ public class GoodsService {
             requestStatus1 = RequestStatus.valueOf(requestStatusStr);
             requestGoods = requestRepository.findSellerByReceiveUserAndRequestStatus(user.getUserId(), requestStatus1, pageable);
         } else {
-            requestGoods = requestRepository.findSellerByReceiveUser(user.getUserId(), pageable);
+            requestGoods = requestRepository.findBuyerByReceiveUser(user.getUserId(), pageable);
         }
 
         //2) requestGoods 순회하면서 buyerGoods 찾아오기
-        for (Goods requestGood : requestGoods) {
-            Goods goods = goodsRepository.findByGoodsId(requestGood.getGoodsId()).orElse(null);// sellergoods가 뭔지 찾았다 !
-            RequestGoods requestGoods1 = requestRepository.findBySellerGoodsId(goods.getGoodsId());
-            RequestSingleResponseDto goodsListResponseDto = new RequestSingleResponseDto(goods, user.getUserId());
-            List<RequestGoods> buyerGoodsList = requestRepository.findAllByBuyerGoodsIdAndUserId(goods.getGoodsId(), user.getUserId());
+        for (User user1 : requestGoods) {
+            Goods sellerGoods = requestRepository.findByReceiveUserId(user.getUserId());
+            List<RequestGoods> requestGoods1 = requestRepository.findBySellerGoodsIdAndBuyerUserId(sellerGoods.getGoodsId(), user1.getUserId());
+            RequestSingleResponseDto goodsListResponseDto = new RequestSingleResponseDto(sellerGoods, user.getUserId());
             List<RequestSingleResponseDto> goodsListResponseDtos = new ArrayList<>();
             // 3) requestGoods 순회하며 buyerGoods 물품 정보 가져오기 => dto 로 변환하기
-            for (RequestGoods buyerGoods : buyerGoodsList) {
-                Goods goods1 = goodsRepository.findByGoodsId(buyerGoods.getBuyer().getGoodsId()).orElse(null);// buyerGoods 찾기
+            for (RequestGoods buyerGoods : requestGoods1) {
+                Goods goods1 = goodsRepository.findByGoodsId(buyerGoods.getBuyer().getGoodsId()).orElse(null);
                 RequestSingleResponseDto goodsListResponseDto2 = new RequestSingleResponseDto(goods1, goods1.getUser().getUserId());
                 goodsListResponseDtos.add(goodsListResponseDto2);
             }
@@ -448,7 +447,7 @@ public class GoodsService {
 
         PageResponse response = new PageResponse<>(goodsRequestResponseDtos, pageable, requestGoods.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-    }
+    }*/
 
     //내물건이 아니여야한다 !
     public ResponseDto goodsRequest(User user, GoodsRequestRequestDto goodsRequestRequestDto, Long urGoodsId) {
@@ -460,8 +459,6 @@ public class GoodsService {
         for (Long goodsId : goodsRequestRequestDto.getGoodsId()) {
             Goods goods = goodsRepository.findById(goodsId).orElseThrow(
                     () -> new IllegalArgumentException("존재하지 않는 goodsId 입니다.")); // 내 물건
-            goods.changeStatus(TRADING);
-            goodsList.add(goods);
 
             if (!(urGoods.getUser().equals(goods.getUser()))) {
                 if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {// ||goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)
@@ -472,6 +469,9 @@ public class GoodsService {
             } else {
                 throw new IllegalArgumentException("내 물건은 교환할 수 없습니다.");
             }
+
+            goods.changeStatus(TRADING);
+            goodsList.add(goods);
         }
         goodsRepository.saveAll(goodsList);
         requestRepository.saveAll(requestGoods);

@@ -3,6 +3,7 @@ package com.example.peeppo.domain.goods.repository.request;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.entity.RequestGoods;
 import com.example.peeppo.domain.goods.enums.RequestStatus;
+import com.example.peeppo.domain.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -27,8 +28,8 @@ public interface RequestRepository extends JpaRepository<RequestGoods, Long> {
 
     List<RequestGoods> findAllBySellerGoodsId(Long goodsId);
 
-    @Query("SELECT DISTINCT r.seller FROM RequestGoods r WHERE r.receiveUser = :user_id")
-    Page<Goods> findSellerByReceiveUser(@Param("user_id") Long userId, Pageable pageable);
+    @Query("SELECT DISTINCT r.user FROM RequestGoods r WHERE r.receiveUser = :user_id")
+    Page<User> findBuyerByReceiveUser(@Param("user_id") Long userId, Pageable pageable);
 
 
     @Override
@@ -46,11 +47,15 @@ public interface RequestRepository extends JpaRepository<RequestGoods, Long> {
     RequestGoods findBySellerGoodsId(@Param("seller_goods_id")Long id);
 
     @Query("SELECT DISTINCT r.seller FROM RequestGoods r WHERE r.receiveUser = :user_id and r.requestStatus= :request_status")
-    Page<Goods> findSellerByReceiveUserAndRequestStatus(@Param("user_id") Long userId, @Param("request_status")  RequestStatus requestStatus, Pageable pageable);
+    Page<User> findSellerByReceiveUserAndRequestStatus(@Param("user_id") Long userId, @Param("request_status")  RequestStatus requestStatus, Pageable pageable);
 
     @Query("SELECT r FROM RequestGoods r WHERE r.seller.goodsId = :seller_goods_id and r.user.userId = :user_id ")
     List<RequestGoods> findAllBySellerGoodsIdAndUserId(@Param("seller_goods_id") Long goodsId, @Param("user_id") Long userId);
 
     @Query("SELECT r FROM RequestGoods r WHERE r.seller.goodsId = :seller_goods_id and r.receiveUser = :user_id ")
     List<RequestGoods> findAllByBuyerGoodsIdAndUserId(@Param("seller_goods_id") Long goodsId, @Param("user_id") Long userId);
+
+    Goods findByReceiveUserId(Long userId);
+
+    List<RequestGoods> findBySellerGoodsIdAndBuyerUserId(Long goodsId, Long userId);
 }
