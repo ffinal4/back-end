@@ -119,7 +119,7 @@ public class GoodsController {
                                                                           @RequestParam("size") int size,
                                                                           @RequestParam("sortBy") String sortBy,
                                                                           @RequestParam("isAsc") boolean isAsc,
-                                                                          @RequestParam(value = "status", required = false) RequestStatus requestStatus) {
+                                                                          @RequestParam(value = "status", required = false) String requestStatus) {
 
         return goodsService.receiveTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, requestStatus);
     }
@@ -131,7 +131,7 @@ public class GoodsController {
                                                                        @RequestParam("size") int size,
                                                                        @RequestParam("sortBy") String sortBy,
                                                                        @RequestParam("isAsc") boolean isAsc,
-                                                                       @RequestParam(value = "status", required = false) RequestStatus requestStatus) {
+                                                                       @RequestParam(value = "status", required = false) String requestStatus) {
 
        return goodsService.requestTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, requestStatus);
    }
@@ -153,6 +153,15 @@ public class GoodsController {
         return ResponseUtils.okWithMessage(GOODS_ACCEPT_SUCCESS);
     }
 
+    // 교환완료 요청
+    @PostMapping("/users/accept/completed")
+    public ApiResponse<?> tradeCompleted(
+            @Valid @RequestBody RequestAcceptRequestDto requestAcceptRequestDto,
+                                         @AuthenticationPrincipal UserDetailsImpl userDetails){
+
+        return goodsService.tradeCompleted(requestAcceptRequestDto, userDetails);
+    }
+
     @PostMapping("/rating/check")
     public ApiResponse<ResponseDto> ratingCheck(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         return ResponseUtils.ok(goodsService.ratingCheck(userDetails.getUser()));
@@ -160,7 +169,7 @@ public class GoodsController {
 
 
     // 교환요청 거절(교환취소)
-    @DeleteMapping("/users/refuse")
+    @PostMapping("/users/refuse")
     public ApiResponse<?> goodsRefuse(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                       @Valid @RequestBody RequestAcceptRequestDto requestAcceptRequestDto){
 

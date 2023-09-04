@@ -85,7 +85,7 @@ public class AuctionController {
                                                                       @RequestParam("size") int size,
                                                                       @RequestParam("sortBy") String sortBy,
                                                                       @RequestParam("isAsc") boolean isAsc,
-                                                                      @RequestParam(value = "auction status", required = false) AuctionStatus auctionStatus) {
+                                                                      @RequestParam(value = "status", required = false) String auctionStatus) {
 
         return auctionService.auctionTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, auctionStatus);
     }
