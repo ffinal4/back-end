@@ -18,9 +18,9 @@ public class UserChatRoomRelation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-//    @ManyToOne
-//    @JoinColumn(name = "seller_id", referencedColumnName = "user_Id", nullable = false)
-//    private User seller;
+    @ManyToOne
+    @JoinColumn(name = "seller_id", referencedColumnName = "user_Id", nullable = false)
+    private User seller;
 
     @ManyToOne
     @JoinColumn(name = "buyer_id",  referencedColumnName = "user_Id", nullable = false)
@@ -40,7 +40,7 @@ public class UserChatRoomRelation {
 
     public UserChatRoomRelation(User enterUser, ChatRoom chatRoom, User buyerUser) {
         this.chatRoom = chatRoom;
-       // this.seller = enterUser;
+        this.seller = enterUser;
         this.buyer = buyerUser;
     }
 }
