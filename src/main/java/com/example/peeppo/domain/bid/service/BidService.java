@@ -60,9 +60,12 @@ public class BidService {
     public ResponseDto bidding(User user, Long auctionId, BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
 
         Auction auction = getAuction(auctionId);
-        List<Bid> bids = bidRepository.findByUserUserId(user.getUserId());
-        if (!bids.isEmpty()) {
-            throw new IllegalAccessException("이미 참여중인 경매입니다.");
+        List<Bid> bids = bidRepository.findByAuctionAuctionIdAndUserUserId(user.getUserId(), auctionId);
+
+        for (Bid bid : bids) {
+            if (!bids.isEmpty()) {
+                throw new IllegalAccessException("이미 참여중인 경매입니다.");
+            }
         }
 
         List<Bid> bidList = new ArrayList<>();
@@ -120,6 +123,7 @@ public class BidService {
     public Page<BidResponseListDto> BidList(Long auctionId, int page) {
         Pageable pageable = PageRequest.of(page, 12);
         Page<Bid> bidPage = bidRepository.findSortedBySellersPick(auctionId, pageable);
+
         List<BidResponseListDto> bidResponseListDtos = new ArrayList<>();
         for (Bid bid : bidPage) {
             List<Long> bidList = bidRepository.findBidIdByUserUserIdAndAuctionAuctionId(bid.getUser().getUserId(), auctionId);
@@ -133,15 +137,17 @@ public class BidService {
     // 입찰물품 상세조회
     public ApiResponse<List<BidDetailResponseDto>> sellectBids(Long auctionId, Long userId) {
         List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndUserUserId(auctionId, userId);
-        List<BidDetailResponseDto> bidDetailResponseDtos = new ArrayList<>();
-        for (Bid bid : bidList) {
-            Long dibs = dibsRepository.countByGoodsGoodsId(bid.getGoods().getGoodsId());
-            List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(bid.getGoods().getGoodsId())
-                    .stream()
-                    .map(Image::getImageUrl)
-                    .collect(Collectors.toList());
-            bidDetailResponseDtos.add(new BidDetailResponseDto(bid, dibs, imageUrls));
-        }
+        List<BidDetailResponseDto> bidDetailResponseDtos = bidList.stream()
+                .map(bid -> {
+                    Long dibs = dibsRepository.countByGoodsGoodsId(bid.getGoods().getGoodsId());
+                    List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(bid.getGoods().getGoodsId())
+                            .stream()
+                            .map(Image::getImageUrl)
+                            .collect(Collectors.toList());
+                    return new BidDetailResponseDto(bid, dibs, imageUrls);
+                })
+                .collect(Collectors.toList());
+
         return new ApiResponse<>(true, bidDetailResponseDtos, null);
     }
 
