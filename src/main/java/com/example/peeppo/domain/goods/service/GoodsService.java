@@ -588,7 +588,7 @@ public class GoodsService {
         List<RequestGoods> requestGoodsList = new ArrayList<>();
         for(Long requestGoodsId : requestAcceptRequestDto.getRequestId()){
 
-            RequestGoods requestGoods = requestRepository.findByBuyerGoodsId(requestGoodsId).orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
+            RequestGoods requestGoods = requestRepository.findBuyerGoodsId(requestGoodsId);
             if(!requestGoods.getRequestStatus().equals(RequestStatus.TRADING)){
                 throw new IllegalArgumentException("정상적인 접근이 아닙니다.");
             }
