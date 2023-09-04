@@ -61,8 +61,11 @@ public class BidService {
 
         Auction auction = getAuction(auctionId);
         List<Bid> bids = bidRepository.findByAuctionAuctionIdAndUserUserId(user.getUserId(), auctionId);
-        if (!bids.isEmpty()) {
-            throw new IllegalAccessException("이미 참여중인 경매입니다.");
+
+        for (Bid bid : bids) {
+            if (!bids.isEmpty()) {
+                throw new IllegalAccessException("이미 참여중인 경매입니다.");
+            }
         }
 
         List<Bid> bidList = new ArrayList<>();
