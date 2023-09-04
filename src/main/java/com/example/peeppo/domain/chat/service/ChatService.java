@@ -25,6 +25,8 @@ import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,6 +89,8 @@ public class ChatService {
         User buyerUser = userRepository.findById(chatRoomRequestDto.getBuyerId()).orElseThrow(()->new IllegalArgumentException("해당하는 사용자는 없습니다"));
        UserChatRoomRelation userChatRoomRelation2 = new UserChatRoomRelation(buyerUser, chatRoom);
        userChatRoomRelationRepository.save(userChatRoomRelation2);
+       ChatMessage chatMessage = new ChatMessage(ChatMessage.MessageType.ENTER, chatRoom,user.getUserId(), String.valueOf(chatRoom.getCreatedAt()),"물물교환 신청이 수락되었습니다");
+       chatMessageRepository.save(chatMessage);
        System.out.println(hashOpsChatRoom.get(CHAT_ROOMS, randomId));
         return chatRoom;
     }
@@ -135,7 +139,7 @@ public class ChatService {
 
 
     //전체 채팅방 조회 => 사용자 마다 !
-    public List<ChatRoomResponseDto> findAllRoom(User user){
+    public ResponseEntity<List<ChatRoomResponseDto>> findAllRoom(User user){
         List<UserChatRoomRelation> userChatRoomRelation = userChatRoomRelationRepository.findAllByBuyerUserId(user.getUserId());
         List<ChatRoomResponseDto> chatRoomResponseDto = new ArrayList<>();
         for(UserChatRoomRelation userChatRoom : userChatRoomRelation){
@@ -143,7 +147,7 @@ public class ChatService {
             ChatRoomResponseDto chatRoomResponseDto1 = new ChatRoomResponseDto(userChatRoom, chatMessage);
             chatRoomResponseDto.add(chatRoomResponseDto1);
         }
-        return chatRoomResponseDto;
+       return ResponseEntity.status(HttpStatus.OK.value()).body(chatRoomResponseDto);
     }
 
     //roomId 기준으로 채팅방 찾기

@@ -9,6 +9,7 @@ import com.example.peeppo.domain.chat.entity.ChatRoom;
 import com.example.peeppo.domain.chat.service.ChatService;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +31,7 @@ public class ChatRoomController {
 
     //채팅방 전체 조회 => 내 채팅방 전체 조회여야한다 !
     @GetMapping
-    public List<ChatRoomResponseDto> findAllRoom(@AuthenticationPrincipal UserDetailsImpl userDetails){
+    public ResponseEntity<List<ChatRoomResponseDto>> findAllRoom(@AuthenticationPrincipal UserDetailsImpl userDetails){
         return chatService.findAllRoom(userDetails.getUser());
     }
 
