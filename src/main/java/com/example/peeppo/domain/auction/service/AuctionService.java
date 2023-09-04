@@ -161,7 +161,6 @@ public class AuctionService {
             }
         } else {
             auctionPage = auctionRepository.findAll(pageable);
-            List<Auction> saveAuctionList = new ArrayList<>();
             for (Auction auction : auctionPage) {
                 TimeRemaining remainingTime = auctionHelper.countDownTime(auction);
 
