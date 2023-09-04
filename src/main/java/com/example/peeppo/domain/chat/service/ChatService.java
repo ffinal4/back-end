@@ -89,7 +89,7 @@ public class ChatService {
         User buyerUser = userRepository.findById(chatRoomRequestDto.getBuyerId()).orElseThrow(()->new IllegalArgumentException("해당하는 사용자는 없습니다"));
        UserChatRoomRelation userChatRoomRelation2 = new UserChatRoomRelation(buyerUser, chatRoom);
        userChatRoomRelationRepository.save(userChatRoomRelation2);
-       ChatMessage chatMessage = new ChatMessage(ChatMessage.MessageType.ENTER, chatRoom,user.getUserId(), String.valueOf(chatRoom.getCreatedAt()),"물물교환 신청이 수락되었습니다");
+       ChatMessage chatMessage = new ChatMessage(ChatMessage.MessageType.ENTER, chatRoom,user.getUserId(),"물물교환 신청이 수락되었습니다", String.valueOf(chatRoom.getCreatedAt()));
        chatMessageRepository.save(chatMessage);
        System.out.println(hashOpsChatRoom.get(CHAT_ROOMS, randomId));
         return chatRoom;
