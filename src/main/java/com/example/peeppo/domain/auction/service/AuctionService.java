@@ -46,7 +46,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -198,7 +197,7 @@ public class AuctionService {
         for (Auction recommendAuction : auctionList) {
             TimeRemaining timeRemaining = auctionHelper.countDownTime(recommendAuction);
             String recommendImageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(recommendAuction.getGoods().getGoodsId()).getImageUrl();
-            boolean checkDibs = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), recommendAuction.getGoods().getGoodsId()).isPresent();
+            boolean checkDibs = dibsRepository.findByUserUserIdAndGoodsGoodsIdAndGoodsIsDeletedFalse(user.getUserId(), recommendAuction.getGoods().getGoodsId()).isPresent();
             AuctionListResponseDtos.add(
                     new AuctionListResponseDto(recommendAuction,
                             recommendImageUrl,
@@ -353,7 +352,8 @@ public class AuctionService {
             throw new IllegalArgumentException("경매 등록자가 아닙니다.");
         }
         auction.changeAuctionStatus(AuctionStatus.DONE);
-        Goods auctionGoods = goodsRepository.findByAuctionAuctionId(auction.getAuctionId());
+        Goods auctionGoods = goodsRepository.findByAuctionAuctionId(auction.getAuctionId())
+                .orElseThrow(() -> new NullPointerException("존재하지 않는 물품입니다."));
         auctionRepository.save(auction);
 
         auctionGoods.changeStatus(SOLDOUT);
@@ -378,7 +378,7 @@ public class AuctionService {
                     TimeRemaining timeRemaining = auctionHelper.countDownTime(auction);
                     boolean checkDibs = false;
                     if (null != userDetails) {
-                        checkDibs = dibsRepository.findByUserUserIdAndGoodsGoodsId(userDetails.getUser().getUserId(), auction.getGoods().getGoodsId()).isPresent();
+                        checkDibs = dibsRepository.findByUserUserIdAndGoodsGoodsIdAndGoodsIsDeletedFalse(userDetails.getUser().getUserId(), auction.getGoods().getGoodsId()).isPresent();
                     }
                     String imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(auction.getGoods().getGoodsId()).getImageUrl();
                     return new AuctionListResponseDto(auction, imageUrl, timeRemaining, findBidCount(auction.getAuctionId()), checkDibs);
@@ -441,7 +441,7 @@ public class AuctionService {
 
         if (Objects.equals(userId, bidUserId)) {
             for (Bid bid : bidList) {
-                if (Objects.equals(userId, bid.getUser().getUserId())) {
+                if (!Objects.equals(userId, bid.getUser().getUserId())) {
                     throw new IllegalArgumentException("자신의 물건이 아닌 물품이 존재합니다");
                 }
 //                if (!bid.getBidStatus().equals(BidStatus.SUCCESS)) {
