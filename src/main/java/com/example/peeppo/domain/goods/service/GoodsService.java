@@ -590,7 +590,7 @@ public class GoodsService {
             if (!(requestGoods.getRequestStatus().equals(RequestStatus.TRADING))) {
                 throw new IllegalArgumentException("정상적인 접근이 아닙니다.");
             }
-            if (!(Objects.equals(requestGoods.getSeller().getUser(), userDetails.getUser()))) {
+            if (!(Objects.equals(requestGoods.getSeller().getUser().getUserId(), userDetails.getUser().getUserId()))) {
                 throw new IllegalArgumentException("판매 물품의 주인이 아니라면 교환 완료를 진행할 수 없습니다...");
             }
             buyerAndSellerList.add(requestGoods.getBuyer());
