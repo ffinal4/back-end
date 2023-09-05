@@ -27,7 +27,8 @@ public class BidRepositoryCustomImpl extends QuerydslRepositorySupport implement
     @Override
     public Page<Bid> findSortedBySellersPick(Long auctionId, Pageable pageable) {
         List<Bid> bidList = queryFactory.selectFrom(bid)
-                .where(bid.auction.auctionId.eq(auctionId))
+                .where(bid.auction.auctionId.eq(auctionId)
+                        .and(bid.goods.isDeleted.eq(false)))
                 .orderBy(bid.sellersPick.desc())
                 .groupBy(bid.user.userId)
                 .offset(pageable.getOffset())
@@ -43,6 +44,7 @@ public class BidRepositoryCustomImpl extends QuerydslRepositorySupport implement
                 .select(bid.count())
                 .from(bid)
                 .where(bid.user.userId.eq(userId)
+                        .and(bid.goods.isDeleted.eq(false))
                         .and(bid.auction.auctionId.eq(auctionId)))
                 .fetchOne();
     }

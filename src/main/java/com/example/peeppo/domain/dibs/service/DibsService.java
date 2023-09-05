@@ -30,7 +30,7 @@ public class DibsService {
     private final ImageRepository imageRepository;
 
     public boolean checkDibsGoods(Long userId, Long GoodsId) {
-        return dibsRepository.findByUserUserIdAndGoodsGoodsId(userId, GoodsId).isPresent();
+        return dibsRepository.findByUserUserIdAndGoodsGoodsIdAndGoodsIsDeletedFalse(userId, GoodsId).isPresent();
     }
 
 
@@ -38,7 +38,7 @@ public class DibsService {
         User user = userDetails.getUser();
         Goods goods = findGoods(dibsRequestDto.getGoodsId());
 
-        Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUserId(), goods.getGoodsId());
+        Optional<Dibs> dibsGoods = dibsRepository.findByUserUserIdAndGoodsGoodsIdAndGoodsIsDeletedFalse(user.getUserId(), goods.getGoodsId());
 
         // 찜한 경우
         if (dibsGoods.isPresent()) {
@@ -62,7 +62,7 @@ public class DibsService {
     }
 
     public List<GoodsListResponseDto> getDibsGoods(User user) {
-        List<Dibs> dibsList = dibsRepository.findByUserUserId(user.getUserId());
+        List<Dibs> dibsList = dibsRepository.findByUserUserIdAndGoodsIsDeletedFalse(user.getUserId());
         List<GoodsListResponseDto> goodsListResponseDtos = new ArrayList<>();
         for (Dibs dibs1 : dibsList) {
             boolean checkDibs = checkDibsGoods(user.getUserId(), dibs1.getGoods().getGoodsId());
