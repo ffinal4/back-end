@@ -322,10 +322,15 @@ public class AuctionService {
                     Long bidCount = findBidCount(auction.getAuctionId());
                     TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount, auctionCount, auctionEndCount);
 
-                    if ((auction.getAuctionStatus() == AuctionStatus.END) ||
-                            auction.getAuctionStatus() == AuctionStatus.DONE ||
-                            auction.getAuctionStatus() == AuctionStatus.TRADING) {
-                        List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndBidStatus(auction.getAuctionId(), BidStatus.SUCCESS);
+                    if (auction.getAuctionStatus() == AuctionStatus.END ||
+                            (auction.getAuctionStatus() == TRADING)) {
+                        List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndBidStatus(auction.getAuctionId(), BidStatus.TRADING);
+                        List<BidListResponseDto> bidListResponseDtos = bidList.stream()
+                                .map(bid -> new BidListResponseDto(bid, bid.getGoodsImg()))
+                                .collect(Collectors.toList());
+                        return new GetAuctionBidResponseDto(responseDto, bidListResponseDtos);
+                    } else if (auction.getAuctionStatus() == AuctionStatus.DONE) {
+                        List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndBidStatus(auction.getAuctionId(), BidStatus.DONE);
                         List<BidListResponseDto> bidListResponseDtos = bidList.stream()
                                 .map(bid -> new BidListResponseDto(bid, bid.getGoodsImg()))
                                 .collect(Collectors.toList());
@@ -335,6 +340,7 @@ public class AuctionService {
                     }
                 })
                 .collect(Collectors.toList());
+        //나중에 stream 으로 처리하자, flatMap 쓰면 될듯?
         PageResponse response = new PageResponse<>(auctionResponseDtoList, pageable, myAuctionPage.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
@@ -435,13 +441,14 @@ public class AuctionService {
 
         if (Objects.equals(userId, bidUserId)) {
             for (Bid bid : bidList) {
-                if (!Objects.equals(userId, bid.getUser().getUserId())) {
+                if (Objects.equals(userId, bid.getUser().getUserId())) {
                     throw new IllegalArgumentException("자신의 물건이 아닌 물품이 존재합니다");
                 }
 //                if (!bid.getBidStatus().equals(BidStatus.SUCCESS)) {
 //                    throw new IllegalArgumentException("정상적인 접근이 아닙니다.");
 //                }
                 bid.changeBidStatus(BidStatus.TRADING);
+//                bidList.add(bid);
             }
             bidRepository.saveAll(bidList);
         }

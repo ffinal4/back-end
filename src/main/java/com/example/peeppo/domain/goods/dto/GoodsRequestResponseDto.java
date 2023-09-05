@@ -24,4 +24,9 @@ public class GoodsRequestResponseDto {
         this.goodsListResponseDto = goodsListResponseDto;
         this.goodsListResponseDtos = goodsListResponseDtos;
     }
+
+    public GoodsRequestResponseDto(RequestSingleResponseDto goodsListResponseDto, List<RequestSingleResponseDto> goodsListResponseDtos) {
+        this.goodsListResponseDto = goodsListResponseDto;
+        this.goodsListResponseDtos = goodsListResponseDtos;
+    }
 }
