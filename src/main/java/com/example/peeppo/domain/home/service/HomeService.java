@@ -7,10 +7,8 @@ import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.auction.helper.AuctionHelper;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
-import com.example.peeppo.domain.auction.service.AuctionService;
 import com.example.peeppo.domain.bid.repository.bid.BidRepository;
 import com.example.peeppo.domain.dibs.repository.DibsRepository;
-import com.example.peeppo.domain.dibs.service.DibsService;
 import com.example.peeppo.domain.goods.dto.GoodsListResponseDto;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
@@ -24,8 +22,6 @@ import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -51,7 +47,7 @@ public class HomeService {
             boolean checkDibs = false;
             String imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goods.getGoodsId()).getImageUrl();
             if(user != null) {
-                checkDibs = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUser().getUserId(), goods.getGoodsId()).isPresent();
+                checkDibs = dibsRepository.findByUserUserIdAndGoodsGoodsIdAndGoodsIsDeletedFalse(user.getUser().getUserId(), goods.getGoodsId()).isPresent();
 
             }
             GoodsListResponseDto goodsListResponseDto = new GoodsListResponseDto(goods, imageUrl, checkDibs);
@@ -79,7 +75,7 @@ public class HomeService {
             String imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(auction.getGoods().getGoodsId()).getImageUrl();
 
             if(user != null) {
-                checkDibs = dibsRepository.findByUserUserIdAndGoodsGoodsId(user.getUser().getUserId(), auction.getGoods().getGoodsId()).isPresent();
+                checkDibs = dibsRepository.findByUserUserIdAndGoodsGoodsIdAndGoodsIsDeletedFalse(user.getUser().getUserId(), auction.getGoods().getGoodsId()).isPresent();
             }
             AuctionListResponseDto auctionResponseDto = new AuctionListResponseDto(auction, imageUrl, timeRemaining, bidRepository.countByAuctionAuctionId(auction.getAuctionId()), checkDibs);
             auctionResponseDtos.add(auctionResponseDto);

@@ -18,7 +18,6 @@ import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.repository.ImageRepository;
-import com.example.peeppo.domain.notification.entity.Notification;
 import com.example.peeppo.domain.notification.repository.NotificationRepository;
 import com.example.peeppo.domain.rating.entity.RatingGoods;
 import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
@@ -142,7 +141,7 @@ public class BidService {
         List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndUserUserId(auctionId, userId);
         List<BidDetailResponseDto> bidDetailResponseDtos = bidList.stream()
                 .map(bid -> {
-                    Long dibs = dibsRepository.countByGoodsGoodsId(bid.getGoods().getGoodsId());
+                    Long dibs = dibsRepository.countByGoodsGoodsIdAndGoodsIsDeletedFalse(bid.getGoods().getGoodsId());
                     List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(bid.getGoods().getGoodsId())
                             .stream()
                             .map(Image::getImageUrl)
