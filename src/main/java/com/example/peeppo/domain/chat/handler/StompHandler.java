@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 // session의 connect / disconnect 시점을 알 수 있다.
@@ -71,7 +72,10 @@ public class StompHandler implements ChannelInterceptor {
            String email = jwtUtil.getUserMail(token);
             User user = userRepository.findByEmail(email).orElse(null);
 
-            chatService.sendChatMessage(ChatMessage.builder().type(ChatMessage.MessageType.ENTER).chatRoom(chatRoom).userId(user.getUserId()).build());
+
+            ChatMessage chatMessage = new ChatMessage(ChatMessage.MessageType.ENTER, chatRoom, user.getUserId(), "물건거래가 시작되었습니다", String.valueOf(LocalDateTime.now()));
+
+            chatService.sendChatMessage(chatMessage, user);
 
             System.out.println("발송 요청");
             user.setSessionId(sessionId);
@@ -95,7 +99,7 @@ public class StompHandler implements ChannelInterceptor {
             String email = jwtUtil.getUserMail(token);
             User user = userRepository.findByEmail(email).orElse(null);
             ChatRoom chatRoom = chatService.findRoomById(roomId);
-            chatService.sendChatMessage(ChatMessage.builder().type(ChatMessage.MessageType.LEAVE).chatRoom(chatRoom).userId(user.getUserId()).build());
+            chatService.sendChatMessage(ChatMessage.builder().type(ChatMessage.MessageType.LEAVE).chatRoom(chatRoom).userId(user.getUserId()).build(), user);
 
             // 퇴장한 클라이언트의 roomId 맵핑 정보를 삭제한다.
             chatService.removeUserEnterInfo(sessionId);

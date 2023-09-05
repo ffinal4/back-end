@@ -21,12 +21,12 @@ public class RequestGoods extends Timestamped {
     private Long requestId;
 
     @ManyToOne
-    @JoinColumn(name = "sellerGoods_id", nullable = false)
+    @JoinColumn(name = "seller_goods_id", nullable = false)
     @JsonBackReference
     private Goods seller;
 
     @ManyToOne
-    @JoinColumn(name = "buyerGoods_id", nullable = false)
+    @JoinColumn(name = "buyer_goods_id", nullable = false)
     @JsonBackReference
     private Goods buyer;
 
