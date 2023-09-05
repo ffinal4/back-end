@@ -11,12 +11,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ChatMessageResponseDto {
 
+    private Boolean checkSameUser;
     private String nickname;
     private String message;
     private String time;
 
 
     public ChatMessageResponseDto(ChatMessage chatMessage, User messageUser) {
+        this.message = chatMessage.getMessage();
+        this.nickname = messageUser.getNickname();
+        this.time = chatMessage.getTime();
+    }
+
+    public ChatMessageResponseDto(ChatMessage chatMessage, User messageUser, boolean checkUser) {
+        this.checkSameUser = checkUser;
         this.message = chatMessage.getMessage();
         this.nickname = messageUser.getNickname();
         this.time = chatMessage.getTime();
