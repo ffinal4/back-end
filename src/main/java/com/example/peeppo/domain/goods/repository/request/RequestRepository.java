@@ -61,4 +61,12 @@ public interface RequestRepository extends JpaRepository<RequestGoods, Long> {
 
     @Query("SELECT r FROM RequestGoods r WHERE r.user.userId = :user_id AND r.seller.goodsId = :seller_goods_id")
     List<RequestGoods> findBySellerGoodsIdAndReceiveUser(@Param("seller_goods_id")Long goodsId, @Param("user_id") Long userId);
+
+    @Query("SELECT r FROM RequestGoods r WHERE r.user.userId = :user_id AND r.seller = :seller_goods_id")
+    RequestGoods findBySellerGoodsAndUserUserId(@Param("seller_goods_id")RequestGoods buyerGoods,@Param("seller_goods_id") Long userId);
+
+    RequestGoods findBySellerAndUserUserId(Goods urGoods, Long userId);
+
+    @Query("SELECT r FROM RequestGoods r WHERE r.user.userId = :user_id AND r.seller = :seller_goods_id AND r.receiveUser = :receiveUser")
+    RequestGoods findBySellerGoodsAndUserUserIdAndReceiveUser(@Param("seller_goods_id")RequestGoods buyerGoods,@Param("seller_goods_id") Long userId,@Param("receiveUser") Long user);
 }

@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 // session의 connect / disconnect 시점을 알 수 있다.

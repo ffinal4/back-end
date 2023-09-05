@@ -69,6 +69,22 @@ public class UserService {
         return new CheckResponseDto("중복되지 않은 이름입니다.", validateDuplicateNickname, OK.value(), "OK");
     }
 
+    public ApiResponse<ResponseDto> checkValidatePassword(PasswordRequestDto passwordRequestDto, User user) {
+        if (!passwordEncoder.matches(passwordRequestDto.getOriginPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        String encodedPassword = user.getPassword();
+        if (null != passwordRequestDto.getPassword()) {
+            encodedPassword = passwordEncoder.encode(passwordRequestDto.getPassword());
+        }
+
+        user.uploadPassword(encodedPassword);
+        userRepository.save(user);
+
+        return new ApiResponse<>(true, new ResponseDto("개인정보가 수정되었습니다.", HttpStatus.OK.value(), "OK"), null);
+    }
+
     private boolean isDuplicatedNickname(String nickname) {
         return userRepository.findByNickname(nickname).isEmpty();
     }
@@ -111,21 +127,13 @@ public class UserService {
     public ApiResponse<ResponseDto> updateMyPage(MyPageRequestDto myPageRequestDto, MultipartFile multipartFile, User user) throws IOException {
 
         userRatingHelper.getUser(user.getUserId());
-        if (!passwordEncoder.matches(myPageRequestDto.getOriginPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
-
-        String encodedPassword = user.getPassword();
-        if(null != myPageRequestDto.getPassword()) {
-            encodedPassword = passwordEncoder.encode(myPageRequestDto.getPassword());
-        }
 
         if (multipartFile != null) {
             imageHelper.deleteUserImages(user);
             imageHelper.saveUserImages(multipartFile, user);
         }
 
-        user.upload(myPageRequestDto, encodedPassword);
+        user.upload(myPageRequestDto);
         userRepository.save(user);
 
         return new ApiResponse<>(true, new ResponseDto("개인정보가 수정되었습니다.", HttpStatus.OK.value(), "OK"), null);

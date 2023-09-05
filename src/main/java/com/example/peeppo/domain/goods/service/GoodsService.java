@@ -84,7 +84,6 @@ public class GoodsService {
             throw new IllegalArgumentException("물품 이미지가 꼭 필요합니다.");
         }
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
-        System.out.println("실행체크");
         Goods goods = new Goods(goodsRequestDto, wantedGoods, user, GoodsStatus.ONSALE);
         RatingGoods ratingGoods = new RatingGoods(goods);
 
@@ -432,7 +431,9 @@ public class GoodsService {
                 RequestSingleResponseDto goodsListResponseDto = new RequestSingleResponseDto(sellerGoods.getSeller());
 
                 for (RequestGoods buyerGoods : requestGoods1) {
-                    RequestSingleResponseDto goodsListResponseDto2 = new RequestSingleResponseDto(buyerGoods.getBuyer());
+                    RequestGoods requestGoods2 = requestRepository.findBySellerGoodsAndUserUserIdAndReceiveUser(buyerGoods, user1.getUserId(), user.getUserId());
+//                    Goods goods1 = goodsRepository.findByGoodsId(requestGoods2.getBuyer().getGoodsId()).orElse(null);
+                    RequestSingleResponseDto goodsListResponseDto2 = new RequestSingleResponseDto(requestGoods2.getBuyer());
                     goodsListResponseDtos.add(goodsListResponseDto2);
                 }
                 goodsRequestResponseDtos.add(new GoodsRequestResponseDto(goodsListResponseDto, goodsListResponseDtos));
@@ -450,6 +451,11 @@ public class GoodsService {
                 .orElseThrow(() -> new NullPointerException("해당 상품이 존재하지 않습니다."));
         List<RequestGoods> requestGoods = new ArrayList<>();
         List<Goods> goodsList = new ArrayList<>();
+
+        RequestGoods requestGoods1 = requestRepository.findBySellerAndUserUserId(urGoods, user.getUserId());
+        if(requestGoods1 != null){
+            throw new IllegalArgumentException("해당 물품과 교환 요청 중입니다. 취소후 다시 시도주세요.");
+        }
 
         for (Long goodsId : goodsRequestRequestDto.getGoodsId()) {
             Goods goods = goodsRepository.findById(goodsId).orElseThrow(

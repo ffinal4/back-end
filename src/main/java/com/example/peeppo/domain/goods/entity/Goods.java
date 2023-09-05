@@ -104,6 +104,26 @@ public class Goods extends Timestamped {
         this.user = user;
     }
 
+    public Goods(GoodsRequestDto requestDto, User user, GoodsStatus goodsStatus) {
+        this.title = requestDto.getTitle();
+        this.content = requestDto.getContent();
+        this.location = requestDto.getLocation();
+        this.goodsCondition = requestDto.getGoodsCondition();
+        this.tradeType = requestDto.getTradeType();
+        this.category = requestDto.getCategory();
+        this.ratingCheck = requestDto.getRatingCheck();
+        if(!ratingCheck){
+            sellerPrice = 0L;
+        } else if(null != requestDto.getSellerPrice()) {
+            this.sellerPrice = requestDto.getSellerPrice();
+        }
+        else{
+            throw new IllegalArgumentException("올바르지 않은 값입니다.");
+        }
+        this.goodsStatus = goodsStatus;
+        this.user = user;
+    }
+
     public void update(GoodsRequestDto requestDto) {
         this.title = requestDto.getTitle();
         this.content = requestDto.getContent();

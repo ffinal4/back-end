@@ -36,6 +36,12 @@ public class UserController {
         return ResponseUtils.ok(userService.checkValidateNickname(validateRequestDto));
     }
 
+    @PostMapping("/users/password")
+    public ApiResponse<ResponseDto> checkValidatePassword(@RequestBody @Valid PasswordRequestDto passwordRequestDto,
+                                                               @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        return userService.checkValidatePassword(passwordRequestDto, userDetails.getUser());
+    }
+
     @PostMapping("/users/logout")
     public ApiResponse<ResponseDto> logout(@RequestBody @Valid LogoutRequestDto logoutRequestDto,
                                            HttpServletRequest req,
