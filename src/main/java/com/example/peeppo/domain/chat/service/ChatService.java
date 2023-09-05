@@ -11,6 +11,7 @@ import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.entity.RequestGoods;
 import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.goods.repository.request.RequestRepository;
+import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.image.repository.UserImageRepository;
 import com.example.peeppo.domain.user.entity.User;
@@ -136,15 +137,20 @@ public class ChatService {
         return Optional.ofNullable(valueOps.decrement(USER_COUNT + "_" + roomId)).filter(count -> count > 0).orElse(0L);
     }
 
-
-
     //전체 채팅방 조회 => 사용자 마다 !
     public ResponseEntity<List<ChatRoomResponseDto>> findAllRoom(User user){
         List<UserChatRoomRelation> userChatRoomRelation = userChatRoomRelationRepository.findAllBySellerUserIdOrBuyerUserId(user.getUserId(), user.getUserId());
         List<ChatRoomResponseDto> chatRoomResponseDto = new ArrayList<>();
         for(UserChatRoomRelation userChatRoom : userChatRoomRelation){
+            Optional<UserImage> userImage = null;
+            if(user.equals(userChatRoom.getBuyer())){
+                userImage = userImageRepository.findByUserUserId(userChatRoom.getSeller().getUserId());
+            }
+            if(user.equals(userChatRoom.getSeller())){
+                userImage =userImageRepository.findByUserUserId(userChatRoom.getBuyer().getUserId());
+            }
             ChatMessage chatMessage = chatMessageRepository.findChatRoomId(userChatRoom.getChatRoom().getId());
-            ChatRoomResponseDto chatRoomResponseDto1 = new ChatRoomResponseDto(userChatRoom, chatMessage);
+            ChatRoomResponseDto chatRoomResponseDto1 = new ChatRoomResponseDto(userChatRoom, chatMessage, userImage);
             chatRoomResponseDto.add(chatRoomResponseDto1);
         }
        return ResponseEntity.status(HttpStatus.OK.value()).body(chatRoomResponseDto);

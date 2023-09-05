@@ -6,6 +6,7 @@ import com.example.peeppo.domain.chat.entity.UserChatRoomRelation;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.entity.RequestGoods;
 import com.example.peeppo.domain.image.entity.Image;
+import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Getter
@@ -23,7 +25,7 @@ public class ChatRoomResponseDto {
     private String roomId;
     private String imageUrl; //물품이미지
 
-    //private String userimageUrl;
+    private String userimageUrl;
     private String nickname;
     private String recentMessage;
     private String recentMessageTime;
@@ -38,6 +40,16 @@ public class ChatRoomResponseDto {
         this.id = userChatRoom.getId();
         this.roomId = userChatRoom.getChatRoom().getRoomId();
         this.imageUrl = userChatRoom.getChatRoom().getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
+        this.nickname = userChatRoom.getBuyer().getNickname();
+        this.recentMessage = chatMessage.getMessage();
+        this.recentMessageTime = chatMessage.getTime();
+    }
+
+    public ChatRoomResponseDto(UserChatRoomRelation userChatRoom, ChatMessage chatMessage, Optional<UserImage> userImage) {
+        this.id = userChatRoom.getId();
+        this.roomId = userChatRoom.getChatRoom().getRoomId();
+        this.imageUrl = userChatRoom.getChatRoom().getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
+        this.userimageUrl = userImage.get().getImageUrl();
         this.nickname = userChatRoom.getBuyer().getNickname();
         this.recentMessage = chatMessage.getMessage();
         this.recentMessageTime = chatMessage.getTime();
