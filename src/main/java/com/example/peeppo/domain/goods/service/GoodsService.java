@@ -412,7 +412,7 @@ public class GoodsService {
     }
 
     //내가 받은 교환요청
-  /*  public ResponseEntity<Page<GoodsRequestResponseDto>> receiveTradeList(User user, int page, int size, String sortBy, boolean isAsc, String requestStatusStr) {
+    public ResponseEntity<Page<GoodsRequestResponseDto>> receiveTradeList(User user, int page, int size, String sortBy, boolean isAsc, String requestStatusStr) {
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<User> requestGoods;
@@ -442,12 +442,12 @@ public class GoodsService {
                 RequestSingleResponseDto goodsListResponseDto2 = new RequestSingleResponseDto(goods1, goods1.getUser().getUserId());
                 goodsListResponseDtos.add(goodsListResponseDto2);
             }
-            goodsRequestResponseDtos.add(new GoodsRequestResponseDto(requestGoods1.getCreatedAt(), requestGoods1.getRequestStatus(), goodsListResponseDto, goodsListResponseDtos));
+            goodsRequestResponseDtos.add(new GoodsRequestResponseDto(goodsListResponseDto, goodsListResponseDtos));
         }
 
         PageResponse response = new PageResponse<>(goodsRequestResponseDtos, pageable, requestGoods.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
-    }*/
+    }
 
     //내물건이 아니여야한다 !
     @Transactional
