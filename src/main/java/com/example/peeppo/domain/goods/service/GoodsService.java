@@ -586,7 +586,7 @@ public class GoodsService {
         List<RequestGoods> requestGoodsList = new ArrayList<>();
         for (Long requestGoodsId : requestAcceptRequestDto.getRequestId()) {
 
-            RequestGoods requestGoods = requestRepository.findBuyerGoodsIdAndUserId(requestGoodsId, userDetails.getUser().getUserId());
+            RequestGoods requestGoods = requestRepository.findBuyerGoodsIdAndUserId(requestGoodsId, userDetails.getUser().getUserId(), RequestStatus.TRADING);
             if (!(requestGoods.getRequestStatus().equals(RequestStatus.TRADING))) {
                 throw new IllegalArgumentException("정상적인 접근이 아닙니다.");
             }
