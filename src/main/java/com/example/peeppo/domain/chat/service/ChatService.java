@@ -88,9 +88,7 @@ public class ChatService {
         hashOpsChatRoom.put(CHAT_ROOMS, randomId, new ChatRoomResponseDto(chatRoom));
         UserChatRoomRelation userChatRoomRelation = new UserChatRoomRelation(enterUser, chatRoom, buyerUser);
         userChatRoomRelationRepository.save(userChatRoomRelation);
-//       UserChatRoomRelation userChatRoomRelation2 = new UserChatRoomRelation(buyerUser, chatRoom);
-//       userChatRoomRelationRepository.save(userChatRoomRelation2);
-       ChatMessage chatMessage = new ChatMessage(ChatMessage.MessageType.ENTER, chatRoom,user.getUserId(),"물물교환 신청이 수락되었습니다", String.valueOf(chatRoom.getCreatedAt()));
+       ChatMessage chatMessage = new ChatMessage(ChatMessage.MessageType.ENTER, chatRoom,user,"물물교환 신청이 수락되었습니다", String.valueOf(chatRoom.getCreatedAt()));
        chatMessageRepository.save(chatMessage);
        System.out.println(hashOpsChatRoom.get(CHAT_ROOMS, randomId));
         return chatRoom;
