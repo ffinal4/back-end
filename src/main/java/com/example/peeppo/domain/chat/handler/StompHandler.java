@@ -98,7 +98,7 @@ public class StompHandler implements ChannelInterceptor {
             String email = jwtUtil.getUserMail(token);
             User user = userRepository.findByEmail(email).orElse(null);
             ChatRoom chatRoom = chatService.findRoomById(roomId);
-            chatService.sendChatMessage(ChatMessage.builder().type(ChatMessage.MessageType.LEAVE).chatRoom(chatRoom).userId(user.getUserId()).build(), user);
+       //     chatService.sendChatMessage(ChatMessage.builder().type(ChatMessage.MessageType.LEAVE).chatRoom(chatRoom).userId(user.getUserId()).build(), user);
 
             // 퇴장한 클라이언트의 roomId 맵핑 정보를 삭제한다.
             chatService.removeUserEnterInfo(sessionId);

@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface RequestRepository extends JpaRepository<RequestGoods, Long>, RequestRepositoryCustom {
+public interface RequestRepository extends JpaRepository<RequestGoods, Long> {
 
   //  Page<RequestGoods> findByUserUserIdAndRequestStatus(Long userId, Pageable pageable, RequestStatus requestStatus);
 
