@@ -46,6 +46,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -322,8 +323,9 @@ public class AuctionService {
                     TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount, auctionCount, auctionEndCount);
 
                     if ((auction.getAuctionStatus() == AuctionStatus.END) ||
-                            (auction.getAuctionStatus() == AuctionStatus.DONE)) {
-                        List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndBidStatus(auction.getAuctionId(), SUCCESS);
+                            auction.getAuctionStatus() == AuctionStatus.DONE ||
+                            auction.getAuctionStatus() == AuctionStatus.TRADING) {
+                        List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndBidStatus(auction.getAuctionId(), BidStatus.SUCCESS);
                         List<BidListResponseDto> bidListResponseDtos = bidList.stream()
                                 .map(bid -> new BidListResponseDto(bid, bid.getGoodsImg()))
                                 .collect(Collectors.toList());
@@ -333,7 +335,6 @@ public class AuctionService {
                     }
                 })
                 .collect(Collectors.toList());
-        //나중에 stream 으로 처리하자, flatMap 쓰면 될듯?
         PageResponse response = new PageResponse<>(auctionResponseDtoList, pageable, myAuctionPage.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
@@ -429,28 +430,26 @@ public class AuctionService {
 
         List<Bid> bidList = bidRepository.findAllById(requestAcceptRequestDto.getRequestId());
 
+        Long bidUserId = bidList.get(0).getUser().getUserId();
         Long userId = userDetails.getUser().getUserId();
 
-        // 입찰자가 교환 완료를 눌렀을 시
-        if (Objects.equals(userId, bidList.get(0).getUser().getUserId())) {
+        if (Objects.equals(userId, bidUserId)) {
             for (Bid bid : bidList) {
-                if (Objects.equals(userId, bid.getUser().getUserId())) {
+                if (!Objects.equals(userId, bid.getUser().getUserId())) {
                     throw new IllegalArgumentException("자신의 물건이 아닌 물품이 존재합니다");
                 }
-                if (!bid.getBidStatus().equals(BidStatus.SUCCESS)) {
-                    throw new IllegalArgumentException("정상적인 접근이 아닙니다.");
-                }
+//                if (!bid.getBidStatus().equals(BidStatus.SUCCESS)) {
+//                    throw new IllegalArgumentException("정상적인 접근이 아닙니다.");
+//                }
                 bid.changeBidStatus(BidStatus.TRADING);
-                bidList.add(bid);
             }
             bidRepository.saveAll(bidList);
         }
 
-        // 경매 등록자가 교환 완료를 눌렀을 시
         else if (Objects.equals(userId, auction.getUser().getUserId())) {
-            if (!auction.getAuctionStatus().equals(AuctionStatus.END)) {
-                throw new IllegalArgumentException("경매가 종료된 후에 교환요청이 가능합니다.");
-            }
+//            if (!auction.getAuctionStatus().equals(AuctionStatus.END)) {
+//                throw new IllegalArgumentException("경매가 종료된 후에 교환요청이 가능합니다.");
+//            }
             auction.changeAuctionStatus(AuctionStatus.TRADING);
             auctionRepository.save(auction);
         } else {
@@ -465,12 +464,10 @@ public class AuctionService {
 
             List<Goods> goodsList = bidList.stream()
                     .peek(bid -> bid.changeBidStatus(BidStatus.DONE))
-                    .map(Bid::getGoods)
-                    .peek(goods -> {
-                        if (!goods.getGoodsStatus().equals(GoodsStatus.TRADING)) {
-                            throw new RuntimeException("상품이 거래중이 아닙니다.");
-                        }
+                    .map(bid -> {
+                        Goods goods = bid.getGoods();
                         goods.changeStatus(SOLDOUT);
+                        return goods;
                     })
                     .collect(Collectors.toList());
 
