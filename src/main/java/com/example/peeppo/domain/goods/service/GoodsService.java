@@ -231,13 +231,19 @@ public class GoodsService {
 
     @Transactional
     public ApiResponse<DeleteResponseDto> deleteGoods(Long goodsId, Long userId) throws IllegalAccessException {
-        userRatingHelper.getUser(userId);
         Goods goods = findGoods(goodsId);
         if (Objects.equals(userId, goods.getUser().getUserId())) {
-            goods.delete();
-            goodsRepository.save(goods);
+            if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE) ||
+                    goods.getGoodsStatus().equals(GoodsStatus.SOLDOUT)) {
+
+                goods.changeStatus(GoodsStatus.ONSALE);
+                goods.delete();
+                goodsRepository.save(goods);
+            } else {
+                throw new IllegalArgumentException("입찰, 경매, 거래중인 상품은 삭제할 수 없습니다.");
+            }
         } else {
-            throw new IllegalAccessException();
+            throw new IllegalAccessException("유저의 정보가 올바르지 않습니다.");
         }
         return new ApiResponse<>(true, new DeleteResponseDto("삭제되었습니다"), null);
     }
@@ -365,7 +371,6 @@ public class GoodsService {
     }
 
 
-
     // 내가 보낸 교환요청
     public ResponseEntity<Page<GoodsRequestResponseDto>> requestTradeList(User user, int page, int size, String sortBy, boolean isAsc,
                                                                           String requestStatusStr) {
@@ -413,7 +418,7 @@ public class GoodsService {
 
         List<GoodsRequestResponseDto> goodsRequestResponseDtos = new ArrayList<>();
 
-        if(requestStatusStr != null) {
+        if (requestStatusStr != null) {
 //1) requestgoods 테이블에서 seller goods 전부 찾아오기 => DTO 변환해주기
             requestStatus1 = RequestStatus.valueOf(requestStatusStr);
             requestGoods = requestRepository.findByReceiveUserAndRequestStatus(user.getUserId(), requestStatus1, pageable);
@@ -425,13 +430,13 @@ public class GoodsService {
 
         for (User buyer : requestGoods) {
             List<Goods> requestGoods1 = requestRepository.findByBuyerUserAndSeller(buyer.getUserId(), user.getUserId()); //seller의 굿즈를 찾아왔어
-            for(Goods goods : requestGoods1){
+            for (Goods goods : requestGoods1) {
                 LocalDateTime createAt = null;
                 RequestStatus requestStatus = null;
                 List<RequestGoods> requestGoods2 = requestRepository.findAllBySellerGoodsIdAndUserId(goods.getGoodsId(), buyer.getUserId());
                 RequestSingleResponseDto goodsListResponseDto = new RequestSingleResponseDto(goods);
                 List<RequestSingleResponseDto> goodsListResponseDtos = new ArrayList<>(); // 같은 물건에 요청 넣은 친구들 저장해서 넣어줌 !
-                for(RequestGoods requestGoods3 : requestGoods2){
+                for (RequestGoods requestGoods3 : requestGoods2) {
                     createAt = requestGoods3.getCreatedAt();
                     requestStatus = requestGoods3.getRequestStatus();
                     RequestSingleResponseDto goodsListResponseDtos2 = new RequestSingleResponseDto(requestGoods3.getBuyer());
