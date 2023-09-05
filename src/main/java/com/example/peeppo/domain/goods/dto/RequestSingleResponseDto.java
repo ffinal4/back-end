@@ -19,18 +19,10 @@ public class RequestSingleResponseDto {
     private String location;
 
     public RequestSingleResponseDto(Goods goods){
-        this.imageUrl = goods.getImage().stream().map(Image::getImageUrl).collect(Collectors.toList()).get(0);
-        this.title = goods.getTitle();
-        this.location = goods.getLocation();
-    }
-
-    public RequestSingleResponseDto(Goods goods, Long userId) {
         this.userId = goods.getUser().getUserId();
         this.goodsId = goods.getGoodsId();
-        this.imageUrl = goods.getImage().stream().map(Image::getImageUrl).collect(Collectors.toList()).get(0);
+        this.imageUrl = goods.getImage().get(0).getImageUrl();
         this.title = goods.getTitle();
         this.location = goods.getLocation();
     }
-
-
 }

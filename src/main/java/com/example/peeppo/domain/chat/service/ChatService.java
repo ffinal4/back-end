@@ -200,12 +200,12 @@ public class ChatService {
         chatRoomRepository.delete(chatRoom);
     }
 
-    public void sendChatMessage(ChatMessage chatMessage) {
+    public void sendChatMessage(ChatMessage chatMessage, User user) {
         if (ChatMessage.MessageType.ENTER.equals(chatMessage.getType())) {
-            chatMessage.sendMessage("물건 거래가 시작되었습니다");
+            chatMessage.sendMessage(user.getNickname() + "님이 입장했습니다");
             System.out.println(chatMessage);
         } else if (ChatMessage.MessageType.LEAVE.equals(chatMessage.getType())) {
-            chatMessage.sendMessage("물건 거래가 종료되었습니다.");
+            chatMessage.sendMessage(user.getNickname() + "님이 퇴장했습니다");
             System.out.println(chatMessage);
         }
         chatMessageRepository.save(chatMessage);
