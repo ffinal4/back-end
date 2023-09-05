@@ -430,19 +430,19 @@ public class GoodsService {
             requestGoods = requestRepository.findBuyerByReceiveUser(user.getUserId(), pageable);
         }
 
-        //2) requestGoods 순회하면서 buyerGoods 찾아오기
+        List<RequestSingleResponseDto> goodsListResponseDtos = new ArrayList<>();
         for (User user1 : requestGoods) {
-            Goods sellerGoods = requestRepository.findByReceiveUserId(user.getUserId());
-            List<RequestGoods> requestGoods1 = requestRepository.findBySellerGoodsIdAndBuyerUserId(sellerGoods.getGoodsId(), user1.getUserId());
-            RequestSingleResponseDto goodsListResponseDto = new RequestSingleResponseDto(sellerGoods, user.getUserId());
-            List<RequestSingleResponseDto> goodsListResponseDtos = new ArrayList<>();
-            // 3) requestGoods 순회하며 buyerGoods 물품 정보 가져오기 => dto 로 변환하기
-            for (RequestGoods buyerGoods : requestGoods1) {
-                Goods goods1 = goodsRepository.findByGoodsId(buyerGoods.getBuyer().getGoodsId()).orElse(null);
-                RequestSingleResponseDto goodsListResponseDto2 = new RequestSingleResponseDto(goods1, goods1.getUser().getUserId());
-                goodsListResponseDtos.add(goodsListResponseDto2);
+            List<RequestGoods> sellerGoodsList = requestRepository.findByReceiveUserAndUserUserId(user.getUserId(), user1.getUserId());
+            for(RequestGoods sellerGoods : sellerGoodsList){
+                List<RequestGoods> requestGoods1 = requestRepository.findBySellerGoodsIdAndReceiveUser(sellerGoods.getSeller().getGoodsId(), user1.getUserId());
+                RequestSingleResponseDto goodsListResponseDto = new RequestSingleResponseDto(sellerGoods.getSeller(), user.getUserId());
+
+                for (RequestGoods buyerGoods : requestGoods1) {
+                    RequestSingleResponseDto goodsListResponseDto2 = new RequestSingleResponseDto(buyerGoods.getBuyer(), buyerGoods.getUser().getUserId());
+                    goodsListResponseDtos.add(goodsListResponseDto2);
+                }
+                goodsRequestResponseDtos.add(new GoodsRequestResponseDto(goodsListResponseDto, goodsListResponseDtos));
             }
-            goodsRequestResponseDtos.add(new GoodsRequestResponseDto(goodsListResponseDto, goodsListResponseDtos));
         }
 
         PageResponse response = new PageResponse<>(goodsRequestResponseDtos, pageable, requestGoods.getTotalElements());

@@ -321,9 +321,15 @@ public class AuctionService {
                     Long bidCount = findBidCount(auction.getAuctionId());
                     TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount, auctionCount, auctionEndCount);
 
-                    if ((auction.getAuctionStatus() == AuctionStatus.END) ||
-                            (auction.getAuctionStatus() == AuctionStatus.DONE)) {
-                        List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndBidStatus(auction.getAuctionId(), SUCCESS);
+                    if (auction.getAuctionStatus() == AuctionStatus.END ||
+                            (auction.getAuctionStatus() == TRADING)) {
+                        List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndBidStatus(auction.getAuctionId(), BidStatus.TRADING);
+                        List<BidListResponseDto> bidListResponseDtos = bidList.stream()
+                                .map(bid -> new BidListResponseDto(bid, bid.getGoodsImg()))
+                                .collect(Collectors.toList());
+                        return new GetAuctionBidResponseDto(responseDto, bidListResponseDtos);
+                    } else if (auction.getAuctionStatus() == AuctionStatus.DONE) {
+                        List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndBidStatus(auction.getAuctionId(), BidStatus.DONE);
                         List<BidListResponseDto> bidListResponseDtos = bidList.stream()
                                 .map(bid -> new BidListResponseDto(bid, bid.getGoodsImg()))
                                 .collect(Collectors.toList());
@@ -434,7 +440,7 @@ public class AuctionService {
         // 입찰자가 교환 완료를 눌렀을 시
         if (Objects.equals(userId, bidList.get(0).getUser().getUserId())) {
             for (Bid bid : bidList) {
-                if (Objects.equals(userId, bid.getUser().getUserId())) {
+                if (!(Objects.equals(userId, bid.getUser().getUserId()))) {
                     throw new IllegalArgumentException("자신의 물건이 아닌 물품이 존재합니다");
                 }
                 if (!bid.getBidStatus().equals(BidStatus.SUCCESS)) {
