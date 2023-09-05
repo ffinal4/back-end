@@ -25,4 +25,5 @@ public class RequestSingleResponseDto {
         this.title = goods.getTitle();
         this.location = goods.getLocation();
     }
+
 }
