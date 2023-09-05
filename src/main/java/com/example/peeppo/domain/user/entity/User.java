@@ -67,9 +67,12 @@ public class User{
         this.location = requestDto.getLocation();
     }
 
-    public void upload(MyPageRequestDto myPageRequestDto, String encodedPassword) {
+    public void upload(MyPageRequestDto myPageRequestDto) {
         this.nickname = myPageRequestDto.getNickname();
         this.location = myPageRequestDto.getLocation();
+    }
+
+    public void uploadPassword(String encodedPassword) {
         this.password = encodedPassword;
     }
 

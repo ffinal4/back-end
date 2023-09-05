@@ -85,7 +85,6 @@ public class GoodsService {
             throw new IllegalArgumentException("물품 이미지가 꼭 필요합니다.");
         }
         WantedGoods wantedGoods = new WantedGoods(wantedRequestDto);
-        System.out.println("실행체크");
         Goods goods = new Goods(goodsRequestDto, wantedGoods, user, GoodsStatus.ONSALE);
         RatingGoods ratingGoods = new RatingGoods(goods);
 
@@ -455,6 +454,11 @@ public class GoodsService {
         List<RequestGoods> requestGoods = new ArrayList<>();
         List<Goods> goodsList = new ArrayList<>();
 
+        RequestGoods requestGoods1 = requestRepository.findBySellerAndUserUserId(urGoods, user.getUserId());
+        if(requestGoods1 != null){
+            throw new IllegalArgumentException("해당 물품과 교환 요청 중입니다. 취소후 다시 시도주세요.");
+        }
+
         for (Long goodsId : goodsRequestRequestDto.getGoodsId()) {
             Goods goods = goodsRepository.findById(goodsId).orElseThrow(
                     () -> new IllegalArgumentException("존재하지 않는 goodsId 입니다.")); // 내 물건
@@ -476,7 +480,6 @@ public class GoodsService {
         requestRepository.saveAll(requestGoods);
         return new ResponseDto("교환신청이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
-
 
     public Page<GoodsListResponseDto> allGoods(Page<Goods> goodsPage, Pageable pageable, User user) {
 
