@@ -434,7 +434,7 @@ public class AuctionService {
         // 입찰자가 교환 완료를 눌렀을 시
         if (Objects.equals(userId, bidList.get(0).getUser().getUserId())) {
             for (Bid bid : bidList) {
-                if (Objects.equals(userId, bid.getUser().getUserId())) {
+                if (!Objects.equals(userId, bid.getUser().getUserId())) {
                     throw new IllegalArgumentException("자신의 물건이 아닌 물품이 존재합니다");
                 }
                 if (!bid.getBidStatus().equals(BidStatus.SUCCESS)) {
