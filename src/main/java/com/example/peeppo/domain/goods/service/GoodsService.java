@@ -432,12 +432,12 @@ public class GoodsService {
                 LocalDateTime createAt = null;
                 RequestStatus requestStatus = null;
                 List<RequestGoods> requestGoods2 = requestRepository.findAllBySellerGoodsIdAndUserId(goods.getGoodsId(), buyer.getUserId());
-                RequestSingleResponseDto goodsListResponseDto = new RequestSingleResponseDto(goods, goods.getUser().getUserId());
+                RequestSingleResponseDto goodsListResponseDto = new RequestSingleResponseDto(goods);
                 List<RequestSingleResponseDto> goodsListResponseDtos = new ArrayList<>(); // 같은 물건에 요청 넣은 친구들 저장해서 넣어줌 !
                 for(RequestGoods requestGoods3 : requestGoods2){
                     createAt = requestGoods3.getCreatedAt();
                     requestStatus = requestGoods3.getRequestStatus();
-                    RequestSingleResponseDto goodsListResponseDtos2 = new RequestSingleResponseDto(requestGoods3.getBuyer(), requestGoods3.getUser().getUserId());
+                    RequestSingleResponseDto goodsListResponseDtos2 = new RequestSingleResponseDto(requestGoods3.getBuyer());
                     goodsListResponseDtos.add(goodsListResponseDtos2);
                 }
                 finalResponseDto.add(new GoodsRequestResponseDto(createAt, requestStatus, goodsListResponseDto, goodsListResponseDtos));
