@@ -28,8 +28,8 @@ public interface RequestRepository extends JpaRepository<RequestGoods, Long> {
 
     List<RequestGoods> findAllBySellerGoodsId(Long goodsId);
 
-    @Query("SELECT DISTINCT r.user FROM RequestGoods r WHERE r.receiveUser = :user_id")
-    Page<User> findBuyerByReceiveUser(@Param("user_id") Long userId, Pageable pageable);
+    @Query("SELECT DISTINCT r.seller FROM RequestGoods r WHERE r.receiveUser = :user_id")
+    Page<Goods> findSellerByReceiveUser(@Param("user_id") Long userId, Pageable pageable);
 
 
     @Override
@@ -47,26 +47,25 @@ public interface RequestRepository extends JpaRepository<RequestGoods, Long> {
     RequestGoods findBySellerGoodsId(@Param("seller_goods_id")Long id);
 
     @Query("SELECT DISTINCT r.seller FROM RequestGoods r WHERE r.receiveUser = :user_id and r.requestStatus= :request_status")
-    Page<User> findSellerByReceiveUserAndRequestStatus(@Param("user_id") Long userId, @Param("request_status")  RequestStatus requestStatus, Pageable pageable);
+    Page<Goods> findSellerByReceiveUserAndRequestStatus(@Param("user_id") Long userId, @Param("request_status")  RequestStatus requestStatus, Pageable pageable);
 
     @Query("SELECT r FROM RequestGoods r WHERE r.seller.goodsId = :seller_goods_id and r.user.userId = :user_id ")
     List<RequestGoods> findAllBySellerGoodsIdAndUserId(@Param("seller_goods_id") Long goodsId, @Param("user_id") Long userId);
 
-    @Query("SELECT r FROM RequestGoods r WHERE r.seller.goodsId = :seller_goods_id and r.receiveUser = :user_id ")
-    List<RequestGoods> findAllByBuyerGoodsIdAndUserId(@Param("seller_goods_id") Long goodsId, @Param("user_id") Long userId);
+//    @Query("SELECT r FROM RequestGoods r WHERE r.seller.goodsId = :seller_goods_id and r.receiveUser = :user_id ")
+//    List<RequestGoods> findAllByBuyerGoodsIdAndUserId(@Param("seller_goods_id") Long goodsId, @Param("user_id") Long userId);
 
-//    RequestGoods findByReceiveUserAndUserUserId(Long userId, Long buyerUserId);
+    @Query("SELECT r.user FROM RequestGoods r WHERE r.receiveUser = :user_id")
+    Page<User> findByReceiveUser(@Param("user_id")Long userId, Pageable pageable);
 
-    List<RequestGoods> findByReceiveUserAndUserUserId(Long userId, Long buyerUserId);
+    @Query("SELECT DISTINCT r.seller FROM RequestGoods r WHERE r.user.userId = :user_id and r.receiveUser = :user_id2 ")
+    List<Goods> findByBuyerUserAndSeller(@Param("user_id")Long userId, @Param("user_id2")Long userId1);
 
-    @Query("SELECT r FROM RequestGoods r WHERE r.user.userId = :user_id AND r.seller.goodsId = :seller_goods_id")
-    List<RequestGoods> findBySellerGoodsIdAndReceiveUser(@Param("seller_goods_id")Long goodsId, @Param("user_id") Long userId);
+//    @Query("SELECT DISTINCT r.seller FROM RequestGoods r WHERE r.user.userId = :user_id and r.receiveUser = :user_id2 ")
+//    List<RequestGoods> findByBuyerUserAndSeller(@Param("user_id")Long userId, @Param("user_id2")Long userId1);
 
-    @Query("SELECT r FROM RequestGoods r WHERE r.user.userId = :user_id AND r.seller = :seller_goods_id")
-    RequestGoods findBySellerGoodsAndUserUserId(@Param("seller_goods_id")RequestGoods buyerGoods,@Param("seller_goods_id") Long userId);
+    @Query("SELECT r.user FROM RequestGoods r WHERE r.receiveUser = :user_id and r.requestStatus= :request_status")
+    Page<User> findByReceiveUserAndRequestStatus(@Param("user_id") Long userId , @Param("request_status") RequestStatus requestStatus, Pageable pageable);
 
     RequestGoods findBySellerAndUserUserId(Goods urGoods, Long userId);
-
-    @Query("SELECT r FROM RequestGoods r WHERE r.user.userId = :user_id AND r.seller = :seller_goods_id AND r.receiveUser = :receiveUser")
-    RequestGoods findBySellerGoodsAndUserUserIdAndReceiveUser(@Param("seller_goods_id")RequestGoods buyerGoods,@Param("seller_goods_id") Long userId,@Param("receiveUser") Long user);
 }
