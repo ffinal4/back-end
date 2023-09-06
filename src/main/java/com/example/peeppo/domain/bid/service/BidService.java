@@ -4,6 +4,7 @@ import com.example.peeppo.domain.auction.dto.GetAuctionBidResponseDto;
 import com.example.peeppo.domain.auction.dto.TestListResponseDto;
 import com.example.peeppo.domain.auction.dto.TimeRemaining;
 import com.example.peeppo.domain.auction.entity.Auction;
+import com.example.peeppo.domain.auction.event.AuctionEvent;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.bid.dto.*;
 import com.example.peeppo.domain.bid.entity.Bid;
@@ -29,6 +30,7 @@ import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.responseDto.PageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -58,6 +60,7 @@ public class BidService {
     private final NotificationRepository notificationRepository;
     private final DibsRepository dibsRepository;
     private final UserRatingHelper userRatingHelper;
+    private final ApplicationEventPublisher eventPublisher;
 
     public ResponseDto bidding(User user, Long auctionId, BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
 
@@ -103,19 +106,7 @@ public class BidService {
                 throw new IllegalAccessException();
             }
         }
-
-/*        Notification notificationList = notificationRepository.findByUserUserId(auction.getUser().getUserId());
-
-        if (notification == null) {
-            notification = new Notification(user);
-        }
-
-        notification.setIsAuction(false);
-        notification.updateAuctionCount();
-        notification.Checked(false);
-
-        notificationRepository.save(notification);*/
-
+        eventPublisher.publishEvent(new AuctionEvent(auction, bidList));
 
         bidRepository.saveAll(bidList);
 

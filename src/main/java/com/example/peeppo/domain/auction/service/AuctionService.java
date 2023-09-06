@@ -3,6 +3,7 @@ package com.example.peeppo.domain.auction.service;
 import com.example.peeppo.domain.auction.dto.*;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
+import com.example.peeppo.domain.auction.event.AuctionEvent;
 import com.example.peeppo.domain.auction.helper.AuctionHelper;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.bid.dto.BidListResponseDto;
@@ -268,32 +269,11 @@ public class AuctionService {
         }).collect(Collectors.toList());
         bidRepository.saveAll(saveBidList);
 
-//            List<Notification> notificationList = notificationRepository.findByUserUserId(auction.getUser().getUserId());
-//
-//            for (Notification notification : notificationList) {
-//                if (notification == null) {
-//                    notification = new Notification();
-//                    notification.setUser(user);
-//                }
-//
-//                notification.setIsAuction(false);
-//                notification.updateAuctionCount();
-//                notification.Checked(false);
-//
-//                notificationRepository.save(notification);
-//            }
-
-        Notification notification = notificationRepository.findByUserUserId(auction.getUser().getUserId());
-
-        if (notification == null) {
-            notification = new Notification(user);
-        }
-        notificationRepository.save(notification);
+        eventPublisher.publishEvent(new AuctionEvent(auction, saveBidList));
 
         user.userPointAdd(10L);
         userRepository.save(user);
 
-//        eventPublisher.publishEvent(new AuctionEvent(auction.getGoods(), auc));
         auction.changeDeleteStatus(true);
     }
 
@@ -441,7 +421,7 @@ public class AuctionService {
 
         if (Objects.equals(userId, bidUserId)) {
             for (Bid bid : bidList) {
-                if (Objects.equals(userId, bid.getUser().getUserId())) {
+                if (!(Objects.equals(userId, bid.getUser().getUserId()))) {
                     throw new IllegalArgumentException("자신의 물건이 아닌 물품이 존재합니다");
                 }
 //                if (!bid.getBidStatus().equals(BidStatus.SUCCESS)) {

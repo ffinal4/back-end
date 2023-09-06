@@ -1,5 +1,6 @@
 package com.example.peeppo.domain.notification.service;
 
+import com.example.peeppo.domain.notification.controller.NotificationController;
 import com.example.peeppo.domain.notification.dto.NotificationResponseDto;
 import com.example.peeppo.domain.notification.dto.NotificationUpdateResponseDto;
 import com.example.peeppo.domain.notification.entity.Notification;
@@ -9,7 +10,9 @@ import com.example.peeppo.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,6 +21,27 @@ import java.util.List;
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+
+    // 메시지 알림
+    public SseEmitter subscribe(Long userId) {
+        // 현재 클라이언트를 위한 sseEmitter 생성
+        SseEmitter sseEmitter = new SseEmitter(Long.MAX_VALUE);
+        try {
+            // 연결
+            sseEmitter.send(SseEmitter.event().name("connect"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // user 의 pk 값을 key 값으로 해서 sseEmitter 를 저장
+        NotificationController.sseEmitters.put(userId, sseEmitter);
+
+        sseEmitter.onCompletion(() -> NotificationController.sseEmitters.remove(userId));
+        sseEmitter.onTimeout(() -> NotificationController.sseEmitters.remove(userId));
+        sseEmitter.onError((e) -> NotificationController.sseEmitters.remove(userId));
+
+        return sseEmitter;
+    }
 
     public NotificationResponseDto getNotification(User user) {
         Notification notification = notificationRepository.findByUserUserId(user.getUserId());

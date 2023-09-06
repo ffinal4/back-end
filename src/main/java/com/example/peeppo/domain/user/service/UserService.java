@@ -128,7 +128,7 @@ public class UserService {
 
         userRatingHelper.getUser(user.getUserId());
 
-        if (multipartFile != null) {
+        if (!(multipartFile.isEmpty())) {
             imageHelper.deleteUserImages(user);
             imageHelper.saveUserImages(multipartFile, user);
         }
