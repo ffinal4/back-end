@@ -26,9 +26,7 @@ public class ChatRoomResponseDto {
     private String roomId;
     private String imageUrl; //물품이미지
     private String title;
-    private boolean checkSellerUser;
-    private String buyerImageUrl;
-    private String sellerImageUrl;
+    private String otherImageUrl;
     private String nickname;
     private String recentMessage;
     private String recentMessageTime;
@@ -40,17 +38,25 @@ public class ChatRoomResponseDto {
     }
 
 
-    public ChatRoomResponseDto(UserChatRoomRelation userChatRoom, ChatMessage chatMessage, Optional<UserImage> sellerImage, Optional<UserImage> buyerImage, boolean checkSellerUser) {
+
+    public ChatRoomResponseDto(UserChatRoomRelation userChatRoom, ChatMessage chatMessage, UserImage otherImage, String nickname) {
         this.id = userChatRoom.getId();
         this.roomId = userChatRoom.getChatRoom().getRoomId();
         this.title = userChatRoom.getChatRoom().getGoods().getTitle();
-        this.imageUrl = userChatRoom.getChatRoom().getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
-        this.buyerImageUrl = String.valueOf(buyerImage);
-        this.sellerImageUrl = String.valueOf(sellerImage);
-        this.nickname = userChatRoom.getBuyer().getNickname();
+        this.nickname = nickname;
+        this.imageUrl = userChatRoom.getChatRoom().getGoods().getImage().get(0).getImageUrl();
+        this.otherImageUrl = otherImage.getImageUrl();
         this.recentMessage = chatMessage.getMessage();
         this.recentMessageTime = chatMessage.getTime();
-        this.checkSellerUser = checkSellerUser;
+    }
 
+    public ChatRoomResponseDto(UserChatRoomRelation userChatRoom, ChatMessage chatMessage, String nickname) {
+        this.id = userChatRoom.getId();
+        this.roomId = userChatRoom.getChatRoom().getRoomId();
+        this.title = userChatRoom.getChatRoom().getGoods().getTitle();
+        this.nickname = nickname;
+        this.imageUrl = userChatRoom.getChatRoom().getGoods().getImage().get(0).getImageUrl();
+        this.recentMessage = chatMessage.getMessage();
+        this.recentMessageTime = chatMessage.getTime();
     }
 }

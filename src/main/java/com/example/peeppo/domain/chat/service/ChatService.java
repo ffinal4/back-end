@@ -10,7 +10,6 @@ import com.example.peeppo.domain.chat.repository.UserChatRoomRelationRepository;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.goods.repository.request.RequestRepository;
-import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.image.repository.UserImageRepository;
 import com.example.peeppo.domain.user.entity.User;
@@ -137,22 +136,49 @@ public class ChatService {
     }
 
     //전체 채팅방 조회 => 사용자 마다 !
-    public ResponseEntity<List<ChatRoomResponseDto>> findAllRoom(User user){
+    public ResponseEntity<List<ChatRoomFindAllRoomDto>> findAllRoom(User user){
         List<UserChatRoomRelation> userChatRoomRelation = userChatRoomRelationRepository.findAllBySellerUserIdOrBuyerUserId(user.getUserId(), user.getUserId());
+        List<ChatRoomFindAllRoomDto> chatRoomFindAllRoomDtos = new ArrayList<>();
         List<ChatRoomResponseDto> chatRoomResponseDto = new ArrayList<>();
-
+        UserImage myImage = userImageRepository.finduserImage(user.getUserId());
         for(UserChatRoomRelation userChatRoom : userChatRoomRelation){
-            boolean checkSellerUser = false;
-            if(Objects.equals(user.getUserId(), userChatRoom.getSeller().getUserId())){
-                checkSellerUser = true;
+            UserImage otherImage = null;
+            String nickname = null;
+            if(user.getUserId() == userChatRoom.getBuyer().getUserId()){
+                otherImage = userImageRepository.finduserImage(userChatRoom.getSeller().getUserId());
+                nickname = userChatRoom.getSeller().getNickname();
             }
-            Optional<UserImage> sellerImage = Optional.ofNullable(userImageRepository.findByUserUserId(userChatRoom.getSeller().getUserId()).orElse(null));
-            Optional<UserImage> buyerImage = Optional.ofNullable(userImageRepository.findByUserUserId(userChatRoom.getBuyer().getUserId()).orElse(null));
+            if(user.getUserId() == userChatRoom.getSeller().getUserId()) {
+                otherImage = userImageRepository.finduserImage(userChatRoom.getBuyer().getUserId());
+                nickname = userChatRoom.getBuyer().getNickname();
+            }
             ChatMessage chatMessage = chatMessageRepository.findChatRoomId(userChatRoom.getChatRoom().getId());
-            chatRoomResponseDto.add(new ChatRoomResponseDto(userChatRoom, chatMessage, sellerImage, buyerImage, checkSellerUser));
+            if(otherImage != null){
+                chatRoomResponseDto.add(new ChatRoomResponseDto(userChatRoom, chatMessage, otherImage, nickname));
+            }else{
+                chatRoomResponseDto.add(new ChatRoomResponseDto(userChatRoom, chatMessage, nickname));
+            }
         }
-       return ResponseEntity.status(HttpStatus.OK.value()).body(chatRoomResponseDto);
+        if(myImage == null){
+            chatRoomFindAllRoomDtos.add(new ChatRoomFindAllRoomDto(chatRoomResponseDto));
+        }
+        else {
+            chatRoomFindAllRoomDtos.add(new ChatRoomFindAllRoomDto(myImage.getImageUrl(), chatRoomResponseDto));
+        }
+            return ResponseEntity.status(HttpStatus.OK.value()).body(chatRoomFindAllRoomDtos);
     }
+
+
+
+    //            boolean checkSellerUser = false;
+//            if(Objects.equals(user.getUserId(), userChatRoom.getSeller().getUserId())){
+//                checkSellerUser = true;
+//            }
+//            UserImage sellerImage = userImageRepository.finduserImage(userChatRoom.getSeller().getUserId());
+//            UserImage buyerImage = userImageRepository.finduserImage(userChatRoom.getBuyer().getUserId());
+//            if(sellerImage == null){
+//
+//            }
 
     //roomId 기준으로 채팅방 찾기
     public ChatRoom findRoomById(String roomId) {
