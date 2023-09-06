@@ -353,19 +353,19 @@ public class AuctionService {
         if (!user.getUserId().equals(auction.getUser().getUserId())) {
             throw new IllegalArgumentException("경매 등록자가 아닙니다.");
         }
-        auction.changeAuctionStatus(AuctionStatus.DONE);
+        auction.changeAuctionStatus(AuctionStatus.TRADING);
         Goods auctionGoods = goodsRepository.findByAuctionAuctionId(auction.getAuctionId())
                 .orElseThrow(() -> new NullPointerException("존재하지 않는 물품입니다."));
         auctionRepository.save(auction);
 
-        auctionGoods.changeStatus(SOLDOUT);
+        auctionGoods.changeStatus(GoodsStatus.TRADING);
         goodsRepository.save(auctionGoods);
 
         List<Bid> bidList = choiceRequestDto.getBidId().stream().map(bidId -> {
                     Bid bid = findBidId(bidId);
 
-                    bid.getGoods().changeStatus(SOLDOUT);
-                    bid.changeBidStatus(BidStatus.DONE);
+                    bid.getGoods().changeStatus(GoodsStatus.TRADING);
+                    bid.changeBidStatus(BidStatus.TRADING);
                     return bid;
                 })
                 .collect(Collectors.toList());
@@ -439,34 +439,25 @@ public class AuctionService {
         Long userId = userDetails.getUser().getUserId();
 
         List<Bid> bidList = new ArrayList<>();
-        BidStatus bidStatus;
+//        BidStatus bidStatus;
 
         // 요청자가 경매 진행자가 아닐 경우
-        if (!Objects.equals(userId, auction.getUser().getUserId())) {
-            bidList = bidHelper.bidTradeCompleted(requestAcceptRequestDto.getRequestId(), userDetails.getUser().getUserId());
-            bidStatus = BidStatus.TRADING;
-        }
+//        if (!Objects.equals(userId, auction.getUser().getUserId())) {
+//            bidHelper.bidTradeCompleted(requestAcceptRequestDto.getRequestId(), userDetails.getUser().getUserId());
+//        }
 
         // 요청자가 경매 진행자일 경우
-        else {
-//            if (!auction.getAuctionStatus().equals(AuctionStatus.END)) {
+//        else {
+//            if (!auction.getAuctionStatus().equals(AuctionStatus.TRADING)) {
 //                throw new IllegalArgumentException("경매가 종료된 후에 교환요청이 가능합니다.");
 //            }
-            auction.changeAuctionStatus(AuctionStatus.TRADING);
-            auctionRepository.save(auction);
-            bidStatus = bidRepository.findById(requestAcceptRequestDto.getRequestId().get(0))
-                    .orElseThrow(() -> new NullPointerException("존재하지 않는 입찰품입니다.")).getBidStatus();
-        }
-
-        if (bidStatus.equals(BidStatus.TRADING) &&
-                auction.getAuctionStatus().equals(AuctionStatus.TRADING)) {
-
+        if (Objects.equals(userId, auction.getUser().getUserId())) {
             auction.changeAuctionStatus(AuctionStatus.DONE);
             auctionRepository.save(auction);
 
-            if (bidList.size() == 0) {
-                bidList = bidRepository.findAllById(requestAcceptRequestDto.getRequestId());
-            }
+//            if (bidList.size() == 0) {
+            bidList = bidRepository.findAllById(requestAcceptRequestDto.getRequestId());
+//            }
 
             List<Goods> goodsList = bidList.stream()
                     .peek(bid -> bid.changeBidStatus(BidStatus.DONE))
@@ -478,8 +469,11 @@ public class AuctionService {
                     .collect(Collectors.toList());
 
             goodsRepository.saveAll(goodsList);
+            bidRepository.saveAll(bidList);
         }
-        bidRepository.saveAll(bidList);
-        return new ApiResponse<>(true, new MsgResponseDto("정상적으로 진행됐습니다."), null);
+        else {
+            throw new IllegalArgumentException("경매 등록자만 가능합니다.");
+        }
+        return new ApiResponse<>(true, new MsgResponseDto("경매가 완료됐습니다."), null);
     }
 }
