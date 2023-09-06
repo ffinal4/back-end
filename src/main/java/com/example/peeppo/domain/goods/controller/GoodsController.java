@@ -146,10 +146,11 @@ public class GoodsController {
     }
 
     // 교환요청 수락 => 채팅방 생성 ( 나한테 교환요청들어온 친구들의 goodsId 를 넘겨받기 )
-    @PostMapping("/users/accept")
-    public ApiResponse<?> goodsAccept(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                      @Valid @RequestBody RequestAcceptRequestDto requestAcceptRequestDto){
-        goodsService.goodsAccept(requestAcceptRequestDto, userDetails.getUser());
+    @PostMapping("{sellerGoodsId}/users/accept")
+    public ApiResponse<?> goodsAccept(@PathVariable Long sellerGoodsId,
+                                      @AuthenticationPrincipal UserDetailsImpl userDetails,
+                                      @Valid @RequestBody RequestAcceptRequestDto requestAcceptRequestDto) {
+        goodsService.goodsAccept(sellerGoodsId, requestAcceptRequestDto, userDetails.getUser());
         return ResponseUtils.okWithMessage(GOODS_ACCEPT_SUCCESS);
     }
 

@@ -554,17 +554,28 @@ public class GoodsService {
     }
 
     // 승인 => 교환중으로 상태 변경
-    public void goodsAccept(RequestAcceptRequestDto requestAcceptRequestDto, User user) {
-        for (Long goodsId : requestAcceptRequestDto.getRequestId()) {
-            RequestGoods requestGoods = requestRepository.findByBuyerGoodsId(goodsId)
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
+    public void goodsAccept(Long sellerGoodsId, RequestAcceptRequestDto requestAcceptRequestDto, User user) {
+        List<RequestGoods> buyerRequest = requestRepository.findAllBySellerGoodsId(sellerGoodsId);
+        List<Goods> goodsList = new ArrayList<>();
+
+        for (RequestGoods requestGoods : buyerRequest) {
             if (!requestGoods.getSeller().getUser().getUserId().equals(user.getUserId())) {
                 throw new IllegalArgumentException("물품 교환 요청 수락은 본인만 가능합니다.");
             }
-            requestGoods.changeStatus(RequestStatus.TRADING);
-            requestRepository.save(requestGoods);
+            Goods goods = requestGoods.getBuyer();
+            if (requestAcceptRequestDto.getRequestId().contains(requestGoods.getBuyer().getGoodsId())) {
+                requestGoods.changeStatus(RequestStatus.TRADING);
+            } else {
+                requestGoods.changeStatus(RequestStatus.CANCEL);
+                goods.changeStatus(GoodsStatus.ONSALE);
+                goodsList.add(goods);
+            }
         }
+
+        requestRepository.saveAll(buyerRequest);
+        goodsRepository.saveAll(goodsList);
     }
+
 
     // 요청 -> 거절
     public void goodsRefuse(RequestAcceptRequestDto requestAcceptRequestDto, User user) {
