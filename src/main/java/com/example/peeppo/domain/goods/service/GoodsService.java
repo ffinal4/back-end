@@ -454,12 +454,15 @@ public class GoodsService {
     public ResponseDto goodsRequest(User user, GoodsRequestRequestDto goodsRequestRequestDto, Long urGoodsId) {
         Goods urGoods = goodsRepository.findByGoodsId(urGoodsId) // sellergoods(남의 물건)
                 .orElseThrow(() -> new NullPointerException("해당 상품이 존재하지 않습니다."));
-        List<RequestGoods> requestGoods = new ArrayList<>();
+                List<RequestGoods> requestGoods = new ArrayList<>();
         List<Goods> goodsList = new ArrayList<>();
 
         for (Long goodsId : goodsRequestRequestDto.getGoodsId()) {
             Goods goods = goodsRepository.findById(goodsId).orElseThrow(
                     () -> new IllegalArgumentException("존재하지 않는 goodsId 입니다.")); // 내 물건
+            if(!goods.getUser().getUserId().equals(user.getUserId())){
+                throw new IllegalArgumentException("자신의 물품만 교환요청 할 수 있습니다.");
+            }
 
 
             if (!(urGoods.getUser().equals(goods.getUser()))) {
