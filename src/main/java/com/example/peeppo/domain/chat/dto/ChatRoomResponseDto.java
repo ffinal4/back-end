@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.cglib.core.Local;
 
+import java.io.StringBufferInputStream;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,8 +25,10 @@ public class ChatRoomResponseDto {
     private Long id;
     private String roomId;
     private String imageUrl; //물품이미지
-
-    private String userimageUrl;
+    private String title;
+    private boolean checkSellerUser;
+    private String buyerImageUrl;
+    private String sellerImageUrl;
     private String nickname;
     private String recentMessage;
     private String recentMessageTime;
@@ -33,25 +36,21 @@ public class ChatRoomResponseDto {
     public ChatRoomResponseDto(ChatRoom chatRoom) {
         this.id = chatRoom.getId();
         this.roomId = chatRoom.getRoomId();
-        this.imageUrl = chatRoom.getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
+        this.imageUrl = chatRoom.getGoods().getImage().get(0).getImageUrl();
     }
 
-    public ChatRoomResponseDto(UserChatRoomRelation userChatRoom, ChatMessage chatMessage) {
+
+    public ChatRoomResponseDto(UserChatRoomRelation userChatRoom, ChatMessage chatMessage, Optional<UserImage> sellerImage, Optional<UserImage> buyerImage, boolean checkSellerUser) {
         this.id = userChatRoom.getId();
         this.roomId = userChatRoom.getChatRoom().getRoomId();
+        this.title = userChatRoom.getChatRoom().getGoods().getTitle();
         this.imageUrl = userChatRoom.getChatRoom().getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
+        this.buyerImageUrl = String.valueOf(buyerImage);
+        this.sellerImageUrl = String.valueOf(sellerImage);
         this.nickname = userChatRoom.getBuyer().getNickname();
         this.recentMessage = chatMessage.getMessage();
         this.recentMessageTime = chatMessage.getTime();
-    }
+        this.checkSellerUser = checkSellerUser;
 
-    public ChatRoomResponseDto(UserChatRoomRelation userChatRoom, ChatMessage chatMessage, UserImage userImage) {
-        this.id = userChatRoom.getId();
-        this.roomId = userChatRoom.getChatRoom().getRoomId();
-        this.imageUrl = userChatRoom.getChatRoom().getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
-        this.userimageUrl = userImage.getImageUrl();
-        this.nickname = userChatRoom.getBuyer().getNickname();
-        this.recentMessage = chatMessage.getMessage();
-        this.recentMessageTime = chatMessage.getTime();
     }
 }

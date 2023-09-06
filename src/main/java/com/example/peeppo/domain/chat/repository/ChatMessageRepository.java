@@ -22,6 +22,10 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     @Query(value = "SELECT c FROM ChatMessage c WHERE c.chatRoom.id = :chatRoom_id ORDER BY c.id DESC limit 1")
     ChatMessage findChatRoomId(@Param("chatRoom_id")Long id);
 
-    Slice<ChatMessage> findChatMessagesByChatRoomId(Long id, Pageable page);
+    //Slice<ChatMessage> findChatMessagesByChatRoomId(Long id, Pageable page);
+
+    //Slice<ChatMessage> findChatMessagesByChatRoomIdOrderByTime(Long id, Pageable page);
+
+    Slice<ChatMessage> findChatMessagesByChatRoomIdOrderByTimeDesc(Long id, Pageable page);
     // 충돌 List<ChatMessage> findAllByChatRoomRoomId(String roomId);
 }

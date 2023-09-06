@@ -10,6 +10,7 @@ import com.example.peeppo.domain.chat.repository.UserChatRoomRelationRepository;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.goods.repository.request.RequestRepository;
+import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.image.repository.UserImageRepository;
 import com.example.peeppo.domain.user.entity.User;
@@ -139,20 +140,16 @@ public class ChatService {
     public ResponseEntity<List<ChatRoomResponseDto>> findAllRoom(User user){
         List<UserChatRoomRelation> userChatRoomRelation = userChatRoomRelationRepository.findAllBySellerUserIdOrBuyerUserId(user.getUserId(), user.getUserId());
         List<ChatRoomResponseDto> chatRoomResponseDto = new ArrayList<>();
+
         for(UserChatRoomRelation userChatRoom : userChatRoomRelation){
-            UserImage userImage = null;
-            if(user.getUserId() == userChatRoom.getBuyer().getUserId()){
-                userImage = userImageRepository.finduserImage(userChatRoom.getSeller().getUserId());
+            boolean checkSellerUser = false;
+            if(Objects.equals(user.getUserId(), userChatRoom.getSeller().getUserId())){
+                checkSellerUser = true;
             }
-            if(user.getUserId() == userChatRoom.getSeller().getUserId()){
-                userImage =userImageRepository.finduserImage(userChatRoom.getBuyer().getUserId());
-            }
+            Optional<UserImage> sellerImage = Optional.ofNullable(userImageRepository.findByUserUserId(userChatRoom.getSeller().getUserId()).orElse(null));
+            Optional<UserImage> buyerImage = Optional.ofNullable(userImageRepository.findByUserUserId(userChatRoom.getBuyer().getUserId()).orElse(null));
             ChatMessage chatMessage = chatMessageRepository.findChatRoomId(userChatRoom.getChatRoom().getId());
-            if(userImage != null){
-                chatRoomResponseDto.add(new ChatRoomResponseDto(userChatRoom, chatMessage, userImage));
-            }else{
-                chatRoomResponseDto.add(new ChatRoomResponseDto(userChatRoom, chatMessage));
-            }
+            chatRoomResponseDto.add(new ChatRoomResponseDto(userChatRoom, chatMessage, sellerImage, buyerImage, checkSellerUser));
         }
        return ResponseEntity.status(HttpStatus.OK.value()).body(chatRoomResponseDto);
     }
@@ -166,10 +163,11 @@ public class ChatService {
     @Transactional(readOnly = true)
     public Slice<ChatMessageResponseDto> findMessageById(String roomId, User user, Pageable page) {
         ChatRoom chatRoom = findRoomById(roomId);
-        Slice<ChatMessage> chatMessageList = chatMessageRepository.findChatMessagesByChatRoomId(chatRoom.getId(), page);
+        Slice<ChatMessage> chatMessageList = chatMessageRepository.findChatMessagesByChatRoomIdOrderByTimeDesc(chatRoom.getId(), page);
         return chatMessageList.map(chatMessage -> {
-            User messageUser = userRepository.findById(chatMessage.getSenderId()).orElse(null);
-            boolean checkUser = (chatMessage.getSenderId() == user.getUserId());
+            User messageUser = userRepository.findById(chatMessage.getSenderId()).orElseThrow(()->
+                    new NullPointerException("유저는 없어요"));
+            boolean checkUser = (Objects.equals(chatMessage.getSenderId(), user.getUserId()));
             return new ChatMessageResponseDto(chatMessage, messageUser, checkUser);
         });
     }
