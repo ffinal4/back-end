@@ -129,8 +129,10 @@ public class UserService {
         userRatingHelper.getUser(user.getUserId());
 
         if (multipartFile != null) {
-            imageHelper.deleteUserImages(user);
-            imageHelper.saveUserImages(multipartFile, user);
+            if(!multipartFile.getOriginalFilename().equals("")) {
+                imageHelper.deleteUserImages(user);
+                imageHelper.saveUserImages(multipartFile, user);
+            }
         }
 
         user.upload(myPageRequestDto);
