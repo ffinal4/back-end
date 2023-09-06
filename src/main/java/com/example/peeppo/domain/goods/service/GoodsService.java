@@ -557,6 +557,7 @@ public class GoodsService {
     }
 
     // 승인 => 교환중으로 상태 변경
+    @Transactional
     public void goodsAccept(Long sellerGoodsId, RequestAcceptRequestDto requestAcceptRequestDto, User user) {
         List<RequestGoods> buyerRequest = requestRepository.findAllBySellerGoodsId(sellerGoodsId);
         List<Goods> goodsList = new ArrayList<>();
