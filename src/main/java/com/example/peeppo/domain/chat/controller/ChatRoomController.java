@@ -9,6 +9,8 @@ import com.example.peeppo.domain.chat.entity.ChatRoom;
 import com.example.peeppo.domain.chat.service.ChatService;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -43,9 +45,10 @@ public class ChatRoomController {
 
     //채팅방 메세지 조회 ( 상세 조회 )
     @GetMapping("/room/{chatId}")
-    public List<ChatMessageResponseDto> findChatRoom(@PathVariable("chatId") String roomId,
-                                                     @AuthenticationPrincipal UserDetailsImpl userDetails){
-        return chatService.findMessageById(roomId, userDetails.getUser());
+    public Slice<ChatMessageResponseDto> findChatRoom(@PathVariable("chatId") String roomId,
+                                                      @AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                      Pageable page){
+        return chatService.findMessageById(roomId, userDetails.getUser(),page);
     }
 
     @DeleteMapping("/room/{chatId}")

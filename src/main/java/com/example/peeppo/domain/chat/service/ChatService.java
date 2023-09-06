@@ -8,10 +8,8 @@ import com.example.peeppo.domain.chat.repository.ChatMessageRepository;
 import com.example.peeppo.domain.chat.repository.ChatRoomRepository;
 import com.example.peeppo.domain.chat.repository.UserChatRoomRelationRepository;
 import com.example.peeppo.domain.goods.entity.Goods;
-import com.example.peeppo.domain.goods.entity.RequestGoods;
 import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.goods.repository.request.RequestRepository;
-import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.image.repository.UserImageRepository;
 import com.example.peeppo.domain.user.entity.User;
@@ -22,6 +20,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -163,20 +163,15 @@ public class ChatService {
     }
 
     //roomId 기준으로 채팅방 메시지 내용 찾기
-    public List<ChatMessageResponseDto> findMessageById(String roomId, User user) {
+    @Transactional(readOnly = true)
+    public Slice<ChatMessageResponseDto> findMessageById(String roomId, User user, Pageable page) {
         ChatRoom chatRoom = findRoomById(roomId);
-        List<ChatMessage> chatMessageList = chatMessageRepository.findAllChatRoomId(chatRoom.getId());
-        List<ChatMessageResponseDto> chatMessageResponseDtos = new ArrayList<>();
-        for(ChatMessage chatMessage : chatMessageList){
-            boolean checkUser = false;
+        Slice<ChatMessage> chatMessageList = chatMessageRepository.findChatMessagesByChatRoomId(chatRoom.getId(), page);
+        return chatMessageList.map(chatMessage -> {
             User messageUser = userRepository.findById(chatMessage.getSenderId()).orElse(null);
-            if(chatMessage.getSenderId() == user.getUserId()){
-                checkUser = true;
-            }
-            ChatMessageResponseDto chatMessageResponseDto = new ChatMessageResponseDto(chatMessage, messageUser, checkUser);
-            chatMessageResponseDtos.add(chatMessageResponseDto);
-        }
-        return chatMessageResponseDtos;
+            boolean checkUser = (chatMessage.getSenderId() == user.getUserId());
+            return new ChatMessageResponseDto(chatMessage, messageUser, checkUser);
+        });
     }
 
     @Transactional
