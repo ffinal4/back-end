@@ -30,8 +30,6 @@ public interface BidRepository extends JpaRepository<Bid, Long>, BidRepositoryCu
     List<Auction> findTop3Auction();
     List<Bid> findByAuctionAuctionIdAndUserUserId(Long auctionId, Long userId);
 
-    Optional<Bid> findById(Long aLong);
-
     @Query(value = "select b.bidId from Bid b where b.user.userId = :user_id and b.auction.auctionId = :auction_id and b.goods.isDeleted = false")
     List<Long> findBidIdByUserUserIdAndAuctionAuctionId(@Param("user_id")Long userId, @Param("auction_id") Long auctionId);
 }
