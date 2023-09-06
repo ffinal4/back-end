@@ -8,7 +8,6 @@ import com.example.peeppo.domain.chat.repository.ChatMessageRepository;
 import com.example.peeppo.domain.chat.repository.ChatRoomRepository;
 import com.example.peeppo.domain.chat.repository.UserChatRoomRelationRepository;
 import com.example.peeppo.domain.goods.entity.Goods;
-import com.example.peeppo.domain.goods.entity.RequestGoods;
 import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.goods.repository.request.RequestRepository;
 import com.example.peeppo.domain.image.entity.UserImage;
@@ -21,6 +20,8 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -87,9 +88,7 @@ public class ChatService {
         hashOpsChatRoom.put(CHAT_ROOMS, randomId, new ChatRoomResponseDto(chatRoom));
         UserChatRoomRelation userChatRoomRelation = new UserChatRoomRelation(enterUser, chatRoom, buyerUser);
         userChatRoomRelationRepository.save(userChatRoomRelation);
-//       UserChatRoomRelation userChatRoomRelation2 = new UserChatRoomRelation(buyerUser, chatRoom);
-//       userChatRoomRelationRepository.save(userChatRoomRelation2);
-       ChatMessage chatMessage = new ChatMessage(ChatMessage.MessageType.ENTER, chatRoom,user.getUserId(),"물물교환 신청이 수락되었습니다", String.valueOf(chatRoom.getCreatedAt()));
+       ChatMessage chatMessage = new ChatMessage(ChatMessage.MessageType.ENTER, chatRoom,user,"물물교환 신청이 수락되었습니다", String.valueOf(chatRoom.getCreatedAt()));
        chatMessageRepository.save(chatMessage);
        System.out.println(hashOpsChatRoom.get(CHAT_ROOMS, randomId));
         return chatRoom;
@@ -136,16 +135,24 @@ public class ChatService {
         return Optional.ofNullable(valueOps.decrement(USER_COUNT + "_" + roomId)).filter(count -> count > 0).orElse(0L);
     }
 
-
-
     //전체 채팅방 조회 => 사용자 마다 !
     public ResponseEntity<List<ChatRoomResponseDto>> findAllRoom(User user){
         List<UserChatRoomRelation> userChatRoomRelation = userChatRoomRelationRepository.findAllBySellerUserIdOrBuyerUserId(user.getUserId(), user.getUserId());
         List<ChatRoomResponseDto> chatRoomResponseDto = new ArrayList<>();
         for(UserChatRoomRelation userChatRoom : userChatRoomRelation){
+            UserImage userImage = null;
+            if(user.getUserId() == userChatRoom.getBuyer().getUserId()){
+                userImage = userImageRepository.finduserImage(userChatRoom.getSeller().getUserId());
+            }
+            if(user.getUserId() == userChatRoom.getSeller().getUserId()){
+                userImage =userImageRepository.finduserImage(userChatRoom.getBuyer().getUserId());
+            }
             ChatMessage chatMessage = chatMessageRepository.findChatRoomId(userChatRoom.getChatRoom().getId());
-            ChatRoomResponseDto chatRoomResponseDto1 = new ChatRoomResponseDto(userChatRoom, chatMessage);
-            chatRoomResponseDto.add(chatRoomResponseDto1);
+            if(userImage != null){
+                chatRoomResponseDto.add(new ChatRoomResponseDto(userChatRoom, chatMessage, userImage));
+            }else{
+                chatRoomResponseDto.add(new ChatRoomResponseDto(userChatRoom, chatMessage));
+            }
         }
        return ResponseEntity.status(HttpStatus.OK.value()).body(chatRoomResponseDto);
     }
@@ -156,20 +163,15 @@ public class ChatService {
     }
 
     //roomId 기준으로 채팅방 메시지 내용 찾기
-    public List<ChatMessageResponseDto> findMessageById(String roomId, User user) {
+    @Transactional(readOnly = true)
+    public Slice<ChatMessageResponseDto> findMessageById(String roomId, User user, Pageable page) {
         ChatRoom chatRoom = findRoomById(roomId);
-        List<ChatMessage> chatMessageList = chatMessageRepository.findAllChatRoomId(chatRoom.getId());
-        List<ChatMessageResponseDto> chatMessageResponseDtos = new ArrayList<>();
-        for(ChatMessage chatMessage : chatMessageList){
-            boolean checkUser = false;
+        Slice<ChatMessage> chatMessageList = chatMessageRepository.findChatMessagesByChatRoomId(chatRoom.getId(), page);
+        return chatMessageList.map(chatMessage -> {
             User messageUser = userRepository.findById(chatMessage.getSenderId()).orElse(null);
-            if(chatMessage.getSenderId() == user.getUserId()){
-                checkUser = true;
-            }
-            ChatMessageResponseDto chatMessageResponseDto = new ChatMessageResponseDto(chatMessage, messageUser, checkUser);
-            chatMessageResponseDtos.add(chatMessageResponseDto);
-        }
-        return chatMessageResponseDtos;
+            boolean checkUser = (chatMessage.getSenderId() == user.getUserId());
+            return new ChatMessageResponseDto(chatMessage, messageUser, checkUser);
+        });
     }
 
     @Transactional

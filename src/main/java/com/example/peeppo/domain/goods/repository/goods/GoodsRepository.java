@@ -60,13 +60,13 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
 
     List<Goods> findAllByUserAndIsDeletedFalseAndGoodsStatus(User user, GoodsStatus onsale);
 
-    List<Goods> findByTitleContaining(String keyword);
+    List<Goods> findByTitleContainingAndIsDeletedFalse(String keyword);
 
     Page<Goods> findByUserUserIdAndGoodsStatus(Long userId, Pageable pageable, GoodsStatus goodsStatus);
 
     Page<Goods> findByUserUserId(Long userId, Pageable pageable);
 
-    Goods findByUserUserId(Long userId);
+    Optional<Goods> findByUserUserId(Long userId);
 
     Page<Goods> findAllByCategoryAndIsDeletedFalse(@Param("category") Category category, Pageable pageable);
 
@@ -79,5 +79,5 @@ public interface GoodsRepository extends JpaRepository<Goods, Long>, GoodsReposi
     @Query(value = "SELECT g.* from goods g where g.is_deleted = false and g.category = category ORDER BY g.created_at desc LIMIT 20", nativeQuery = true)
     List<Goods> findByCategoryAndIsDeletedFalse(Category category);
 
-    Goods findByAuctionAuctionId(Long auctionId);
+    Optional<Goods> findByAuctionAuctionId(Long auctionId);
 }

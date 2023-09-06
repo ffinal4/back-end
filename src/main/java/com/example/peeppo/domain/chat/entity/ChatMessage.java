@@ -37,6 +37,7 @@ public class ChatMessage {
     @JoinColumn(name = "chatRoom_id")
     private ChatRoom chatRoom; // 방번호
     private Long senderId; // 채팅을 보낸 사람
+    private String nickname;
     private String message; //메시지
     private String time; //채팅 발송 시간
 
@@ -44,14 +45,16 @@ public class ChatMessage {
         this.type = chatMessageRequestDto.getMessageType();
         this.chatRoom = chatRoom;
         this.senderId = user.getUserId();
+        this.nickname = user.getNickname();
         this.message = chatMessageRequestDto.getMessage();
         this.time = dTime;
     }
     @Builder
-    public ChatMessage(MessageType type, ChatRoom chatRoom, Long userId,String message, String createdAt) {
+    public ChatMessage(MessageType type, ChatRoom chatRoom, User user, String message, String createdAt) {
         this.type = type;
         this.chatRoom = chatRoom;
-        this.senderId = userId;
+        this.senderId = user.getUserId();
+        this.nickname = user.getNickname();
         this.message = message;
         this.time = createdAt;
     }

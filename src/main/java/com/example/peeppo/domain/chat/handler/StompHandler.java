@@ -73,14 +73,13 @@ public class StompHandler implements ChannelInterceptor {
             User user = userRepository.findByEmail(email).orElse(null);
 
 
-            ChatMessage chatMessage = new ChatMessage(ChatMessage.MessageType.ENTER, chatRoom, user.getUserId(), "물건거래가 시작되었습니다", String.valueOf(LocalDateTime.now()));
-
-            chatService.sendChatMessage(chatMessage, user);
+//            ChatMessage chatMessage = new ChatMessage(ChatMessage.MessageType.ENTER, chatRoom, user.getUserId(), "물건거래가 시작되었습니다", String.valueOf(LocalDateTime.now()));
+//
+//            chatService.sendChatMessage(chatMessage, user);
 
             System.out.println("발송 요청");
             user.setSessionId(sessionId);
             userRepository.save(user);
-
             log.info("SUBSCRIBED {}, {}", user.getNickname(), roomId);
 
         } else if (StompCommand.DISCONNECT == accessor.getCommand()) { // Websocket 연결 종료
@@ -99,7 +98,7 @@ public class StompHandler implements ChannelInterceptor {
             String email = jwtUtil.getUserMail(token);
             User user = userRepository.findByEmail(email).orElse(null);
             ChatRoom chatRoom = chatService.findRoomById(roomId);
-            chatService.sendChatMessage(ChatMessage.builder().type(ChatMessage.MessageType.LEAVE).chatRoom(chatRoom).userId(user.getUserId()).build(), user);
+       //     chatService.sendChatMessage(ChatMessage.builder().type(ChatMessage.MessageType.LEAVE).chatRoom(chatRoom).userId(user.getUserId()).build(), user);
 
             // 퇴장한 클라이언트의 roomId 맵핑 정보를 삭제한다.
             chatService.removeUserEnterInfo(sessionId);

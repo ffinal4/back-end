@@ -2,6 +2,7 @@ package com.example.peeppo.domain.chat.entity;
 
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.entity.RequestGoods;
+import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -29,7 +30,6 @@ public class UserChatRoomRelation {
     @ManyToOne
     @JoinColumn(name = "chatRoom_id", nullable = false)
     private ChatRoom chatRoom;
-
 
 
     public UserChatRoomRelation(User user, ChatRoom chatRoom) {

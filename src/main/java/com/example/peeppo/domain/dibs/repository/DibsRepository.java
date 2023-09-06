@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DibsRepository extends JpaRepository<Dibs, Long> {
-    Optional<Dibs> findByUserUserIdAndGoodsGoodsId(Long userId, Long goodsId);
+    Optional<Dibs> findByUserUserIdAndGoodsGoodsIdAndGoodsIsDeletedFalse(Long userId, Long goodsId);
 
-    List<Dibs> findByUserUserId(Long userId);
+    List<Dibs> findByUserUserIdAndGoodsIsDeletedFalse(Long userId);
 
-    Long countByGoodsGoodsId(Long goodsId);
+    Long countByGoodsGoodsIdAndGoodsIsDeletedFalse(Long goodsId);
 }
