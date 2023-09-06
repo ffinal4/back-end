@@ -10,6 +10,8 @@ import java.util.Optional;
 
 public interface UserImageRepository extends JpaRepository<UserImage, Long> {
     Optional<UserImage> findByUserUserId(Long userId);
+    @Query("select ui from UserImage ui where  ui.user.userId = :userId")
+    UserImage finduserImage(Long userId);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("delete from UserImage ui where  ui.imageKey = :imageKey")

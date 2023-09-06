@@ -140,16 +140,19 @@ public class ChatService {
         List<UserChatRoomRelation> userChatRoomRelation = userChatRoomRelationRepository.findAllBySellerUserIdOrBuyerUserId(user.getUserId(), user.getUserId());
         List<ChatRoomResponseDto> chatRoomResponseDto = new ArrayList<>();
         for(UserChatRoomRelation userChatRoom : userChatRoomRelation){
-            Optional<UserImage> userImage = null;
-            if(user.equals(userChatRoom.getBuyer())){
-                userImage = userImageRepository.findByUserUserId(userChatRoom.getSeller().getUserId());
+            UserImage userImage = null;
+            if(user.getUserId() == userChatRoom.getBuyer().getUserId()){
+                userImage = userImageRepository.finduserImage(userChatRoom.getSeller().getUserId());
             }
-            if(user.equals(userChatRoom.getSeller())){
-                userImage =userImageRepository.findByUserUserId(userChatRoom.getBuyer().getUserId());
+            if(user.getUserId() == userChatRoom.getSeller().getUserId()){
+                userImage =userImageRepository.finduserImage(userChatRoom.getBuyer().getUserId());
             }
             ChatMessage chatMessage = chatMessageRepository.findChatRoomId(userChatRoom.getChatRoom().getId());
-            ChatRoomResponseDto chatRoomResponseDto1 = new ChatRoomResponseDto(userChatRoom, chatMessage, userImage);
-            chatRoomResponseDto.add(chatRoomResponseDto1);
+            if(userImage != null){
+                chatRoomResponseDto.add(new ChatRoomResponseDto(userChatRoom, chatMessage, userImage));
+            }else{
+                chatRoomResponseDto.add(new ChatRoomResponseDto(userChatRoom, chatMessage));
+            }
         }
        return ResponseEntity.status(HttpStatus.OK.value()).body(chatRoomResponseDto);
     }

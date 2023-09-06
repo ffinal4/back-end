@@ -45,11 +45,11 @@ public class ChatRoomResponseDto {
         this.recentMessageTime = chatMessage.getTime();
     }
 
-    public ChatRoomResponseDto(UserChatRoomRelation userChatRoom, ChatMessage chatMessage, Optional<UserImage> userImage) {
+    public ChatRoomResponseDto(UserChatRoomRelation userChatRoom, ChatMessage chatMessage, UserImage userImage) {
         this.id = userChatRoom.getId();
         this.roomId = userChatRoom.getChatRoom().getRoomId();
         this.imageUrl = userChatRoom.getChatRoom().getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
-        this.userimageUrl = userImage.get().getImageUrl();
+        this.userimageUrl = userImage.getImageUrl();
         this.nickname = userChatRoom.getBuyer().getNickname();
         this.recentMessage = chatMessage.getMessage();
         this.recentMessageTime = chatMessage.getTime();
