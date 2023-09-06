@@ -57,7 +57,7 @@ public class UserController {
 
     @PatchMapping("/users/mypage")
     public ApiResponse<ResponseDto> updateMyPage(@RequestPart(value = "data") @Valid MyPageRequestDto myPageRequestDto,
-                                                        @RequestPart(value = "image") MultipartFile multipartFile,
+                                                        @RequestPart(value = "image", required = false) MultipartFile multipartFile,
                                                         @AuthenticationPrincipal UserDetailsImpl userDetails) throws IOException {
         return userService.updateMyPage(myPageRequestDto, multipartFile, userDetails.getUser());
     }
