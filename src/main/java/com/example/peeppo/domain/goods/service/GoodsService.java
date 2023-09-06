@@ -401,7 +401,7 @@ public class GoodsService {
                 goodsListResponseDtos.add(goodsListResponseDto2);
             }
             goodsRequestResponseDtos.add(new GoodsRequestResponseDto(requestGoods1.getCreatedAt(), requestGoods1.getRequestStatus(), goodsListResponseDto, goodsListResponseDtos));
-        }
+        }//status값 수정
 
         PageResponse response = new PageResponse<>(goodsRequestResponseDtos, pageable, requestGoods.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);

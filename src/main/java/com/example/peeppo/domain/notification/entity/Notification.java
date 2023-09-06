@@ -33,7 +33,7 @@ public class Notification {
 
     private Long requestCount = 0L;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_Id")
     private User user;
 
