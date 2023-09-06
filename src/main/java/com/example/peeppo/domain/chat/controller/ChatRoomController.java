@@ -42,11 +42,16 @@ public class ChatRoomController {
 
     //채팅방 메세지 조회 ( 상세 조회 )
     @GetMapping("/room/{chatId}")
-    public Slice<ChatMessageResponseDto> findChatRoom(@PathVariable("chatId") String roomId,
-                                                      @AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                      Pageable page){
-        return chatService.findMessageById(roomId, userDetails.getUser(),page);
+    public List<ChatMessageResponseDto> findChatRoom(@PathVariable("chatId") String roomId,
+                                                      @AuthenticationPrincipal UserDetailsImpl userDetails){
+        return chatService.findMessageById(roomId, userDetails.getUser());
     }
+    //    @GetMapping("/room/{chatId}")
+//    public Slice<ChatMessageResponseDto> findChatRoom(@PathVariable("chatId") String roomId,
+//                                                      @AuthenticationPrincipal UserDetailsImpl userDetails,
+//                                                      Pageable page){
+//        return chatService.findMessageById(roomId, userDetails.getUser(),page);
+//    }
 
     @DeleteMapping("/room/{chatId}")
     public void deleteRoom(@PathVariable("chatId") String roomId){

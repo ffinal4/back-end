@@ -187,16 +187,33 @@ public class ChatService {
 
     //roomId 기준으로 채팅방 메시지 내용 찾기
     @Transactional(readOnly = true)
-    public Slice<ChatMessageResponseDto> findMessageById(String roomId, User user, Pageable page) {
+    public List<ChatMessageResponseDto> findMessageById(String roomId, User user) {
         ChatRoom chatRoom = findRoomById(roomId);
-        Slice<ChatMessage> chatMessageList = chatMessageRepository.findChatMessagesByChatRoomIdOrderByTimeDesc(chatRoom.getId(), page);
-        return chatMessageList.map(chatMessage -> {
-            User messageUser = userRepository.findById(chatMessage.getSenderId()).orElseThrow(()->
-                    new NullPointerException("유저는 없어요"));
-            boolean checkUser = (Objects.equals(chatMessage.getSenderId(), user.getUserId()));
-            return new ChatMessageResponseDto(chatMessage, messageUser, checkUser);
-        });
+        List<ChatMessage> chatMessageList = chatMessageRepository.findAllChatRoomId(chatRoom.getId());
+        List<ChatMessageResponseDto> chatMessageResponseDtos = new ArrayList<>();
+        for(ChatMessage chatMessage : chatMessageList){
+            boolean checkUser = false;
+            User messageUser = userRepository.findById(chatMessage.getSenderId()).orElse(null);
+            if(chatMessage.getSenderId() == user.getUserId()){
+                checkUser = true;
+            }
+            ChatMessageResponseDto chatMessageResponseDto = new ChatMessageResponseDto(chatMessage, messageUser, checkUser);
+            chatMessageResponseDtos.add(chatMessageResponseDto);
+        }
+        return chatMessageResponseDtos;
     }
+
+//    @Transactional(readOnly = true)
+//    public Slice<ChatMessageResponseDto> findMessageById(String roomId, User user, Pageable page) {
+//        ChatRoom chatRoom = findRoomById(roomId);
+//        Slice<ChatMessage> chatMessageList = chatMessageRepository.findChatMessagesByChatRoomIdOrderByTimeDesc(chatRoom.getId(), page);
+//        return chatMessageList.map(chatMessage -> {
+//            User messageUser = userRepository.findById(chatMessage.getSenderId()).orElseThrow(()->
+//                    new NullPointerException("유저는 없어요"));
+//            boolean checkUser = (Objects.equals(chatMessage.getSenderId(), user.getUserId()));
+//            return new ChatMessageResponseDto(chatMessage, messageUser, checkUser);
+//        });
+//    }
 
     @Transactional
     public void saveMessage(String roomId ,ChatMessageRequestDto chatMessageRequestDto, String token){
