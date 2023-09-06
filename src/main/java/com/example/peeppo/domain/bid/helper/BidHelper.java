@@ -15,7 +15,8 @@ import java.util.Objects;
 public class BidHelper {
     private final BidRepository bidRepository;
 
-    public List<Bid> bidTradeCompleted(List<Long> requestIds, Long userId) {
+    @Transactional
+    public void bidTradeCompleted(List<Long> requestIds, Long userId) {
 
         List<Bid> bidList = bidRepository.findAllById(requestIds);
 
@@ -26,10 +27,10 @@ public class BidHelper {
 //                if (!bid.getBidStatus().equals(BidStatus.SUCCESS)) {
 //                    throw new IllegalArgumentException("정상적인 접근이 아닙니다.");
 //                }
-            bid.changeBidStatus(BidStatus.TRADING);
+            bid.changeBidStatus(BidStatus.DONE);
 //                bidList.add(bid);
         }
-        return bidList;
+        bidRepository.saveAll(bidList);
     }
 }
 
