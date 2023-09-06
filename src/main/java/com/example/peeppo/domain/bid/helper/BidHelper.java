@@ -15,7 +15,6 @@ import java.util.Objects;
 public class BidHelper {
     private final BidRepository bidRepository;
 
-    @Transactional
     public List<Bid> bidTradeCompleted(List<Long> requestIds, Long userId) {
 
         List<Bid> bidList = bidRepository.findAllById(requestIds);
