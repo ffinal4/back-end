@@ -16,12 +16,12 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> 
     List<ChatMessage> findAllByRoomId(String roomId);*/
   /*  List<ChatMessage> findAllByChatRoomAndSenderId(ChatRoom chatRoom, Long userId);*/
 
-    @Query(value = "SELECT c FROM ChatMessage c WHERE c.chatRoom.id = :chatRoom_id ORDER BY c.id DESC")
+    @Query(value = "SELECT c FROM ChatMessage c WHERE c.chatRoom.id = :chatRoom_id ORDER BY c.id")
     List<ChatMessage> findAllChatRoomId(@Param("chatRoom_id")Long id);
 
     @Query(value = "SELECT c FROM ChatMessage c WHERE c.chatRoom.id = :chatRoom_id ORDER BY c.id DESC limit 1")
     ChatMessage findChatRoomId(@Param("chatRoom_id")Long id);
 
-    Slice<ChatMessage> findChatMessagesByChatRoomId(Long id, Pageable page);
+    Slice<ChatMessage> findChatMessagesByChatRoomIdOrderByTimeDesc(Long id, Pageable page);
     // 충돌 List<ChatMessage> findAllByChatRoomRoomId(String roomId);
 }

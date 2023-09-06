@@ -136,26 +136,49 @@ public class ChatService {
     }
 
     //전체 채팅방 조회 => 사용자 마다 !
-    public ResponseEntity<List<ChatRoomResponseDto>> findAllRoom(User user){
+    public ResponseEntity<List<ChatRoomFindAllRoomDto>> findAllRoom(User user){
         List<UserChatRoomRelation> userChatRoomRelation = userChatRoomRelationRepository.findAllBySellerUserIdOrBuyerUserId(user.getUserId(), user.getUserId());
+        List<ChatRoomFindAllRoomDto> chatRoomFindAllRoomDtos = new ArrayList<>();
         List<ChatRoomResponseDto> chatRoomResponseDto = new ArrayList<>();
+        UserImage myImage = userImageRepository.finduserImage(user.getUserId());
         for(UserChatRoomRelation userChatRoom : userChatRoomRelation){
-            UserImage userImage = null;
+            UserImage otherImage = null;
+            String nickname = null;
             if(user.getUserId() == userChatRoom.getBuyer().getUserId()){
-                userImage = userImageRepository.finduserImage(userChatRoom.getSeller().getUserId());
+                otherImage = userImageRepository.finduserImage(userChatRoom.getSeller().getUserId());
+                nickname = userChatRoom.getSeller().getNickname();
             }
-            if(user.getUserId() == userChatRoom.getSeller().getUserId()){
-                userImage =userImageRepository.finduserImage(userChatRoom.getBuyer().getUserId());
+            if(user.getUserId() == userChatRoom.getSeller().getUserId()) {
+                otherImage = userImageRepository.finduserImage(userChatRoom.getBuyer().getUserId());
+                nickname = userChatRoom.getBuyer().getNickname();
             }
             ChatMessage chatMessage = chatMessageRepository.findChatRoomId(userChatRoom.getChatRoom().getId());
-            if(userImage != null){
-                chatRoomResponseDto.add(new ChatRoomResponseDto(userChatRoom, chatMessage, userImage));
+            if(otherImage != null){
+                chatRoomResponseDto.add(new ChatRoomResponseDto(userChatRoom, chatMessage, otherImage, nickname));
             }else{
-                chatRoomResponseDto.add(new ChatRoomResponseDto(userChatRoom, chatMessage));
+                chatRoomResponseDto.add(new ChatRoomResponseDto(userChatRoom, chatMessage, nickname));
             }
         }
-       return ResponseEntity.status(HttpStatus.OK.value()).body(chatRoomResponseDto);
+        if(myImage == null){
+            chatRoomFindAllRoomDtos.add(new ChatRoomFindAllRoomDto(chatRoomResponseDto));
+        }
+        else {
+            chatRoomFindAllRoomDtos.add(new ChatRoomFindAllRoomDto(myImage.getImageUrl(), chatRoomResponseDto));
+        }
+            return ResponseEntity.status(HttpStatus.OK.value()).body(chatRoomFindAllRoomDtos);
     }
+
+
+
+    //            boolean checkSellerUser = false;
+//            if(Objects.equals(user.getUserId(), userChatRoom.getSeller().getUserId())){
+//                checkSellerUser = true;
+//            }
+//            UserImage sellerImage = userImageRepository.finduserImage(userChatRoom.getSeller().getUserId());
+//            UserImage buyerImage = userImageRepository.finduserImage(userChatRoom.getBuyer().getUserId());
+//            if(sellerImage == null){
+//
+//            }
 
     //roomId 기준으로 채팅방 찾기
     public ChatRoom findRoomById(String roomId) {
@@ -164,15 +187,33 @@ public class ChatService {
 
     //roomId 기준으로 채팅방 메시지 내용 찾기
     @Transactional(readOnly = true)
-    public Slice<ChatMessageResponseDto> findMessageById(String roomId, User user, Pageable page) {
+    public List<ChatMessageResponseDto> findMessageById(String roomId, User user) {
         ChatRoom chatRoom = findRoomById(roomId);
-        Slice<ChatMessage> chatMessageList = chatMessageRepository.findChatMessagesByChatRoomId(chatRoom.getId(), page);
-        return chatMessageList.map(chatMessage -> {
+        List<ChatMessage> chatMessageList = chatMessageRepository.findAllChatRoomId(chatRoom.getId());
+        List<ChatMessageResponseDto> chatMessageResponseDtos = new ArrayList<>();
+        for(ChatMessage chatMessage : chatMessageList){
+            boolean checkUser = false;
             User messageUser = userRepository.findById(chatMessage.getSenderId()).orElse(null);
-            boolean checkUser = (chatMessage.getSenderId() == user.getUserId());
-            return new ChatMessageResponseDto(chatMessage, messageUser, checkUser);
-        });
+            if(chatMessage.getSenderId() == user.getUserId()){
+                checkUser = true;
+            }
+            ChatMessageResponseDto chatMessageResponseDto = new ChatMessageResponseDto(chatMessage, messageUser, checkUser);
+            chatMessageResponseDtos.add(chatMessageResponseDto);
+        }
+        return chatMessageResponseDtos;
     }
+
+//    @Transactional(readOnly = true)
+//    public Slice<ChatMessageResponseDto> findMessageById(String roomId, User user, Pageable page) {
+//        ChatRoom chatRoom = findRoomById(roomId);
+//        Slice<ChatMessage> chatMessageList = chatMessageRepository.findChatMessagesByChatRoomIdOrderByTimeDesc(chatRoom.getId(), page);
+//        return chatMessageList.map(chatMessage -> {
+//            User messageUser = userRepository.findById(chatMessage.getSenderId()).orElseThrow(()->
+//                    new NullPointerException("유저는 없어요"));
+//            boolean checkUser = (Objects.equals(chatMessage.getSenderId(), user.getUserId()));
+//            return new ChatMessageResponseDto(chatMessage, messageUser, checkUser);
+//        });
+//    }
 
     @Transactional
     public void saveMessage(String roomId ,ChatMessageRequestDto chatMessageRequestDto, String token){

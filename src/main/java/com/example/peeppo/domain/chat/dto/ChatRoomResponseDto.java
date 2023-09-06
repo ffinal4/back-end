@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.cglib.core.Local;
 
+import java.io.StringBufferInputStream;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -24,8 +25,8 @@ public class ChatRoomResponseDto {
     private Long id;
     private String roomId;
     private String imageUrl; //물품이미지
-
-    private String userimageUrl;
+    private String title;
+    private String otherImageUrl;
     private String nickname;
     private String recentMessage;
     private String recentMessageTime;
@@ -33,24 +34,28 @@ public class ChatRoomResponseDto {
     public ChatRoomResponseDto(ChatRoom chatRoom) {
         this.id = chatRoom.getId();
         this.roomId = chatRoom.getRoomId();
-        this.imageUrl = chatRoom.getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
+        this.imageUrl = chatRoom.getGoods().getImage().get(0).getImageUrl();
     }
 
-    public ChatRoomResponseDto(UserChatRoomRelation userChatRoom, ChatMessage chatMessage) {
+
+
+    public ChatRoomResponseDto(UserChatRoomRelation userChatRoom, ChatMessage chatMessage, UserImage otherImage, String nickname) {
         this.id = userChatRoom.getId();
         this.roomId = userChatRoom.getChatRoom().getRoomId();
-        this.imageUrl = userChatRoom.getChatRoom().getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
-        this.nickname = userChatRoom.getBuyer().getNickname();
+        this.title = userChatRoom.getChatRoom().getGoods().getTitle();
+        this.nickname = nickname;
+        this.imageUrl = userChatRoom.getChatRoom().getGoods().getImage().get(0).getImageUrl();
+        this.otherImageUrl = otherImage.getImageUrl();
         this.recentMessage = chatMessage.getMessage();
         this.recentMessageTime = chatMessage.getTime();
     }
 
-    public ChatRoomResponseDto(UserChatRoomRelation userChatRoom, ChatMessage chatMessage, UserImage userImage) {
+    public ChatRoomResponseDto(UserChatRoomRelation userChatRoom, ChatMessage chatMessage, String nickname) {
         this.id = userChatRoom.getId();
         this.roomId = userChatRoom.getChatRoom().getRoomId();
-        this.imageUrl = userChatRoom.getChatRoom().getGoods().getImage().stream().map(Image::getImageUrl).toList().get(0);
-        this.userimageUrl = userImage.getImageUrl();
-        this.nickname = userChatRoom.getBuyer().getNickname();
+        this.title = userChatRoom.getChatRoom().getGoods().getTitle();
+        this.nickname = nickname;
+        this.imageUrl = userChatRoom.getChatRoom().getGoods().getImage().get(0).getImageUrl();
         this.recentMessage = chatMessage.getMessage();
         this.recentMessageTime = chatMessage.getTime();
     }
