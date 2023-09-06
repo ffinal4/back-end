@@ -4,23 +4,23 @@ import com.example.peeppo.domain.notification.controller.NotificationController;
 import com.example.peeppo.domain.notification.dto.NotificationResponseDto;
 import com.example.peeppo.domain.notification.dto.NotificationUpdateResponseDto;
 import com.example.peeppo.domain.notification.entity.Notification;
+import com.example.peeppo.domain.notification.repository.EmitterRepository;
 import com.example.peeppo.domain.notification.repository.NotificationRepository;
-import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final EmitterRepository emitterRepository;
 
     // 메시지 알림
     public SseEmitter subscribe(Long userId) {
@@ -43,6 +43,32 @@ public class NotificationService {
         return sseEmitter;
     }
 
+    @Transactional
+    public void send(User receiver, Review review, String content) {
+        Notification notification = createNotification(receiver, review, content);
+        String id = String.valueOf(receiver.getId());
+        notificationRepository.save(notification);
+        Map<String, SseEmitter> sseEmitters = emitterRepository.findAllStartWithByUserId(id);
+        sseEmitters.forEach(
+                (key, emitter) -> {
+                    emitterRepository.saveEventCache(key, notification);
+                    sendToClient(emitter, key, NotificationResponse.from(notification));
+                }
+        );
+    }
+
+    private void sendToClient(SseEmitter emitter, String id, Object data) {
+        try {
+            emitter.send(SseEmitter.event()
+                    .id(id)
+                    .name("sse")
+                    .data(data));
+        } catch (IOException exception) {
+            emitterRepository.deleteById(id);
+            throw new RuntimeException("연결 오류!");
+        }
+    }
+
     public NotificationResponseDto getNotification(User user) {
         Notification notification = notificationRepository.findByUserUserId(user.getUserId());
   //      List<NotificationResponseDto> notificationResponseDtos = new ArrayList<>();
@@ -51,7 +77,6 @@ public class NotificationService {
             NotificationResponseDto notificationResponseDto = new NotificationResponseDto(notification.getChecked());
   //          notificationResponseDtos.add(notificationResponseDto);
   //      }
-
         return notificationResponseDto;
     }
 
