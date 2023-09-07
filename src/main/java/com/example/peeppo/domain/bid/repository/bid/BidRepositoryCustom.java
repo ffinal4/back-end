@@ -12,4 +12,6 @@ public interface BidRepositoryCustom {
 
     Long countBidsByUserIdAndAuctionId(Long auctionId, Long userId);
 
+    Long countByAuctionAuctionIdAndGroupByBidUserId(Long auctionId);
+
 }

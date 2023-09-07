@@ -26,8 +26,9 @@ public class AuctionResponseDto {
     private boolean checkSameUser;
     private AuctionStatus auctionStatus;
     private Double lowPrice;
+    private Long dibsCount;
 
-    public AuctionResponseDto(Auction auction, GoodsResponseDto goodsResponseDto, User user, TimeRemaining countDownTime) {
+    public AuctionResponseDto(Auction auction, GoodsResponseDto goodsResponseDto, TimeRemaining countDownTime) {
         this.auctionId = auction.getAuctionId();
         this.deleteStatus = auction.getIsDeleted();
         this.goodsResponseDto = goodsResponseDto;
@@ -38,20 +39,7 @@ public class AuctionResponseDto {
         this.auctionStatus = auction.getAuctionStatus();
     }
 
-    public AuctionResponseDto(Auction auction, Goods goods, TimeRemaining countDownTime, Long bidCount, boolean checkSameUser, String image) {
-        this.auctionId = auction.getAuctionId();
-        this.deleteStatus = auction.getIsDeleted();
-        this.goodsResponseDto = new GoodsResponseDto(goods, image);
-        this.auctionEndTime = auction.getAuctionEndTime();
-        this.createdAt = auction.getCreatedAt();
-        this.modifiedAt = auction.getModifiedAt();
-        this.leftTime = countDownTime;
-        this.bidCount = bidCount;
-        this.auctionStatus = auction.getAuctionStatus();
-        this.checkSameUser = checkSameUser;
-    }
-
-    public AuctionResponseDto(Auction auction, Goods goods, TimeRemaining countDownTime, Long bidCount, boolean checkSameUser, List<String> image) {
+    public AuctionResponseDto(Auction auction, Goods goods, TimeRemaining countDownTime, Long bidCount, boolean checkSameUser, List<String> image, Long dibsCount) {
         this.auctionId = auction.getAuctionId();
         this.deleteStatus = auction.getIsDeleted();
         this.goodsResponseDto = new GoodsResponseDto(goods, image);
@@ -63,6 +51,7 @@ public class AuctionResponseDto {
         this.checkSameUser = checkSameUser;
         this.auctionStatus = auction.getAuctionStatus();
         this.lowPrice = auction.getLowPrice();
+        this.dibsCount = dibsCount;
     }
 }
 

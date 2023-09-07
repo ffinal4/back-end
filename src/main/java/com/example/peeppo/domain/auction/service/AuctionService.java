@@ -109,7 +109,7 @@ public class AuctionService {
         auction.getGoods().changeStatus(GoodsStatus.ONAUCTION);
         auction.changeAuctionStatus(AuctionStatus.AUCTION);
         auctionRepository.save(auction);
-        return new AuctionResponseDto(auction, goodsResponseDto, user, auctionHelper.countDownTime(auction));
+        return new AuctionResponseDto(auction, goodsResponseDto, auctionHelper.countDownTime(auction));
     }
 
     // 마감시간 계산
@@ -196,6 +196,7 @@ public class AuctionService {
                 .stream().map(Image::getImageUrl).collect(Collectors.toList());
 
         List<Auction> auctionList = auctionRepository.findTop20ByAuctionStatus(AuctionStatus.AUCTION);
+        Long dibsCount = dibsRepository.countByGoodsGoodsIdAndGoodsIsDeletedFalse(auction.getGoods().getGoodsId());
         List<AuctionListResponseDto> AuctionListResponseDtos = new ArrayList<>();
         for (Auction recommendAuction : auctionList) {
             TimeRemaining timeRemaining = auctionHelper.countDownTime(recommendAuction);
@@ -209,7 +210,7 @@ public class AuctionService {
                             checkDibs));
         }
 
-        AuctionResponseDto auctionResponseDto = new AuctionResponseDto(auction, auction.getGoods(), auctionHelper.countDownTime(auction), findBidCount(auctionId), checkSameUser, imageUrls);
+        AuctionResponseDto auctionResponseDto = new AuctionResponseDto(auction, auction.getGoods(), auctionHelper.countDownTime(auction), findBidCount(auctionId), checkSameUser, imageUrls, dibsCount);
         return new GetAuctionResponseDto(AuctionListResponseDtos, auctionResponseDto);
     }
 
@@ -377,7 +378,7 @@ public class AuctionService {
 
     // 경매 입찰 수
     public Long findBidCount(Long id) {
-        return bidRepository.countByAuctionAuctionId(id);
+        return bidRepository.countByAuctionAuctionIdAndGroupByBidUserId(id);
     }
 
 

@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface AuctionRepository extends JpaRepository<Auction, Long>{
+public interface AuctionRepository extends JpaRepository<Auction, Long>, AuctionRepositoryCustom{
     Page<Auction> findByUserUserIdAndAuctionStatus(Long userId, Pageable pageable, AuctionStatus auctionStatus);
 
 
