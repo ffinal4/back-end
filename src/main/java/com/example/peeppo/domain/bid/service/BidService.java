@@ -114,7 +114,7 @@ public class BidService {
         for (Bid bid : bidPage) {
             List<Long> bidList = bidRepository.findBidIdByUserUserIdAndAuctionAuctionId(bid.getUser().getUserId(), auctionId);
             String imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(bid.getGoods().getGoodsId()).getImageUrl();
-            Long bidCount = bidRepository.countBidsByUserIdAndAuctionId(bid.getAuction().getAuctionId(), bid.getUser().getUserId());
+            Long bidCount = bidRepository.countBidsByUserIdAndAuctionId(auctionId, bid.getUser().getUserId());
             bidResponseListDtos.add(new BidResponseListDto(bidList, bid, imageUrl, bidCount));
         }
         return new PageResponse<>(bidResponseListDtos, pageable, bidPage.getTotalElements());
@@ -172,7 +172,7 @@ public class BidService {
     }
 
     public Long findBidCount(Long id) {
-        return bidRepository.countByAuctionAuctionId(id);
+        return auctionRepository.countByAuctionAuctionIdAndGroupByBidUserId(id);
     }
 
     public TimeRemaining countDownTime(Auction auction) {
