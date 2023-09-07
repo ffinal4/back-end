@@ -142,6 +142,7 @@ public class AuctionService {
     public Page<AuctionListResponseDto> findAllAuction(int i, int size, String sortBy, boolean isAsc, String categoryStr, UserDetailsImpl userDetails) {
         Pageable pageable = paging(i, size, sortBy, isAsc);
         Page<Auction> auctionPage;
+        List<Goods> goodsList = new ArrayList<>();
         if (categoryStr != null) {
             try {
                 Category category = Category.valueOf(categoryStr);
@@ -153,15 +154,15 @@ public class AuctionService {
                             List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
                             if (bid.isEmpty()) {    //체크해보세요 안먹히는거 같아요
                                 auction.changeAuctionStatus(CANCEL);
+                                auction.getGoods().changeStatus(ONSALE);
+                                goodsList.add(auction.getGoods());
                             } else {
                                 auction.changeAuctionStatus(AuctionStatus.END);
                             }
                         }
                     }
                 }
-                auctionRepository.saveAll(auctionPage);
 
-                return findAllAuction(auctionPage, pageable, userDetails);
             } catch (IllegalArgumentException e) {
                 log.error("올바르지 않은 카테고리입니다.");
                 throw new IllegalArgumentException("올바르지 않은 카테고리입니다.");
@@ -175,15 +176,18 @@ public class AuctionService {
                     List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
                     if (bid.isEmpty()) {
                         auction.changeAuctionStatus(CANCEL);
+                        auction.getGoods().changeStatus(ONSALE);
+                        goodsList.add(auction.getGoods());
                     } else {
                         auction.changeAuctionStatus(AuctionStatus.END);
                     }
                 }
             }
-            auctionRepository.saveAll(auctionPage);
 
-            return findAllAuction(auctionPage, pageable, userDetails);
         }
+        goodsRepository.saveAll(goodsList);
+        auctionRepository.saveAll(auctionPage);
+        return findAllAuction(auctionPage, pageable, userDetails);
     }
 
     // 경매 상세 조회
@@ -450,8 +454,7 @@ public class AuctionService {
 
             goodsRepository.saveAll(goodsList);
             bidRepository.saveAll(bidList);
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("경매 등록자만 가능합니다.");
         }
         return new ApiResponse<>(true, new MsgResponseDto("경매가 완료됐습니다."), null);
