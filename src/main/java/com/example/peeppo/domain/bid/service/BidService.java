@@ -105,7 +105,6 @@ public class BidService {
                 throw new IllegalAccessException();
             }
         }
-        eventPublisher.publishEvent(new AuctionEvent(auction, bidList));
 
         bidRepository.saveAll(bidList);
 

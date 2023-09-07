@@ -56,7 +56,7 @@ public interface RequestRepository extends JpaRepository<RequestGoods, Long> {
     Page<User> findByReceiveUser(@Param("user_id")Long userId, Pageable pageable);
 
     @Query("SELECT DISTINCT r.seller FROM RequestGoods r WHERE r.user.userId = :user_id and r.receiveUser = :user_id2 and r.seller.isDeleted = false and r.buyer.isDeleted = false ")
-    List<Goods> findByBuyerUserAndSeller(@Param("user_id")Long userId, @Param("user_id2")Long userId1);
+    List<Goods> findByBuyerUserAndSeller(@Param("user_id")Long userId, @Param("user_id2")Long userId2);
 
 //    @Query("SELECT DISTINCT r.seller FROM RequestGoods r WHERE r.user.userId = :user_id and r.receiveUser = :user_id2 ")
 //    List<RequestGoods> findByBuyerUserAndSeller(@Param("user_id")Long userId, @Param("user_id2")Long userId1);
@@ -68,4 +68,7 @@ public interface RequestRepository extends JpaRepository<RequestGoods, Long> {
 
     @Query("SELECT r FROM RequestGoods r WHERE r.buyer.goodsId = :buyer_goods_id and r.receiveUser= :user_id and r.requestStatus= :request_status and r.seller.isDeleted = false and r.buyer.isDeleted = false ")
     RequestGoods findBuyerGoodsIdAndUserId(@Param("buyer_goods_id") Long requestGoodsId, @Param("user_id") Long userId, @Param("request_status") RequestStatus requestStatus);
+
+    @Query("SELECT DISTINCT r.seller FROM RequestGoods r WHERE r.user.userId = :user_id and r.receiveUser = :user_id2 and r.seller.isDeleted = false and r.buyer.isDeleted = false and r.requestStatus = :request_status")
+    List<Goods> findByBuyerUserAndSellerAndRequestStatus(@Param("user_id")Long userId, @Param("user_id2")Long userId2,@Param("request_status") RequestStatus requestStatus1);
 }

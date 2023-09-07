@@ -413,8 +413,8 @@ public class GoodsService {
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
         Page<User> requestGoods;
-        RequestStatus requestStatus1;
-        userRatingHelper.getUser(user.getUserId());
+        RequestStatus requestStatus1 = null;
+        List<Goods> requestGoods1 = new ArrayList<>();
 
         List<GoodsRequestResponseDto> goodsRequestResponseDtos = new ArrayList<>();
 
@@ -429,7 +429,11 @@ public class GoodsService {
 //2) requestGoods 순회하면서 buyerGoods 찾아오기
 
         for (User buyer : requestGoods) {
-            List<Goods> requestGoods1 = requestRepository.findByBuyerUserAndSeller(buyer.getUserId(), user.getUserId()); //seller의 굿즈를 찾아왔어
+            if (requestStatusStr != null) {
+                requestGoods1 = requestRepository.findByBuyerUserAndSellerAndRequestStatus(buyer.getUserId(), user.getUserId(), requestStatus1); //seller의 굿즈를 찾아왔어
+            } else {
+                requestGoods1 = requestRepository.findByBuyerUserAndSeller(buyer.getUserId(), user.getUserId());
+            }
             for (Goods goods : requestGoods1) {
                 LocalDateTime createAt = null;
                 RequestStatus requestStatus = null;
