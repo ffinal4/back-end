@@ -270,8 +270,6 @@ public class AuctionService {
         }).collect(Collectors.toList());
         bidRepository.saveAll(saveBidList);
 
-        eventPublisher.publishEvent(new AuctionEvent(auction, saveBidList));
-
         user.userPointAdd(10L);
         userRepository.save(user);
 
