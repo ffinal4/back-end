@@ -4,13 +4,12 @@ import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 import static com.example.peeppo.domain.auction.entity.QAuction.auction;
+import static com.example.peeppo.domain.bid.entity.QBid.bid;
 
 public class AuctionRepositoryCustomImpl implements AuctionRepositoryCustom {
 
@@ -42,6 +41,14 @@ public class AuctionRepositoryCustomImpl implements AuctionRepositoryCustom {
                 .limit(pageable.getPageSize())
                 .fetch();
 
+    }
+    @Override
+    public Long countByAuctionAuctionIdAndGroupByBidUserId(Long auctionId){
+        return queryFactory.selectFrom(auction)
+                .where(auction.auctionId.eq(auctionId))
+                .innerJoin(bid).on(auction.eq(bid.auction))
+                .groupBy(bid.user)
+                .fetchCount();
     }
 
 }

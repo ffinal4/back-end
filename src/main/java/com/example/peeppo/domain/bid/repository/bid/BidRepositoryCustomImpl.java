@@ -48,4 +48,16 @@ public class BidRepositoryCustomImpl extends QuerydslRepositorySupport implement
                         .and(bid.auction.auctionId.eq(auctionId)))
                 .fetchOne();
     }
+    @Override
+    public Long countByAuctionAuctionIdAndGroupByBidUserId(Long auctionId) {
+        return queryFactory
+                .select(bid.count())
+                .from(bid)
+                .where(bid.auction.auctionId.eq(auctionId)
+                        .and(bid.goods.isDeleted.eq(false)))
+                .groupBy(bid.user.userId)
+                .fetchCount();
+    }
+
+
 }
