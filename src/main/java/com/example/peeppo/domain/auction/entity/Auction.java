@@ -44,11 +44,6 @@ public class Auction extends Timestamped {
     @JoinColumn(name = "user_id")
     private User user;
 
-/*
-    @OneToMany(mappedBy = "auction")
-    private List<AuctionList> auctionList = new ArrayList<AuctionList>();
-//두 객체중 하나의 객체만 테이블을 관리할 수 있도록 정하는 것이 MappedBy 옵션
-*/
     @OneToOne(cascade = CascadeType.DETACH) // 부모가 삭제되어도 자식은 남아있도록
     @JoinColumn(name = "goods_id")
     private Goods goods;

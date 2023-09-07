@@ -54,21 +54,6 @@ public class BidController {
         return bidService.sellectBids(auctionId, userId);
     }
 
-    @PostMapping("/auction/{auctionId}/choice/bids")
-    public ApiResponse<ResponseDto> choiceBids(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                  @PathVariable Long auctionId,
-                                                  @Valid @RequestBody ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
-
-        return ResponseUtils.ok(bidService.choiceBids(userDetails.getUser(), auctionId, choiceRequestDto));
-    }
-
-    @PutMapping("/auction/{auctionId}/choice/bids")
-    public ApiResponse<ResponseDto> choiceUpdateBids(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                                        @PathVariable Long auctionId,
-                                                        @Valid @RequestBody ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
-
-        return ResponseUtils.ok(bidService.choiceUpdateBids(userDetails.getUser(), auctionId, choiceRequestDto));
-    }
 
     //교환 요청 페이지(입찰 경매)
     @GetMapping("/bid/users/trade")
