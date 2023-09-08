@@ -199,7 +199,7 @@ public class AuctionService {
         List<String> imageUrls = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAsc(auction.getGoods().getGoodsId())
                 .stream().map(Image::getImageUrl).collect(Collectors.toList());
 
-        List<Auction> auctionList = auctionRepository.findTop20ByAuctionStatus(AuctionStatus.AUCTION);
+        List<Auction> auctionList = auctionRepository.findTop20ByAuctionStatus(AuctionStatus.AUCTION, auctionId, user.getUserId());
         Long dibsCount = dibsRepository.countByGoodsGoodsIdAndGoodsIsDeletedFalse(auction.getGoods().getGoodsId());
         List<AuctionListResponseDto> AuctionListResponseDtos = new ArrayList<>();
         for (Auction recommendAuction : auctionList) {
