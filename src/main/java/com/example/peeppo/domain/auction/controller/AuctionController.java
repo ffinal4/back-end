@@ -4,7 +4,6 @@ package com.example.peeppo.domain.auction.controller;
 import com.amazonaws.Response;
 import com.example.peeppo.domain.auction.dto.*;
 import com.example.peeppo.domain.auction.entity.Auction;
-import com.example.peeppo.domain.auction.entity.AuctionList;
 import com.example.peeppo.domain.auction.dto.AuctionListResponseDto;
 import com.example.peeppo.domain.auction.dto.AuctionRequestDto;
 import com.example.peeppo.domain.auction.dto.AuctionResponseDto;

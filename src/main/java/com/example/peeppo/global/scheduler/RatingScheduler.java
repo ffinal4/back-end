@@ -5,6 +5,7 @@ import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.rating.helper.RatingHelper;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -13,6 +14,7 @@ import java.util.List;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.ONSALE;
 
 @Component
+@DynamicUpdate
 @RequiredArgsConstructor
 public class RatingScheduler {
     private final GoodsRepository goodsRepository;

@@ -4,14 +4,10 @@ import com.example.peeppo.domain.auction.dto.GetAuctionBidResponseDto;
 import com.example.peeppo.domain.auction.dto.TestListResponseDto;
 import com.example.peeppo.domain.auction.dto.TimeRemaining;
 import com.example.peeppo.domain.auction.entity.Auction;
-import com.example.peeppo.domain.auction.event.AuctionEvent;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.bid.dto.*;
 import com.example.peeppo.domain.bid.entity.Bid;
-import com.example.peeppo.domain.bid.entity.Choice;
 import com.example.peeppo.domain.bid.enums.BidStatus;
-import com.example.peeppo.domain.bid.repository.ChoiceBidRepository;
-import com.example.peeppo.domain.bid.repository.QueryRepository;
 import com.example.peeppo.domain.bid.repository.bid.BidRepository;
 import com.example.peeppo.domain.dibs.repository.DibsRepository;
 import com.example.peeppo.domain.goods.entity.Goods;
@@ -53,8 +49,6 @@ public class BidService {
     private final AuctionRepository auctionRepository;
     private final GoodsRepository goodsRepository;
     private final ImageRepository imageRepository;
-    private final QueryRepository queryRepository;
-    private final ChoiceBidRepository choiceBidRepository;
     private final RatingGoodsRepository ratingGoodsRepository;
     private final NotificationRepository notificationRepository;
     private final DibsRepository dibsRepository;
@@ -142,57 +136,7 @@ public class BidService {
 
         return new ApiResponse<>(true, bidDetailResponseDtos, null);
     }
-
-    //경매자가 선택
-    public ResponseDto choiceBids(User user, Long auctionId, ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
-        Auction auction = getAuction(auctionId);
-        userRatingHelper.getUser(user.getUserId());
-        if (!auction.getUser().getUserId().equals(user.getUserId())) {
-            throw new IllegalAccessException("잘못된 접근입니다. 다시 시도해주세요.");
-        }
-        List<Bid> bidList = new ArrayList<>();
-        for (Long bidId : choiceRequestDto.getBidId()) {
-            Bid bid = bidRepository.findById(bidId)
-                    .orElseThrow(() -> new NullPointerException("존재하지 않는 입찰품입니다."));
-            bid.select();
-            bidList.add(bid);
-        }
-        bidRepository.saveAll(bidList);
-        return new ResponseDto("선택이 완료되었습니다.", HttpStatus.OK.value(), "OK");
-    }
-
-    //경매자가 선택 바꾸는 기능
-    public ResponseDto choiceUpdateBids(User user, Long auctionId, ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
-        Auction auction = getAuction(auctionId);
-        userRatingHelper.getUser(user.getUserId());
-        List<Choice> bidsList = new ArrayList<>();
-        List<Choice> findAllChoice = queryRepository.findChoice(auctionId);
-
-        if (auction.getUser().getUserId().equals(user.getUserId())) {
-            for (Choice choice : findAllChoice) {
-                choiceBidRepository.delete(choice);
-            }
-
-            getBiddingList(choiceRequestDto, auction, bidsList);
-        } else {
-            throw new IllegalAccessException();
-        }
-
-        return new ResponseDto("재선택 되었습니다.", HttpStatus.OK.value(), "OK");
-    }
-
-    private void getBiddingList(ChoiceRequestDto choiceRequestDto, Auction auction, List<Choice> bidsList) throws IllegalAccessException {
-        for (Long bidId : choiceRequestDto.getBidId()) {
-            Bid bid = getBid(bidId);
-
-            if (!auction.getAuctionId().equals(bid.getAuction().getAuctionId())) {
-                throw new IllegalAccessException();
-            }
-            bidsList.add(new Choice(bid, auction));
-        }
-
-        choiceBidRepository.saveAll(bidsList);
-    }
+    
 
     public ResponseEntity<Page<GetAuctionBidResponseDto>> bidTradeList(User user, int page, int size, String sortBy, boolean isAsc,
                                                                        String bidStatus1) {
@@ -244,11 +188,6 @@ public class BidService {
     private Bid getBid(Long bidId) {
         return bidRepository.findById(bidId).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 bidId 입니다."));
-    }
-
-    private Choice getChoice(Long choiceId) {
-        return choiceBidRepository.findById(choiceId).orElseThrow(
-                () -> new IllegalArgumentException("존재하지 않는 choiceId 입니다."));
     }
 
     private Auction getAuction(Long auctionId) {
