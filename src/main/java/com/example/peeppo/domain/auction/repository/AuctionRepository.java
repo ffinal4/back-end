@@ -3,6 +3,7 @@ package com.example.peeppo.domain.auction.repository;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.bid.enums.BidStatus;
+import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.enums.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +35,9 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
     @Query(value = "SELECT a.* FROM auction a WHERE a.auction_Status = auction_Status ORDER BY a.auction_end_time Desc LIMIT 20", nativeQuery = true)
     List<Auction> findTop20ByAuctionStatus(AuctionStatus auctionStatus);
 
+//    @Query(value = "SELECT a.* FROM auction a WHERE a.auction_Status = auction_Status ORDER BY a.auction_end_time LIMIT 20", nativeQuery = true)
+//    List<Auction> findTop20ByAuctionStatus(AuctionStatus auctionStatus);
+
     @Query("SELECT DISTINCT b.auction FROM Bid b WHERE b.user.userId = :user_id")
     Page<Auction> findAuctionListByUserUserId(@Param("user_id") Long userId, Pageable pageable);
 
@@ -44,4 +48,6 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
     List<Auction> findByAuctionStatus(AuctionStatus auction);
 
     Long countByUserUserIdAndAuctionStatus(Long userId, AuctionStatus auctionStatus);
+
+    Auction findByGoodsGoodsId(Long goodsId);
 }

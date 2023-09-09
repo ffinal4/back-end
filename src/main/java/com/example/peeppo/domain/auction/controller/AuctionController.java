@@ -60,7 +60,7 @@ public class AuctionController {
         return ResponseUtils.ok(auctionService.findAuctionById(auctionId, userDetails.getUser()));
     }
 
-    // 경매 정상 종료 -> 우선 입찰 물품 전체 보여주기 -> 입찰 물품 선택
+    // 경매 낙찰하기
     @PostMapping("/{auctionId}/pick/bid/list")
     public ApiResponse<?> endAuction(@PathVariable("auctionId") Long auctionId,
                                      @Valid @RequestBody ChoiceRequestDto choiceRequestDto,
