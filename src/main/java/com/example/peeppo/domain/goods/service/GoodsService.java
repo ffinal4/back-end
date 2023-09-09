@@ -419,7 +419,7 @@ public class GoodsService {
         List<GoodsRequestResponseDto> goodsRequestResponseDtos = new ArrayList<>();
 
         if (requestStatusStr != null) {
-// 받는사람과 요청상태로 user 전부 찾아오기(중복X)
+// 받는사람과 요청상태로 user 전부 찾아오기(중복X) => 나 -> 지원  나 -> 지원 나,지훈 -> 지원
             requestStatus1 = RequestStatus.valueOf(requestStatusStr);
             requestGoods = requestRepository.findByReceiveUserAndRequestStatus(user.getUserId(), requestStatus1, pageable);
         } else {
