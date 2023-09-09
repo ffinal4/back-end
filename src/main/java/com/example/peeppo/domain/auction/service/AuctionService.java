@@ -81,6 +81,9 @@ public class AuctionService {
     public AuctionResponseDto createAuction(Long goodsId, AuctionRequestDto auctionRequestDto, User user) {
         userRatingHelper.getUser(user.getUserId());
         checkGoodsUsername(goodsId, user);
+        if(auctionRepository.findByGoodsGoodsId(goodsId) != null){
+            throw new IllegalArgumentException("이미 경매에 등록했던 물품입니다.");
+        }
         if (user.getUserPoint() < 10) {
             throw new IllegalArgumentException("경매 등록에는 10p가 필요합니다. 현재" + user.getUserPoint() + "포인트를 가지고 있습니다.");
         }
@@ -107,7 +110,7 @@ public class AuctionService {
         log.info("{}", auctionEndTime);
         Auction auction = new Auction(getGoods, auctionEndTime, user, ratingGoods, auctionRequestDto.getLowPrice()); // 경매와 마감기한 생성
         auction.getGoods().changeStatus(GoodsStatus.ONAUCTION);
-        auction.changeAuctionStatus(AuctionStatus.AUCTION);
+        auction.changeAuctionStatus(AUCTION);
         auctionRepository.save(auction);
         return new AuctionResponseDto(auction, goodsResponseDto, auctionHelper.countDownTime(auction));
     }
@@ -275,10 +278,13 @@ public class AuctionService {
         }).collect(Collectors.toList());
         bidRepository.saveAll(saveBidList);
 
+        auction.changeAuctionStatus(TRADING);
+        auction.changeDeleteStatus(true);
+        auctionRepository.save(auction);
+
         user.userPointAdd(10L);
         userRepository.save(user);
 
-        auction.changeDeleteStatus(true);
     }
 
     public ResponseEntity<Page<TestListResponseDto>> auctionTradeList(User user, int page, int size, String sortBy, boolean isAsc,

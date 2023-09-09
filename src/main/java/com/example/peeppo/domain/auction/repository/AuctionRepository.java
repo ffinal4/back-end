@@ -3,6 +3,7 @@ package com.example.peeppo.domain.auction.repository;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
 import com.example.peeppo.domain.bid.enums.BidStatus;
+import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.enums.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -44,4 +45,6 @@ public interface AuctionRepository extends JpaRepository<Auction, Long>, Auction
     List<Auction> findByAuctionStatus(AuctionStatus auction);
 
     Long countByUserUserIdAndAuctionStatus(Long userId, AuctionStatus auctionStatus);
+
+    Auction findByGoodsGoodsId(Long goodsId);
 }
