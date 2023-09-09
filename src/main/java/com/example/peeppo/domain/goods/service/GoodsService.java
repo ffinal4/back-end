@@ -423,10 +423,12 @@ public class GoodsService {
                 throw new IllegalArgumentException("올바르지 않은 상태값입니다.");
             }
             requestGoodsList = requestRepository.findBySellerGoodsIdAndUserIdGroupAndStatus(user.getUserId(), pageable, requestStatus1);
+
         } else {
             requestGoodsList = requestRepository.findBySellerGoodsIdAndUserIdGroup(user.getUserId(), pageable);
             }
         List<GoodsRequestResponseDto> finalResponseDto = new ArrayList<>();
+
 //2) requestGoods 순회하면서 buyerGoods 찾아오기
         for (RequestGoods requestGoods2 : requestGoodsList) {
             LocalDateTime createAt = null;
@@ -440,6 +442,7 @@ public class GoodsService {
                 requestStatus = requestGoods3.getRequestStatus();
                 RequestSingleResponseDto goodsListResponseDtos2 = new RequestSingleResponseDto(requestGoods3.getBuyer());
                 goodsListResponseDtos.add(goodsListResponseDtos2);
+
 
             }
             finalResponseDto.add(new GoodsRequestResponseDto(createAt, requestStatus, goodsListResponseDto, goodsListResponseDtos));
