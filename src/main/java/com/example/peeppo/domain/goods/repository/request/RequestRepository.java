@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface RequestRepository extends JpaRepository<RequestGoods, Long> {
+public interface RequestRepository extends JpaRepository<RequestGoods, Long>, RequestRepositoryCustom {
 
   //  Page<RequestGoods> findByUserUserIdAndRequestStatus(Long userId, Pageable pageable, RequestStatus requestStatus);
 
@@ -43,6 +43,9 @@ public interface RequestRepository extends JpaRepository<RequestGoods, Long> {
     @Query("SELECT r FROM RequestGoods r WHERE r.seller.goodsId = :seller_goods_id and r.seller.isDeleted = false and r.buyer.isDeleted = false ORDER BY r.requestId LIMIT 1 ")
     RequestGoods findBySellerGoodsId(@Param("seller_goods_id")Long id);
 
+    @Query("SELECT r FROM RequestGoods r WHERE r.seller.goodsId = :seller_goods_id and r.seller.isDeleted = false and r.buyer.isDeleted = false ORDER BY r.requestId ")
+    List<RequestGoods> findBySellerGoodsIds(@Param("seller_goods_id")Long id);
+
     @Query("SELECT DISTINCT r.seller FROM RequestGoods r WHERE r.receiveUser = :user_id and r.requestStatus= :request_status and r.seller.isDeleted = false and r.buyer.isDeleted = false ")
     Page<Goods> findSellerByReceiveUserAndRequestStatus(@Param("user_id") Long userId, @Param("request_status")  RequestStatus requestStatus, Pageable pageable);
 
@@ -71,4 +74,5 @@ public interface RequestRepository extends JpaRepository<RequestGoods, Long> {
 
     @Query("SELECT DISTINCT r.seller FROM RequestGoods r WHERE r.user.userId = :user_id and r.receiveUser = :user_id2 and r.seller.isDeleted = false and r.buyer.isDeleted = false and r.requestStatus = :request_status")
     List<Goods> findByBuyerUserAndSellerAndRequestStatus(@Param("user_id")Long userId, @Param("user_id2")Long userId2,@Param("request_status") RequestStatus requestStatus1);
+
 }
