@@ -419,14 +419,13 @@ public class GoodsService {
         List<GoodsRequestResponseDto> goodsRequestResponseDtos = new ArrayList<>();
 
         if (requestStatusStr != null) {
-//1) requestgoods 테이블에서 seller goods 전부 찾아오기 => DTO 변환해주기
+// 받는사람과 요청상태로 user 전부 찾아오기(중복X)
             requestStatus1 = RequestStatus.valueOf(requestStatusStr);
             requestGoods = requestRepository.findByReceiveUserAndRequestStatus(user.getUserId(), requestStatus1, pageable);
         } else {
             requestGoods = requestRepository.findByReceiveUser(user.getUserId(), pageable);
         }
         List<GoodsRequestResponseDto> finalResponseDto = new ArrayList<>();
-//2) requestGoods 순회하면서 buyerGoods 찾아오기
 
         for (User buyer : requestGoods) {
             if (requestStatusStr != null) {
