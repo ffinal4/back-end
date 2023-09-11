@@ -13,12 +13,10 @@ public class NotificationResponseDto {
 
     private Boolean checked;
     private String content;
-    private String url;
     private NotificationStatus notificationStatus;
 
     public NotificationResponseDto(Notification notification) {
         this.content = notification.getContent();
-        this.url = notification.getUrl();
         this.notificationStatus = notification.getNotificationStatus();
     }
 

@@ -8,9 +8,5 @@ import java.util.List;
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
     List<Notification> findAllByUserUserIdOrderByCreatedAtDesc(Long userId);
 
-    Long countByUserUserIdAndIsAuction(Long userId, Boolean checked);
-
-    Long countByUserUserIdAndIsRequest(Long userId, Boolean checked);
-
     Notification findByUserUserId(Long userId);
 }
