@@ -23,7 +23,9 @@ import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.domain.notification.entity.Notification;
+import com.example.peeppo.domain.notification.enums.NotificationStatus;
 import com.example.peeppo.domain.notification.repository.NotificationRepository;
+import com.example.peeppo.domain.notification.service.NotificationService;
 import com.example.peeppo.domain.rating.entity.RatingGoods;
 import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
 import com.example.peeppo.domain.user.dto.ResponseDto;
@@ -71,6 +73,7 @@ public class AuctionService {
     private final RatingGoodsRepository ratingGoodsRepository;
     private final DibsRepository dibsRepository;
     private final NotificationRepository notificationRepository;
+    private final NotificationService notificationService;
     private final ImageRepository imageRepository;
     private final AuctionHelper auctionHelper;
     private final ApplicationEventPublisher eventPublisher;
@@ -284,7 +287,8 @@ public class AuctionService {
 
         user.userPointAdd(10L);
         userRepository.save(user);
-
+        notificationService.send(auction.getUser(), NotificationStatus.AUCTION, "경매가 종료되었습니다");
+        notificationService.send(saveBidList.get(0).getUser(), NotificationStatus.AUCTION, "낙찰되었습니다");
     }
 
     public ResponseEntity<Page<TestListResponseDto>> auctionTradeList(User user, int page, int size, String sortBy, boolean isAsc,

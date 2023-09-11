@@ -22,21 +22,37 @@ public class QNotification extends EntityPathBase<Notification> {
 
     public static final QNotification notification = new QNotification("notification");
 
+    public final com.example.peeppo.global.utils.QTimestamped _super = new com.example.peeppo.global.utils.QTimestamped(this);
+
     public final NumberPath<Long> auctionCount = createNumber("auctionCount", Long.class);
 
     public final BooleanPath checked = createBoolean("checked");
+
+    public final StringPath content = createString("content");
+
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> createdAt = _super.createdAt;
 
     public final BooleanPath isAuction = createBoolean("isAuction");
 
     public final BooleanPath isMessage = createBoolean("isMessage");
 
+    public final BooleanPath isRead = createBoolean("isRead");
+
     public final BooleanPath isRequest = createBoolean("isRequest");
 
     public final NumberPath<Long> messageCount = createNumber("messageCount", Long.class);
 
+    //inherited
+    public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
+
     public final NumberPath<Long> notificationId = createNumber("notificationId", Long.class);
 
+    public final EnumPath<com.example.peeppo.domain.notification.enums.NotificationStatus> notificationStatus = createEnum("notificationStatus", com.example.peeppo.domain.notification.enums.NotificationStatus.class);
+
     public final NumberPath<Long> requestCount = createNumber("requestCount", Long.class);
+
+    public final StringPath url = createString("url");
 
     public final com.example.peeppo.domain.user.entity.QUser user;
 
