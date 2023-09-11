@@ -1,4 +1,4 @@
-package com.example.peeppo.domain.user.helper.repository;
+package com.example.peeppo.domain.user.repository;
 
 import com.example.peeppo.domain.user.entity.User;
 

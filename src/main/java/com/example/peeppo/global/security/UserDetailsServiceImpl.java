@@ -1,7 +1,7 @@
 package com.example.peeppo.global.security;
 
 import com.example.peeppo.domain.user.entity.User;
-import com.example.peeppo.domain.user.helper.repository.UserRepository;
+import com.example.peeppo.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

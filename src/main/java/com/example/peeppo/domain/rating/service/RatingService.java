@@ -11,7 +11,7 @@ import com.example.peeppo.domain.rating.helper.RatingHelper;
 import com.example.peeppo.domain.rating.repository.ratingRepository.RatingRepository;
 import com.example.peeppo.domain.user.dto.RatingUserResponseDto;
 import com.example.peeppo.domain.user.entity.User;
-import com.example.peeppo.domain.user.helper.repository.UserRepository;
+import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

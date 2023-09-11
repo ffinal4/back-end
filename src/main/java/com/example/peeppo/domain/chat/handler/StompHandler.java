@@ -3,7 +3,7 @@ package com.example.peeppo.domain.chat.handler;
 import com.example.peeppo.domain.chat.entity.ChatRoom;
 import com.example.peeppo.domain.chat.service.ChatService;
 import com.example.peeppo.domain.user.entity.User;
-import com.example.peeppo.domain.user.helper.repository.UserRepository;
+import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

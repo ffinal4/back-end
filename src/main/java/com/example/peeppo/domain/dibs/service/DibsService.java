@@ -9,7 +9,7 @@ import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.domain.user.dto.CheckResponseDto;
 import com.example.peeppo.domain.user.entity.User;
-import com.example.peeppo.domain.user.helper.repository.UserRepository;
+import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

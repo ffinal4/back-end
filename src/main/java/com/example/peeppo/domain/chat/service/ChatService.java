@@ -13,7 +13,7 @@ import com.example.peeppo.domain.goods.repository.request.RequestRepository;
 import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.image.repository.UserImageRepository;
 import com.example.peeppo.domain.user.entity.User;
-import com.example.peeppo.domain.user.helper.repository.UserRepository;
+import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.security.jwt.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;

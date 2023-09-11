@@ -1,7 +1,7 @@
 package com.example.peeppo.domain.user.helper;
 
 import com.example.peeppo.domain.user.entity.User;
-import com.example.peeppo.domain.user.helper.repository.UserRepository;
+import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.exception.CustomTokenException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

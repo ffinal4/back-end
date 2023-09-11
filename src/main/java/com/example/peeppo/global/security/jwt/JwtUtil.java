@@ -1,7 +1,7 @@
 package com.example.peeppo.global.security.jwt;
 
 import com.example.peeppo.domain.user.entity.UserRoleEnum;
-import com.example.peeppo.domain.user.helper.repository.UserRepository;
+import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.exception.CustomTokenException;
 import com.example.peeppo.global.lib.RedisUtil;
 import com.example.peeppo.global.security.UserDetailsServiceImpl;
