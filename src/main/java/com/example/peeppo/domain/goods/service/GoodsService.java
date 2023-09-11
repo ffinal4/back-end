@@ -50,7 +50,6 @@ import java.util.stream.Collectors;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.SOLDOUT;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.TRADING;
 import static com.example.peeppo.domain.goods.enums.RequestStatus.DONE;
-import static com.example.peeppo.domain.goods.enums.RequestStatus.REQUEST;
 
 @Service
 @Slf4j
@@ -576,14 +575,18 @@ public class GoodsService {
             if (!requestGoods.getSeller().getUser().getUserId().equals(user.getUserId())) {
                 throw new IllegalArgumentException("물품 교환 요청 수락은 본인만 가능합니다.");
             }
-            Goods goods = requestGoods.getBuyer();
-            if (requestAcceptRequestDto.getRequestId().contains(requestGoods.getBuyer().getGoodsId())) {
+            Goods buyerGoods = requestGoods.getBuyer();
+            Goods sellerGoods = requestGoods.getSeller();
+            if (requestAcceptRequestDto.getRequestId().contains(buyerGoods.getGoodsId())) {
                 requestGoods.changeStatus(RequestStatus.TRADING);
+                buyerGoods.changeStatus(GoodsStatus.TRADING);
+                sellerGoods.changeStatus(GoodsStatus.TRADING);
+                goodsList.add(sellerGoods);
             } else {
                 requestGoods.changeStatus(RequestStatus.CANCEL);
-                goods.changeStatus(GoodsStatus.ONSALE);
-                goodsList.add(goods);
+                buyerGoods.changeStatus(GoodsStatus.ONSALE);
             }
+            goodsList.add(buyerGoods);
         }
 
         requestRepository.saveAll(buyerRequest);
