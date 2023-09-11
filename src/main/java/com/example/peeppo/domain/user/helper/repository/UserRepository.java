@@ -1,6 +1,5 @@
-package com.example.peeppo.domain.user.repository;
+package com.example.peeppo.domain.user.helper.repository;
 
-import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

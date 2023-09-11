@@ -1,4 +1,4 @@
-package com.example.peeppo.domain.user.repository;
+package com.example.peeppo.domain.user.helper.repository;
 
 import com.example.peeppo.domain.user.entity.User;
 import com.querydsl.jpa.impl.JPAQueryFactory;

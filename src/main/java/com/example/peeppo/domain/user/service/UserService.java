@@ -1,6 +1,5 @@
 package com.example.peeppo.domain.user.service;
 
-import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.image.helper.ImageHelper;
 import com.example.peeppo.domain.image.repository.UserImageRepository;
@@ -8,8 +7,7 @@ import com.example.peeppo.domain.user.dto.*;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.entity.UserRoleEnum;
 import com.example.peeppo.domain.user.helper.UserRatingHelper;
-import com.example.peeppo.domain.user.repository.UserRepository;
-import com.example.peeppo.global.exception.CustomTokenException;
+import com.example.peeppo.domain.user.helper.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;

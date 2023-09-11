@@ -26,7 +26,7 @@ import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingG
 import com.example.peeppo.domain.user.dto.ResponseDto;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.domain.user.helper.UserRatingHelper;
-import com.example.peeppo.domain.user.repository.UserRepository;
+import com.example.peeppo.domain.user.helper.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.responseDto.PageResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
@@ -50,7 +50,6 @@ import java.util.stream.Collectors;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.SOLDOUT;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.TRADING;
 import static com.example.peeppo.domain.goods.enums.RequestStatus.DONE;
-import static com.example.peeppo.domain.goods.enums.RequestStatus.REQUEST;
 
 @Service
 @Slf4j

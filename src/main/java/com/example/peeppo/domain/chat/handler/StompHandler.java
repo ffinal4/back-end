@@ -1,12 +1,9 @@
 package com.example.peeppo.domain.chat.handler;
 
-import com.example.peeppo.domain.chat.entity.ChatMessage;
 import com.example.peeppo.domain.chat.entity.ChatRoom;
-import com.example.peeppo.domain.chat.entity.UserChatRoomRelation;
 import com.example.peeppo.domain.chat.service.ChatService;
 import com.example.peeppo.domain.user.entity.User;
-import com.example.peeppo.domain.user.repository.UserRepository;
-import com.example.peeppo.domain.user.service.UserService;
+import com.example.peeppo.domain.user.helper.repository.UserRepository;
 import com.example.peeppo.global.security.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,11 +13,8 @@ import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import java.security.Principal;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 // session의 connect / disconnect 시점을 알 수 있다.

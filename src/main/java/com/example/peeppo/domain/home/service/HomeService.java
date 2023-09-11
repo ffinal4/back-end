@@ -17,7 +17,7 @@ import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.domain.image.repository.UserImageRepository;
 import com.example.peeppo.domain.user.dto.RatingUserResponseDto;
-import com.example.peeppo.domain.user.repository.UserRepository;
+import com.example.peeppo.domain.user.helper.repository.UserRepository;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
