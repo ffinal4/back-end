@@ -33,7 +33,7 @@ public class NotificationService {
         SseEmitter sseEmitter = emitterRepository.save(id, new SseEmitter(Long.MAX_VALUE));
         try {
             // 연결
-            sseEmitter.send(SseEmitter.event().name("connect").data("connected!"));
+            sseEmitter.send(SseEmitter.event().name("sse").data("connected!"));
         } catch (IOException e) {
             e.printStackTrace();
         }
