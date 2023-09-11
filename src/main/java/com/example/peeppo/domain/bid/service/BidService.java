@@ -15,7 +15,9 @@ import com.example.peeppo.domain.goods.enums.GoodsStatus;
 import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.repository.ImageRepository;
+import com.example.peeppo.domain.notification.enums.NotificationStatus;
 import com.example.peeppo.domain.notification.repository.NotificationRepository;
+import com.example.peeppo.domain.notification.service.NotificationService;
 import com.example.peeppo.domain.rating.entity.RatingGoods;
 import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
 import com.example.peeppo.domain.user.dto.ResponseDto;
@@ -51,6 +53,7 @@ public class BidService {
     private final ImageRepository imageRepository;
     private final RatingGoodsRepository ratingGoodsRepository;
     private final NotificationRepository notificationRepository;
+    private final NotificationService notificationService;
     private final DibsRepository dibsRepository;
     private final UserRatingHelper userRatingHelper;
     private final ApplicationEventPublisher eventPublisher;
@@ -101,6 +104,7 @@ public class BidService {
         }
 
         bidRepository.saveAll(bidList);
+        notificationService.send(auction.getUser(), NotificationStatus.AUCTION, "새로운 입찰이 들어왔습니다");
 
         return new ResponseDto("입찰이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }

@@ -1,6 +1,7 @@
 package com.example.peeppo.domain.goods.entity;
 
 import com.example.peeppo.domain.goods.enums.RequestStatus;
+import com.example.peeppo.domain.notification.enums.NotificationStatus;
 import com.example.peeppo.domain.user.entity.User;
 import com.example.peeppo.global.utils.Timestamped;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -8,6 +9,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.context.ApplicationEventPublisher;
 
 @Entity
 @Setter

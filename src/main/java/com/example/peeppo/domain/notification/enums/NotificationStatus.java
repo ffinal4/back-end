@@ -1,4 +1,10 @@
 package com.example.peeppo.domain.notification.enums;
 
-public class NotificationStatus {
+import lombok.Getter;
+
+@Getter
+public enum NotificationStatus {
+    AUCTION,
+    REQUEST,
+    CHAT;
 }

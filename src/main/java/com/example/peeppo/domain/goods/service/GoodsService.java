@@ -18,6 +18,8 @@ import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.image.helper.ImageHelper;
 import com.example.peeppo.domain.image.repository.ImageRepository;
 import com.example.peeppo.domain.image.repository.UserImageRepository;
+import com.example.peeppo.domain.notification.enums.NotificationStatus;
+import com.example.peeppo.domain.notification.service.NotificationService;
 import com.example.peeppo.domain.rating.entity.RatingGoods;
 import com.example.peeppo.domain.rating.helper.RatingHelper;
 import com.example.peeppo.domain.rating.repository.ratingGoodsRepository.RatingGoodsRepository;
@@ -48,6 +50,7 @@ import java.util.stream.Collectors;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.SOLDOUT;
 import static com.example.peeppo.domain.goods.enums.GoodsStatus.TRADING;
 import static com.example.peeppo.domain.goods.enums.RequestStatus.DONE;
+import static com.example.peeppo.domain.goods.enums.RequestStatus.REQUEST;
 
 @Service
 @Slf4j
@@ -66,6 +69,7 @@ public class GoodsService {
     private final RatingHelper ratingHelper;
     private final DibsService dibsService;
     private final ApplicationEventPublisher eventPublisher;
+    private final NotificationService notificationService;
 
     private final DibsRepository dibsRepository;
     private static final String RECENT_GOODS = "goods";
@@ -482,8 +486,11 @@ public class GoodsService {
         }
         goodsRepository.saveAll(goodsList);
         requestRepository.saveAll(requestGoods);
+        notificationService.send(urGoods.getUser(), NotificationStatus.REQUEST, "새로운 교환요청이 생겼습니다");
         return new ResponseDto("교환신청이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
+
+
 
     public Page<GoodsListResponseDto> allGoods(Page<Goods> goodsPage, Pageable pageable, User user) {
 
@@ -581,20 +588,24 @@ public class GoodsService {
 
         requestRepository.saveAll(buyerRequest);
         goodsRepository.saveAll(goodsList);
+        notificationService.send(buyerRequest.get(0).getBuyer().getUser(), NotificationStatus.REQUEST, "교환요청이 수락되었습니다");
     }
 
 
     // 요청 -> 거절
     public void goodsRefuse(RequestAcceptRequestDto requestAcceptRequestDto, User user) {
+        User buyer = null;
         for (Long goodsId : requestAcceptRequestDto.getRequestId()) {
             RequestGoods requestGoods = requestRepository.findByBuyerGoodsId(goodsId)
                     .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
             if (!requestGoods.getSeller().getUser().getUserId().equals(user.getUserId())) {
                 throw new IllegalArgumentException("물품 교환 요청 수락은 본인만 가능합니다.");
             }
+            buyer = requestGoods.getUser();
             requestGoods.changeStatus(RequestStatus.CANCEL);
             requestRepository.save(requestGoods);
         }
+        notificationService.send(buyer, NotificationStatus.REQUEST, "교환요청이 거절되었습니다");
     }
 
     // 교환 완료 => 우선적으로 받은 쪽에서만 진행하는거로 !
