@@ -403,7 +403,7 @@ public class GoodsService {
                 RequestSingleResponseDto goodsListResponseDto2 = new RequestSingleResponseDto(goods1);
                 goodsListResponseDtos.add(goodsListResponseDto2);
             }
-            goodsRequestResponseDtos.add(new GoodsRequestResponseDto(requestGoods1.getCreatedAt(), requestGoods1.getRequestStatus(), goodsListResponseDto, goodsListResponseDtos));
+            goodsRequestResponseDtos.add(new GoodsRequestResponseDto(requestGoods1.getCreatedAt(), requestGoods1.getRequestStatus(), goodsListResponseDto, goodsListResponseDtos, buyerGoodsList.size()));
         }//status값 수정
 
         PageResponse response = new PageResponse<>(goodsRequestResponseDtos, pageable, requestGoods.getTotalElements());
@@ -448,8 +448,7 @@ public class GoodsService {
 
 
             }
-            finalResponseDto.add(new GoodsRequestResponseDto(createAt, requestStatus, goodsListResponseDto, goodsListResponseDtos));
-
+            finalResponseDto.add(new GoodsRequestResponseDto(createAt, requestStatus, goodsListResponseDto, goodsListResponseDtos, buyerGoodsList.size()));
         }
         PageResponse response = new PageResponse<>(finalResponseDto, pageable, requestGoodsList.getTotalElements());
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
@@ -591,7 +590,7 @@ public class GoodsService {
 
         requestRepository.saveAll(buyerRequest);
         goodsRepository.saveAll(goodsList);
-        notificationService.send(buyerRequest.get(0).getBuyer().getUser(), NotificationStatus.REQUEST, "교환요청이 수락되었습니다");
+        notificationService.send(buyerRequest.get(0).getBuyer().getUser(), NotificationStatus.REQUESTEND, "교환요청이 수락되었습니다");
     }
 
 
@@ -599,8 +598,7 @@ public class GoodsService {
     public void goodsRefuse(RequestAcceptRequestDto requestAcceptRequestDto, User user) {
         User buyer = null;
         for (Long goodsId : requestAcceptRequestDto.getRequestId()) {
-            RequestGoods requestGoods = requestRepository.findByBuyerGoodsId(goodsId)
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시물입니다"));
+            RequestGoods requestGoods = requestRepository.findByBuyerGoodsIdAndReceiveUserAndRequestStatus(goodsId, user.getUserId(), RequestStatus.REQUEST);
             if (!requestGoods.getSeller().getUser().getUserId().equals(user.getUserId())) {
                 throw new IllegalArgumentException("물품 교환 요청 수락은 본인만 가능합니다.");
             }

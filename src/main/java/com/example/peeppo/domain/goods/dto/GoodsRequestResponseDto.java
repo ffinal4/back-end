@@ -14,15 +14,17 @@ public class GoodsRequestResponseDto {
 
     private LocalDateTime createdAt;
     private RequestStatus requestStatus;
+    private int goodsNum;
     private RequestSingleResponseDto goodsListResponseDto;
     private List<RequestSingleResponseDto> goodsListResponseDtos;
 
 
-    public GoodsRequestResponseDto(LocalDateTime createdAt, RequestStatus requestStatus, RequestSingleResponseDto goodsListResponseDto, List<RequestSingleResponseDto> goodsListResponseDtos) {
+    public GoodsRequestResponseDto(LocalDateTime createdAt, RequestStatus requestStatus, RequestSingleResponseDto goodsListResponseDto, List<RequestSingleResponseDto> goodsListResponseDtos, int goodsNum) {
         this.createdAt = createdAt;
         this.requestStatus = requestStatus;
         this.goodsListResponseDto = goodsListResponseDto;
         this.goodsListResponseDtos = goodsListResponseDtos;
+        this.goodsNum = goodsNum;
     }
 
     public GoodsRequestResponseDto(RequestSingleResponseDto goodsListResponseDto, List<RequestSingleResponseDto> goodsListResponseDtos) {

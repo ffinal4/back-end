@@ -11,6 +11,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -39,7 +40,7 @@ public class NotificationService {
         }
         // 클라이언트가 미수신한 Event 목록이 존재할 경우 전송하여 Event 유실을 예방
         if (hasLostData(lastEventId)) {
-            sendLostData(lastEventId, id, sseEmitter);
+            sendLostData(lastEventId, userId, id, sseEmitter);
         }
 
         // user 의 pk 값을 key 값으로 해서 sseEmitter 를 저장
@@ -56,11 +57,11 @@ public class NotificationService {
         return !lastEventId.isEmpty();
     }
 
-    private void sendLostData(String lastEventId, String id, SseEmitter emitter) {
-        Map<String, Object> eventCaches = emitterRepository.findAllEventCacheStartWithUserId(String.valueOf(id));
+    private void sendLostData(String lastEventId, Long userId, String emitterId, SseEmitter emitter) {
+        Map<String, Object> eventCaches = emitterRepository.findAllEventCacheStartWithUserId(String.valueOf(userId));
         eventCaches.entrySet().stream()
                 .filter(entry -> lastEventId.compareTo(entry.getKey()) < 0)
-                .forEach(entry -> sendToClient(emitter, entry.getKey(), entry.getValue()));
+                .forEach(entry -> sendToClient(emitter, entry.getKey(), emitterId, entry.getValue()));
     }
     @Transactional
     public void send(User receiver, NotificationStatus notificationStatus, String content) {
@@ -72,16 +73,16 @@ public class NotificationService {
         sseEmitters.forEach(
                 (key, emitter) -> {
                     emitterRepository.saveEventCache(key, notification);
-                    sendToClient(emitter, key, NotificationResponseDto.from(notification));
+                    sendToClient(emitter, eventId, key, NotificationResponseDto.from(notification));
                 }
         );
     }
-    private void sendToClient(SseEmitter emitter, String id, Object data) {
+    private void sendToClient(SseEmitter emitter, String eventId, String id, Object data) {
         try {
             emitter.send(SseEmitter.event()
-                    .id(id)
+                    .id(eventId)
                     .name("sse")
-                    .data(data));
+                    .data(data, MediaType.APPLICATION_JSON));
         } catch (IOException exception) {
             emitterRepository.deleteByUserId(id);
             throw new RuntimeException("연결 오류!");
