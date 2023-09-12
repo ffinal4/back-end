@@ -9,5 +9,7 @@ public enum NotificationStatus {
     AUCTIONEND, // 경매가 종료되었을때
     REQUEST, // 교환신청
     REQUESTEND, // 교환이 수락되었을때
+
+    REQUESTREFUSE, // 교환이 거절되었을때
     CHAT; // 채팅
 }

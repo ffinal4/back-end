@@ -461,6 +461,8 @@ public class GoodsService {
                 .orElseThrow(() -> new NullPointerException("해당 상품이 존재하지 않습니다."));
         List<RequestGoods> requestGoods = new ArrayList<>();
         List<Goods> goodsList = new ArrayList<>();
+        String title = goodsRepository.findById(goodsRequestRequestDto.getGoodsId().get(0)).orElse(null).getTitle();
+        String myImage = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsRequestRequestDto.getGoodsId().get(0)).getImageUrl();
 
         for (Long goodsId : goodsRequestRequestDto.getGoodsId()) {
             Goods goods = goodsRepository.findById(goodsId).orElseThrow(
@@ -484,7 +486,7 @@ public class GoodsService {
         }
         goodsRepository.saveAll(goodsList);
         requestRepository.saveAll(requestGoods);
-        notificationService.send(urGoods.getUser(), NotificationStatus.REQUEST, "새로운 교환요청이 생겼습니다");
+        notificationService.send(urGoods.getUser(), NotificationStatus.REQUEST, title, myImage);
         return new ResponseDto("교환신청이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
@@ -570,6 +572,7 @@ public class GoodsService {
         List<RequestGoods> buyerRequest = requestRepository.findAllBySellerGoodsId(sellerGoodsId);
         List<Goods> goodsList = new ArrayList<>();
 
+
         for (RequestGoods requestGoods : buyerRequest) {
             if (!requestGoods.getSeller().getUser().getUserId().equals(user.getUserId())) {
                 throw new IllegalArgumentException("물품 교환 요청 수락은 본인만 가능합니다.");
@@ -590,23 +593,28 @@ public class GoodsService {
 
         requestRepository.saveAll(buyerRequest);
         goodsRepository.saveAll(goodsList);
-        notificationService.send(buyerRequest.get(0).getBuyer().getUser(), NotificationStatus.REQUESTEND, "교환요청이 수락되었습니다");
+        Goods sellerGoodsTitle = buyerRequest.get(0).getSeller();
+        Image sellerImage = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(sellerGoodsTitle.getGoodsId());
+        notificationService.send(buyerRequest.get(0).getBuyer().getUser(), NotificationStatus.REQUESTEND, sellerGoodsTitle.getTitle(), sellerImage.getImageUrl());
     }
 
 
     // 요청 -> 거절
     public void goodsRefuse(RequestAcceptRequestDto requestAcceptRequestDto, User user) {
         User buyer = null;
+        Goods sellerGoods = null;
         for (Long goodsId : requestAcceptRequestDto.getRequestId()) {
             RequestGoods requestGoods = requestRepository.findByBuyerGoodsIdAndReceiveUserAndRequestStatus(goodsId, user.getUserId(), RequestStatus.REQUEST);
             if (!requestGoods.getSeller().getUser().getUserId().equals(user.getUserId())) {
                 throw new IllegalArgumentException("물품 교환 요청 수락은 본인만 가능합니다.");
             }
             buyer = requestGoods.getUser();
+            sellerGoods = requestGoods.getSeller();
             requestGoods.changeStatus(RequestStatus.CANCEL);
             requestRepository.save(requestGoods);
         }
-        notificationService.send(buyer, NotificationStatus.REQUEST, "교환요청이 거절되었습니다");
+        Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(sellerGoods.getGoodsId());
+        notificationService.send(buyer, NotificationStatus.REQUESTREFUSE, sellerGoods.getTitle(), image.getImageUrl());
     }
 
     // 교환 완료 => 우선적으로 받은 쪽에서만 진행하는거로 !

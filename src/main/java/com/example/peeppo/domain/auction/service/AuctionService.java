@@ -285,8 +285,9 @@ public class AuctionService {
 
         user.userPointAdd(10L);
         userRepository.save(user);
-        notificationService.send(auction.getUser(), NotificationStatus.AUCTIONEND, "경매가 종료되었습니다");
-        notificationService.send(saveBidList.get(0).getUser(), NotificationStatus.AUCTIONPICK, "낙찰되었습니다");
+        Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(auctionId);
+        notificationService.send(auction.getUser(), NotificationStatus.AUCTIONEND,  auction.getGoods().getTitle(), image.getImageUrl());
+        notificationService.send(saveBidList.get(0).getUser(), NotificationStatus.AUCTIONPICK, auction.getGoods().getTitle(), image.getImageUrl());
     }
 
     public ResponseEntity<Page<TestListResponseDto>> auctionTradeList(User user, int page, int size, String sortBy, boolean isAsc,

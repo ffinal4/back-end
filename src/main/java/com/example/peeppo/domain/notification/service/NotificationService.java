@@ -1,5 +1,4 @@
 package com.example.peeppo.domain.notification.service;
-
 import com.example.peeppo.domain.notification.dto.NotificationResponseDto;
 import com.example.peeppo.domain.notification.entity.Notification;
 import com.example.peeppo.domain.notification.enums.NotificationStatus;
@@ -64,8 +63,8 @@ public class NotificationService {
                 .forEach(entry -> sendToClient(emitter, entry.getKey(), emitterId, entry.getValue()));
     }
     @Transactional
-    public void send(User receiver, NotificationStatus notificationStatus, String content) {
-        Notification notification = createNotification(receiver, notificationStatus, content);
+    public void send(User receiver, NotificationStatus notificationStatus, String content, String goodsImage) {
+        Notification notification = createNotification(receiver, notificationStatus, content, goodsImage);
         String id = String.valueOf(receiver.getUserId());
         String eventId = id + "_" + System.currentTimeMillis();
         notificationRepository.save(notification);
@@ -89,10 +88,11 @@ public class NotificationService {
         }
     }
 
-    private Notification createNotification(User user, NotificationStatus notificationStatus, String content) {
+    private Notification createNotification(User user, NotificationStatus notificationStatus, String content, String goodsImage) {
         return Notification.builder()
                 .receiver(user)
                 .content(content)
+                .goodsImage(goodsImage)
                 .notificationStatus(notificationStatus)
                 .isRead(false)
                 .build();
