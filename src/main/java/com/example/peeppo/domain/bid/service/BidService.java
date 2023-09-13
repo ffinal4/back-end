@@ -64,10 +64,8 @@ public class BidService {
         userRatingHelper.getUser(user.getUserId());
         List<Bid> bids = bidRepository.findByAuctionAuctionIdAndUserUserId(user.getUserId(), auctionId);
 
-        for (Bid bid : bids) {
-            if (!bids.isEmpty()) {
+        if (!bids.isEmpty()) {
                 throw new IllegalAccessException("이미 참여중인 경매입니다.");
-            }
         }
 
         List<Bid> bidList = new ArrayList<>();
@@ -104,7 +102,9 @@ public class BidService {
         }
 
         bidRepository.saveAll(bidList);
-        notificationService.send(auction.getUser(), NotificationStatus.AUCTION, "새로운 입찰이 들어왔습니다");
+        Goods myBid = bids.get(0).getGoods();
+        Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(myBid.getGoodsId());
+        notificationService.send(auction.getUser(), NotificationStatus.AUCTION, myBid.getTitle(), image.getImageUrl()); // 경매 받은 사람이 받아야한다 입찰을 거는 물품의 타이틀과 이미지가 필요해
 
         return new ResponseDto("입찰이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }

@@ -13,10 +13,13 @@ public class NotificationResponseDto {
 
     private Boolean checked;
     private String content;
+    private String goodsImage;
     private NotificationStatus notificationStatus;
 
     public NotificationResponseDto(Notification notification) {
+        this.checked = notification.getIsRead();
         this.content = notification.getContent();
+        this.goodsImage = notification.getGoodsImage();
         this.notificationStatus = notification.getNotificationStatus();
     }
 

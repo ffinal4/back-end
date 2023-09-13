@@ -23,12 +23,11 @@ public class Notification extends Timestamped {
     @Enumerated(EnumType.STRING)
     private NotificationStatus notificationStatus;
 
-    private String content;
+    private String content; // 내용
 
+    private String goodsImage; // 물건의 이미지
     @Column(nullable = false)
     private Boolean isRead;
-
-//    private Boolean checked = false;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -84,10 +83,11 @@ public class Notification extends Timestamped {
     }
 
     @Builder
-    public Notification(User receiver, NotificationStatus notificationStatus, String content, Boolean isRead){
+    public Notification(User receiver, NotificationStatus notificationStatus, String content, Boolean isRead, String goodsImage){
         this.user = receiver;
         this.notificationStatus = notificationStatus;
         this.content = content;
         this.isRead = false;
+        this.goodsImage = goodsImage;
     }
 }
