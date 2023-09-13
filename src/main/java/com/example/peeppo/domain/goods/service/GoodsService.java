@@ -603,6 +603,7 @@ public class GoodsService {
     public void goodsRefuse(RequestAcceptRequestDto requestAcceptRequestDto, User user) {
         User buyer = null;
         Goods sellerGoods = null;
+        List<Goods> goodsList = new ArrayList<>();
         for (Long goodsId : requestAcceptRequestDto.getRequestId()) {
             RequestGoods requestGoods = requestRepository.findByBuyerGoodsIdAndReceiveUserAndRequestStatus(goodsId, user.getUserId(), RequestStatus.REQUEST);
             if (!requestGoods.getSeller().getUser().getUserId().equals(user.getUserId())) {
@@ -610,9 +611,19 @@ public class GoodsService {
             }
             buyer = requestGoods.getUser();
             sellerGoods = requestGoods.getSeller();
+            Goods buyerGoods = requestGoods.getBuyer();
+            
+            sellerGoods.changeStatus(GoodsStatus.ONSALE);
+            buyerGoods.changeStatus(GoodsStatus.ONSALE);
+
+            goodsList.add(sellerGoods);
+            goodsList.add(buyerGoods);
+
             requestGoods.changeStatus(RequestStatus.CANCEL);
             requestRepository.save(requestGoods);
         }
+        goodsRepository.saveAll(goodsList);
+
         Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(sellerGoods.getGoodsId());
         notificationService.send(buyer, NotificationStatus.REQUESTREFUSE, sellerGoods.getTitle(), image.getImageUrl());
     }
