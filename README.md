@@ -60,7 +60,6 @@
 ![image](https://github.com/ffinal4/back-end/assets/102176567/21568fb1-4da8-4b60-ae47-033aca8649d2)
 
 ### Teck Stack
-
 - s3 : 2.2.6
 - jwt version: 0.11.5
 - querydsl-jpa:5.0.0:jakarta
