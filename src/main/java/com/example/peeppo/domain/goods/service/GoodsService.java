@@ -614,7 +614,6 @@ public class GoodsService {
             requestRepository.save(requestGoods);
         }
         Image image = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(sellerGoods.getGoodsId());
-        //Goods onsale로 변경해주기
         notificationService.send(buyer, NotificationStatus.REQUESTREFUSE, sellerGoods.getTitle(), image.getImageUrl());
     }
 
