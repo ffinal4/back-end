@@ -61,16 +61,16 @@
 
 ### Teck Stack
 
-s3 : 2.2.6
-jwt version: 0.11.5
-querydsl-jpa:5.0.0:jakarta
-stomp: 2.3.4
-mySQL: 8.0.28
-Redis : '3.1.2'
-gradle: 8.2.1
-springframework.boot: '3.1.2'
-security: 6.1.2
-java: 17
+- s3 : 2.2.6
+- jwt version: 0.11.5
+- querydsl-jpa:5.0.0:jakarta
+- stomp: 2.3.4
+- mySQL: 8.0.28
+- Redis : '3.1.2'
+- gradle: 8.2.1
+- springframework.boot: '3.1.2'
+- security: 6.1.2
+- java: 17
 
 ## 앞으로 진행될 사항들
 - 클린 코드를 위한 코드 리팩터링
