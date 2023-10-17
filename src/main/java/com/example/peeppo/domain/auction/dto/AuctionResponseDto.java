@@ -30,7 +30,7 @@ public class AuctionResponseDto {
 
     public AuctionResponseDto(Auction auction, GoodsResponseDto goodsResponseDto, TimeRemaining countDownTime) {
         this.auctionId = auction.getAuctionId();
-        this.deleteStatus = auction.getIsDeleted();
+        this.deleteStatus = auction.isDeleted();
         this.goodsResponseDto = goodsResponseDto;
         this.auctionEndTime = auction.getAuctionEndTime();
         this.createdAt = auction.getCreatedAt();
@@ -41,7 +41,7 @@ public class AuctionResponseDto {
 
     public AuctionResponseDto(Auction auction, Goods goods, TimeRemaining countDownTime, Long bidCount, boolean checkSameUser, List<String> image, Long dibsCount) {
         this.auctionId = auction.getAuctionId();
-        this.deleteStatus = auction.getIsDeleted();
+        this.deleteStatus = auction.isDeleted();
         this.goodsResponseDto = new GoodsResponseDto(goods, image);
         this.auctionEndTime = auction.getAuctionEndTime();
         this.createdAt = auction.getCreatedAt();

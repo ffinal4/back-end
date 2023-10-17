@@ -27,6 +27,6 @@ public class PocketListResponseDto {
         this.image = userImageUrl;
         this.goodsStatus = goods.getGoodsStatus();
         this.ratingPrice = ratingPrice;
-        this.ratingCheck = goods.getRatingCheck();
+        this.ratingCheck = goods.isRatingCheck();
     }
 }

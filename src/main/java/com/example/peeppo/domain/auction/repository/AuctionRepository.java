@@ -17,6 +17,7 @@ import java.util.Optional;
 public interface AuctionRepository extends JpaRepository<Auction, Long>, AuctionRepositoryCustom{
     Page<Auction> findByUserUserIdAndAuctionStatus(Long userId, Pageable pageable, AuctionStatus auctionStatus);
 
+    Optional<Auction> findByGoodsAndIsDeletedIsFalse(Goods goods);
 
     @Query(value = "select a.* from auction a inner join (SELECT b.auction_id, COUNT(b.bid_id) AS bidCount FROM bid b GROUP BY b.auction_id ORDER BY bidCount DESC LIMIT 3) as top3auction on a.auction_id= top3auction.auction_id where a.auction_status <> 'end'", nativeQuery = true)
     List<Auction> findTop3Auction();

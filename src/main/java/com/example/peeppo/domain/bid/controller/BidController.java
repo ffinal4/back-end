@@ -66,4 +66,11 @@ public class BidController {
 
         return bidService.bidTradeList(userDetails.getUser(), page - 1, size, sortBy, isAsc, bidStatus);
     }
+    @PutMapping("/auction/{auctionId}/choice/bids")
+    public ApiResponse<ResponseDto> choiceBids(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                               @PathVariable Long auctionId,
+                                               @Valid @RequestBody ChoiceRequestDto choiceRequestDto) throws IllegalAccessException {
+
+        return bidService.choiceBids(userDetails.getUser(), auctionId, choiceRequestDto);
+    }
 }

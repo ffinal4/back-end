@@ -5,7 +5,6 @@ import com.example.peeppo.domain.auction.dto.AuctionListResponseDto;
 import com.example.peeppo.domain.auction.dto.TimeRemaining;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
-import com.example.peeppo.domain.auction.helper.AuctionHelper;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.bid.repository.bid.BidRepository;
 import com.example.peeppo.domain.dibs.repository.DibsRepository;
@@ -19,6 +18,7 @@ import com.example.peeppo.domain.image.repository.UserImageRepository;
 import com.example.peeppo.domain.user.dto.RatingUserResponseDto;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.security.UserDetailsImpl;
+import com.example.peeppo.global.utils.time.TimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +37,6 @@ public class HomeService {
     private final ImageRepository imageRepository;
     private final UserImageRepository userImageRepository;
     private final BidRepository bidRepository;
-    private final AuctionHelper auctionHelper;
 
     //@Cacheable(value = "homeCache", cacheManager = "cacheManager")
     public HomeResponseDto peeppoHome(UserDetailsImpl user) {
@@ -70,7 +69,7 @@ public class HomeService {
         List<Auction> auctionList = findTopAuctionByCount();
         List<AuctionListResponseDto> auctionResponseDtos = new ArrayList<>();
         for (Auction auction : auctionList) {
-            TimeRemaining timeRemaining = auctionHelper.countDownTime(auction);
+            TimeRemaining timeRemaining = TimeUtil.countDownTime(auction.getAuctionEndTime());
             boolean checkDibs = false;
             String imageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(auction.getGoods().getGoodsId()).getImageUrl();
 

@@ -14,4 +14,6 @@ public interface BidRepositoryCustom {
 
     Long countByAuctionAuctionIdAndGroupByBidUserId(Long auctionId);
 
+    List<Bid> findBySellersPick(Long auctionId);
+
 }

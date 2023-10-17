@@ -26,6 +26,7 @@ import com.example.peeppo.domain.user.helper.UserRatingHelper;
 import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.responseDto.PageResponse;
+import com.example.peeppo.global.utils.time.TimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
@@ -35,7 +36,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -85,7 +88,7 @@ public class BidService {
             Goods goods = getGoods(goodsId);
             String goodsImg = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsId).getImageUrl();
 
-            if (goods.getIsDeleted() && !goods.getUser().getUserId().equals(user.getUserId())) {
+            if (goods.isDeleted() && !goods.getUser().getUserId().equals(user.getUserId())) {
                 System.out.println(" ");
                 throw new IllegalAccessException();
                 //여기도 고민
@@ -157,6 +160,9 @@ public class BidService {
             myAuctionPage = auctionRepository.findAuctionListByUserUserId(user.getUserId(), pageable);
         }
 
+
+
+
         for (Auction auction : myAuctionPage) {
             List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndUserUserId(auction.getAuctionId(), user.getUserId());
 
@@ -164,7 +170,7 @@ public class BidService {
             for (Bid bid : bidList) {
                 bidListResponseDtos.add(new BidListResponseDto(bid, bid.getGoodsImg()));
             }
-            TimeRemaining timeRemaining = countDownTime(auction);
+            TimeRemaining timeRemaining = TimeUtil.countDownTime(auction.getAuctionEndTime());
             Long bidCount = findBidCount(auction.getAuctionId());
             TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount);
             GetAuctionBidResponseDto getAuctionBidResponseDto = new GetAuctionBidResponseDto(responseDto, bidListResponseDtos);
@@ -177,16 +183,6 @@ public class BidService {
 
     public Long findBidCount(Long id) {
         return auctionRepository.countByAuctionAuctionIdAndGroupByBidUserId(id);
-    }
-
-    public TimeRemaining countDownTime(Auction auction) {
-        LocalDateTime now = LocalDateTime.now();
-        long days = ChronoUnit.DAYS.between(now, auction.getAuctionEndTime());
-        long hours = ChronoUnit.HOURS.between(now, auction.getAuctionEndTime());
-        long minutes = ChronoUnit.MINUTES.between(now, auction.getAuctionEndTime());
-        long seconds = ChronoUnit.SECONDS.between(now, auction.getAuctionEndTime());
-
-        return new TimeRemaining(days, hours % 24, minutes % 60, seconds % 60);
     }
 
     private Bid getBid(Long bidId) {
@@ -213,5 +209,26 @@ public class BidService {
         Sort.Direction direction = isAsc ? Sort.Direction.ASC : Sort.Direction.DESC;
         Sort sort = Sort.by(direction, sortBy);
         return PageRequest.of(page, size, sort);
+    }
+
+    @Transactional
+    public ApiResponse<ResponseDto> choiceBids(User user, Long auctionId, ChoiceRequestDto choiceRequestDto) {
+        // 방어코드 작성
+        List<Bid> afterSellersPick = bidRepository.findBySellersPick(auctionId);
+        for(int i = 0; i < afterSellersPick.size(); i++){
+            afterSellersPick.get(i).setSellersPick();
+        }
+
+        List<Bid> bidList = new ArrayList<>();
+        for(Long bidId : choiceRequestDto.getBidId()){
+            Bid bid = bidRepository.findById(bidId).orElseThrow(() -> new IllegalComponentStateException("존재하지 않는 입찰품"));
+            bid.setSellersPick();
+            bidList.add(bid);
+        }
+        bidRepository.saveAll(afterSellersPick);
+        bidRepository.saveAll(bidList);
+
+
+        return new ApiResponse<>(true, new ResponseDto("선택완료", 200, "dd"), null);
     }
 }

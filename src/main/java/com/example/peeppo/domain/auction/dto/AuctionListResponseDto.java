@@ -30,7 +30,7 @@ public class AuctionListResponseDto {
 
     public AuctionListResponseDto(Auction auction, String imageUrl, TimeRemaining timeRemaining, Long bidCount, boolean checkDibs) {
         this.auctionId = auction.getAuctionId();
-        this.deleteStatus = auction.getIsDeleted();
+        this.deleteStatus = auction.isDeleted();
         this.nickname = auction.getUser().getNickname();
         this.auctionEndTime = auction.getAuctionEndTime();
         this.createdAt = auction.getCreatedAt();

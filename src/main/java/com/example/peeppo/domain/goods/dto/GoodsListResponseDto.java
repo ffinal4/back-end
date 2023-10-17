@@ -83,7 +83,7 @@ public class GoodsListResponseDto {
         this.title = goods.getTitle();
         this.content = goods.getContent();
         this.location = goods.getLocation();
-        this.ratingCheck = goods.getRatingCheck();
+        this.ratingCheck = goods.isRatingCheck();
         this.image = image;
         this.nickname = goods.getUser().getNickname();
         this.goodsStatus = goods.getGoodsStatus();
