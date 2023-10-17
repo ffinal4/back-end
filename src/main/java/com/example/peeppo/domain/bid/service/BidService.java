@@ -8,7 +8,7 @@ import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.bid.dto.*;
 import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.bid.enums.BidStatus;
-import com.example.peeppo.domain.bid.repository.bid.BidRepository;
+import com.example.peeppo.domain.bid.repository.BidRepository;
 import com.example.peeppo.domain.dibs.repository.DibsRepository;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.enums.GoodsStatus;

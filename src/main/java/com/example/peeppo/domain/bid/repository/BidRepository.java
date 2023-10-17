@@ -1,18 +1,14 @@
-package com.example.peeppo.domain.bid.repository.bid;
+package com.example.peeppo.domain.bid.repository;
 
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.bid.enums.BidStatus;
-import com.example.peeppo.domain.bid.repository.bid.BidRepositoryCustom;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 public interface BidRepository extends JpaRepository<Bid, Long>, BidRepositoryCustom {
     Long countByAuctionAuctionId(Long auctionId);
