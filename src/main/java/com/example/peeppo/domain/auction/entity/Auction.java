@@ -44,7 +44,7 @@ public class Auction extends Timestamped {
     private AuctionStatus auctionStatus;
 
     @ManyToOne
-    @JoinColumn(name = "usere_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne // 부모가 삭제되어도 자식은 남아있도록
