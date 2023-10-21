@@ -24,8 +24,6 @@ public class QGoods extends EntityPathBase<Goods> {
 
     public final com.example.peeppo.global.utils.QTimestamped _super = new com.example.peeppo.global.utils.QTimestamped(this);
 
-    public final com.example.peeppo.domain.auction.entity.QAuction auction;
-
     public final EnumPath<com.example.peeppo.domain.goods.enums.Category> category = createEnum("category", com.example.peeppo.domain.goods.enums.Category.class);
 
     public final ListPath<com.example.peeppo.domain.chat.entity.ChatRoom, com.example.peeppo.domain.chat.entity.QChatRoom> chatRooms = this.<com.example.peeppo.domain.chat.entity.ChatRoom, com.example.peeppo.domain.chat.entity.QChatRoom>createList("chatRooms", com.example.peeppo.domain.chat.entity.ChatRoom.class, com.example.peeppo.domain.chat.entity.QChatRoom.class, PathInits.DIRECT2);
@@ -82,7 +80,6 @@ public class QGoods extends EntityPathBase<Goods> {
 
     public QGoods(Class<? extends Goods> type, PathMetadata metadata, PathInits inits) {
         super(type, metadata, inits);
-        this.auction = inits.isInitialized("auction") ? new com.example.peeppo.domain.auction.entity.QAuction(forProperty("auction"), inits.get("auction")) : null;
         this.user = inits.isInitialized("user") ? new com.example.peeppo.domain.user.entity.QUser(forProperty("user")) : null;
         this.wantedGoods = inits.isInitialized("wantedGoods") ? new QWantedGoods(forProperty("wantedGoods")) : null;
     }

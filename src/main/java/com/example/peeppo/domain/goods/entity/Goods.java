@@ -23,40 +23,59 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 @DynamicUpdate
+@Table(
+        name = "goods",
+        indexes = {
+              @Index(columnList = "category")
+        }
+)
 //@Where(clause = "is_deleted = false") //이거 사용하면 isDeleted 체크안해도됩니다.
 public class Goods extends Timestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "goods_id")
     private Long goodsId;
+
+    // where title like '%{keyword}%'
+    // index를 타지 않는 쿼리
+    // index는 조회 시 데이터의 순서를 보고 range 조회를 하게 되는데,
+    // 스트링의 %로 like 조회를 하게 되면 첫 번째 문자가 어떤 것이 올지 모르기 때문에
+    // index에 의한 정렬이 제대로 이루어지지 않아 인덱스를 타지 않는 쿼리가 된다.
+    // 즉, full scan이 발생하게 된다.
+    @Column(name = "title", nullable = false, length = 150)
     private String title;
+    @Column(name = "content", nullable = false, length = 3000)
     private String content;
+    @Column(name = "location", nullable = false, length = 500)
     private String location;
+    @Column(name = "goods", nullable = false, length = 20)
     private String goodsCondition;
+    @Column(name = "trade_type", nullable = false, length = 20)
     private String tradeType;
+
+    @Column(name = "category", nullable = false, length = 191)
     @Enumerated(EnumType.STRING) // ENUM타입을 String으로 넣음
     private Category category;
 
+    @Column(name = "seller_price", nullable = false)
     private Long sellerPrice;
-    @Column(nullable = false)
-    private Boolean isDeleted = false;
 
-    private Boolean ratingCheck;
+    private boolean isDeleted;
+    private boolean ratingCheck;
+
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "wanted_id")
     private WantedGoods wantedGoods;
 
-    @OneToOne(mappedBy = "goods")
-    @JoinColumn(name = "auction_id")
-    private Auction auction;
-
+    // TODO: 2023-10-14 삭제가능한지 확인 필요
     @OneToMany(mappedBy = "goods", fetch = FetchType.EAGER)
     private List<Image> image;
 
+    @Column(name = "goods_status", nullable = false, length = 191) // 최대 767byte / 한글자당 4byte = 191.~~
     @Enumerated(EnumType.STRING)
     private GoodsStatus goodsStatus;
 

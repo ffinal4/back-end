@@ -52,7 +52,7 @@ public class GoodsResponseDto {
         this.nickname = goods.getUser().getNickname();
         this.goodsStatus = goods.getGoodsStatus();
         this.sellerPrice = goods.getSellerPrice();
-        this.ratingCheck = goods.getRatingCheck();
+        this.ratingCheck = goods.isRatingCheck();
     }
 
     public GoodsResponseDto(Goods goods, String Img) {
@@ -71,7 +71,7 @@ public class GoodsResponseDto {
         this.nickname = goods.getUser().getNickname();
         this.goodsStatus = goods.getGoodsStatus();
         this.sellerPrice = goods.getSellerPrice();
-        this.ratingCheck = goods.getRatingCheck();
+        this.ratingCheck = goods.isRatingCheck();
     }
 
     public GoodsResponseDto(Goods goods, List<String> imageUrls) {
@@ -90,7 +90,7 @@ public class GoodsResponseDto {
         this.nickname = goods.getUser().getNickname();
         this.goodsStatus = goods.getGoodsStatus();
         this.sellerPrice = goods.getSellerPrice();
-        this.ratingCheck = goods.getRatingCheck();
+        this.ratingCheck = goods.isRatingCheck();
     }
 
 
@@ -111,7 +111,7 @@ public class GoodsResponseDto {
         this.checkSameUser = checkSameUser;
         this.checkDibs = checkDibs;
         this.sellerPrice = goods.getSellerPrice();
-        this.ratingCheck = goods.getRatingCheck();
+        this.ratingCheck = goods.isRatingCheck();
         this.dibsCount = dibsCount;
         this.goodsStatus = goods.getGoodsStatus();
     }
@@ -130,7 +130,7 @@ public class GoodsResponseDto {
         this.images = imageUrls;
         this.wantedGoods = wantedGoods;
         this.nickname = goods.getUser().getNickname();
-        this.ratingCheck = goods.getRatingCheck();
+        this.ratingCheck = goods.isRatingCheck();
         this.goodsStatus = goods.getGoodsStatus();
         this.sellerPrice = goods.getSellerPrice();
     }
@@ -151,7 +151,7 @@ public class GoodsResponseDto {
         this.nickname = goods.getUser().getNickname();
         this.goodsStatus = goods.getGoodsStatus();
         this.sellerPrice = goods.getSellerPrice();
-        this.ratingCheck = goods.getRatingCheck();
+        this.ratingCheck = goods.isRatingCheck();
         this.avgRatingPrice = avgRatingPrice;
     }
 }

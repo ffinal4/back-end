@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Image extends Timestamped {
 
-    // Long으로 고칠 것
     @Id
     private String imageKey;
 
