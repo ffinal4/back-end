@@ -1,3 +1,4 @@
+/*
 package com.example.peeppo.global.config;
 
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +10,7 @@ import java.util.Arrays;
 
 
 // Spring AOP에서 사용되는 조인 포인트는 항상 메소드 호출을 의미
+*/
 /*
 Pointcut 지정자의 종류 -> advice를 어디에 적용 시킬지 , AOP에 알려주는 키워드
 
@@ -34,7 +36,8 @@ Pointcut 지정자의 종류 -> advice를 어디에 적용 시킬지 , AOP에 �
 2. @args : 특정 클래스를 사용되고 있는 파라미터를 추적하기
 3. @within : 특정 애노테이션을 통합 관리
 4. @annotation : 어노테이션을 생성하고 특정 메소드에 애노테이션 부착 후 @annotation PCD 지정하면된다.
- */
+ *//*
+
 
 @Aspect
 @Component
@@ -73,3 +76,4 @@ public class LogConfig {
         log.error("\t{}", e.getMessage());
     }
 }
+*/

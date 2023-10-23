@@ -12,7 +12,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableJpaAuditing
 @EnableCaching
 @EnableScheduling
-@EnableAspectJAutoProxy
+//@EnableAspectJAutoProxy
 public class PeeppoApplication {
 
     public static void main(String[] args) {
