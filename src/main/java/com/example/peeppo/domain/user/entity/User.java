@@ -87,6 +87,20 @@ public class User{
         this.totalPoint += userPoint;
     }
 
+    public User(Long userId, String nickname, String email, String password, String location, UserRoleEnum role, Long maxRatingCount, Long currentRatingCount, Long totalPoint, Long userPoint, String sessionId) {
+        this.userId = userId;
+        this.nickname = nickname;
+        this.email = email;
+        this.password = password;
+        this.location = location;
+        this.role = role;
+        this.maxRatingCount = maxRatingCount;
+        this.currentRatingCount = currentRatingCount;
+        this.totalPoint = totalPoint;
+        this.userPoint = userPoint;
+        this.sessionId = sessionId;
+    }
+
     public void totalPointInit(){
         this.totalPoint = 0L;
     }

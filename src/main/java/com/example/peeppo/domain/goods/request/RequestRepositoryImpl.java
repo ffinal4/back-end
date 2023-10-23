@@ -1,6 +1,5 @@
-package com.example.peeppo.domain.goods.repository.request;
+package com.example.peeppo.domain.goods.request;
 
-import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.goods.entity.RequestGoods;
 import com.example.peeppo.domain.goods.enums.RequestStatus;
 import com.querydsl.jpa.impl.JPAQueryFactory;

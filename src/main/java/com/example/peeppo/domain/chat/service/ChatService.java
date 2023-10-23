@@ -9,7 +9,7 @@ import com.example.peeppo.domain.chat.repository.ChatRoomRepository;
 import com.example.peeppo.domain.chat.repository.UserChatRoomRelationRepository;
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
-import com.example.peeppo.domain.goods.repository.request.RequestRepository;
+import com.example.peeppo.domain.goods.request.RequestRepository;
 import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.image.repository.UserImageRepository;
 import com.example.peeppo.domain.user.entity.User;

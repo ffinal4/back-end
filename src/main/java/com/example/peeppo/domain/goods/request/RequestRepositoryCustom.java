@@ -1,4 +1,4 @@
-package com.example.peeppo.domain.goods.repository.request;
+package com.example.peeppo.domain.goods.request;
 
 import com.example.peeppo.domain.goods.entity.RequestGoods;
 import com.example.peeppo.domain.goods.enums.RequestStatus;

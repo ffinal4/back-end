@@ -1,4 +1,4 @@
-package com.example.peeppo.domain.goods.repository.request;
+package com.example.peeppo.domain.goods.request;
 
 import com.example.peeppo.domain.goods.entity.Goods;
 import com.example.peeppo.domain.goods.entity.RequestGoods;
@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface RequestRepository extends JpaRepository<RequestGoods, Long>, RequestRepositoryCustom {
 
