@@ -1,5 +1,5 @@
 
-package com.example.peeppo.domain.bid.repository.bid;
+package com.example.peeppo.domain.bid.repository;
 
 import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.bid.entity.QBid;

@@ -1,4 +1,4 @@
-package com.example.peeppo.domain.bid.repository.bid;
+package com.example.peeppo.domain.bid.repository;
 
 import com.example.peeppo.domain.bid.entity.Bid;
 import org.springframework.data.domain.Page;

@@ -9,7 +9,7 @@ import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
 import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.bid.enums.BidStatus;
 import com.example.peeppo.domain.bid.helper.BidHelper;
-import com.example.peeppo.domain.bid.repository.bid.BidRepository;
+import com.example.peeppo.domain.bid.repository.BidRepository;
 import com.example.peeppo.domain.dibs.repository.DibsRepository;
 import com.example.peeppo.domain.goods.dto.GoodsResponseDto;
 import com.example.peeppo.domain.goods.dto.MsgResponseDto;

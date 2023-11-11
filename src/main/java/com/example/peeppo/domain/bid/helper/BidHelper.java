@@ -2,7 +2,7 @@ package com.example.peeppo.domain.bid.helper;
 
 import com.example.peeppo.domain.bid.entity.Bid;
 import com.example.peeppo.domain.bid.enums.BidStatus;
-import com.example.peeppo.domain.bid.repository.bid.BidRepository;
+import com.example.peeppo.domain.bid.repository.BidRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
