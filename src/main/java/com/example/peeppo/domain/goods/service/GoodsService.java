@@ -366,7 +366,7 @@ public class GoodsService {
         List<String> imageUrls = images.stream()
                 .map(Image::getImageUrl)
                 .collect(Collectors.toList());
-        if (goodsRecent.size() >= MAX_RECENT_GOODS) {
+        if (goodsRecent.size() >= MAX_RECENT_GOODS) { // entity1 -> entity2 / 3
             goodsRecent.remove(0);
         }
         goodsRecent.add(Long.toString(goods.getGoodsId())); // 조회시에 리스트에 추가 !
@@ -539,7 +539,7 @@ public class GoodsService {
     public Goods findGoods(Long goodsId) {
         Goods goods = goodsRepository.findById(goodsId).orElseThrow(() ->
                 new NullPointerException("해당 게시글은 존재하지 않습니다."));
-        if (goods.getIsDeleted()) {
+        if (goods.isDeleted()) {
             throw new IllegalStateException("삭제된 게시글입니다.");
         }
         return goods;

@@ -3,7 +3,6 @@ package com.example.peeppo.domain.auction.service;
 import com.example.peeppo.domain.auction.dto.*;
 import com.example.peeppo.domain.auction.entity.Auction;
 import com.example.peeppo.domain.auction.enums.AuctionStatus;
-import com.example.peeppo.domain.auction.helper.AuctionHelper;
 import com.example.peeppo.domain.auction.repository.AuctionRepository;
 import com.example.peeppo.domain.bid.dto.BidListResponseDto;
 import com.example.peeppo.domain.bid.dto.ChoiceRequestDto;
@@ -33,6 +32,7 @@ import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.responseDto.PageResponse;
 import com.example.peeppo.global.security.UserDetailsImpl;
+import com.example.peeppo.global.utils.time.TimeUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -62,6 +62,7 @@ import static com.example.peeppo.domain.goods.enums.GoodsStatus.SOLDOUT;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AuctionService {
 
     private final GoodsRepository goodsRepository;
@@ -73,7 +74,6 @@ public class AuctionService {
     private final NotificationRepository notificationRepository;
     private final NotificationService notificationService;
     private final ImageRepository imageRepository;
-    private final AuctionHelper auctionHelper;
     private final ApplicationEventPublisher eventPublisher;
     private final UserRatingHelper userRatingHelper;
     private final BidHelper bidHelper;
@@ -82,9 +82,7 @@ public class AuctionService {
     public AuctionResponseDto createAuction(Long goodsId, AuctionRequestDto auctionRequestDto, User user) {
         userRatingHelper.getUser(user.getUserId());
         checkGoodsUsername(goodsId, user);
-        if(auctionRepository.findByGoodsGoodsId(goodsId) != null){
-            throw new IllegalArgumentException("이미 경매에 등록했던 물품입니다.");
-        }
+
         if (user.getUserPoint() < 10) {
             throw new IllegalArgumentException("경매 등록에는 10p가 필요합니다. 현재" + user.getUserPoint() + "포인트를 가지고 있습니다.");
         }
@@ -93,13 +91,17 @@ public class AuctionService {
         if (getGoods.getGoodsStatus() != ONSALE) {
             throw new IllegalArgumentException("해당 물건으로는 경매를 등록할 수 없습니다");
         }
-        if (getGoods.getIsDeleted()) {
+        if (getGoods.isDeleted()) {
             throw new IllegalArgumentException("해당 물건은 삭제된 물건입니다.");
         }
 
         RatingGoods ratingGoods = ratingGoodsRepository.findByGoodsGoodsId(goodsId);
         if (ratingGoods.getRatingCount() < 3) {
             throw new IllegalArgumentException("해당 물건은 3회 이상의 평가가 끝나지 않은 상태입니다.");
+        }
+
+        if (auctionRepository.findByGoodsAndIsDeletedIsFalse(getGoods).isPresent()) {
+            throw new IllegalArgumentException("이미 경매 중인 물품입니다.");
         }
 
         user.userPointSubtract(10L);
@@ -113,7 +115,7 @@ public class AuctionService {
         auction.getGoods().changeStatus(GoodsStatus.ONAUCTION);
         auction.changeAuctionStatus(AUCTION);
         auctionRepository.save(auction);
-        return new AuctionResponseDto(auction, goodsResponseDto, auctionHelper.countDownTime(auction));
+        return new AuctionResponseDto(auction, goodsResponseDto, TimeUtil.countDownTime(auction.getAuctionEndTime()));
     }
 
     // 마감시간 계산
@@ -142,7 +144,8 @@ public class AuctionService {
         return daysLater;
     }
 
-    // 경매 전체 조회
+    // TODO: 2023-10-15 Get 요청이므로 auction, goods 상태변화는 배치를 사용해서 처리할 수 있도록 수정할 것
+    @Transactional
     public Page<AuctionListResponseDto> findAllAuction(int i, int size, String sortBy, boolean isAsc, String categoryStr, UserDetailsImpl userDetails) {
         Pageable pageable = paging(i, size, sortBy, isAsc);
         Page<Auction> auctionPage;
@@ -152,7 +155,7 @@ public class AuctionService {
                 Category category = Category.valueOf(categoryStr);
                 auctionPage = auctionRepository.findByGoodsCategory(category, pageable);
                 for (Auction auction : auctionPage) {
-                    TimeRemaining remainingTime = auctionHelper.countDownTime(auction);
+                    TimeRemaining remainingTime = TimeUtil.countDownTime(auction.getAuctionEndTime()); //auctionHelper.countDownTime(auction);
                     if (!auction.getAuctionStatus().equals(CANCEL)) {
                         if (remainingTime.isExpired()) {
                             List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
@@ -174,7 +177,7 @@ public class AuctionService {
         } else {
             auctionPage = auctionRepository.findAll(pageable);
             for (Auction auction : auctionPage) {
-                TimeRemaining remainingTime = auctionHelper.countDownTime(auction);
+                TimeRemaining remainingTime = TimeUtil.countDownTime(auction.getAuctionEndTime());
 
                 if (remainingTime.isExpired()) {
                     List<Bid> bid = bidRepository.findByAuctionAuctionId(auction.getAuctionId());
@@ -207,7 +210,7 @@ public class AuctionService {
         Long dibsCount = dibsRepository.countByGoodsGoodsIdAndGoodsIsDeletedFalse(auction.getGoods().getGoodsId());
         List<AuctionListResponseDto> AuctionListResponseDtos = new ArrayList<>();
         for (Auction recommendAuction : auctionList) {
-            TimeRemaining timeRemaining = auctionHelper.countDownTime(recommendAuction);
+            TimeRemaining timeRemaining = TimeUtil.countDownTime(recommendAuction.getAuctionEndTime());
             String recommendImageUrl = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(recommendAuction.getGoods().getGoodsId()).getImageUrl();
             boolean checkDibs = dibsRepository.findByUserUserIdAndGoodsGoodsIdAndGoodsIsDeletedFalse(user.getUserId(), recommendAuction.getGoods().getGoodsId()).isPresent();
             AuctionListResponseDtos.add(
@@ -218,7 +221,7 @@ public class AuctionService {
                             checkDibs));
         }
 
-        AuctionResponseDto auctionResponseDto = new AuctionResponseDto(auction, auction.getGoods(), auctionHelper.countDownTime(auction), findBidCount(auctionId), checkSameUser, imageUrls, dibsCount);
+        AuctionResponseDto auctionResponseDto = new AuctionResponseDto(auction, auction.getGoods(), TimeUtil.countDownTime(auction.getAuctionEndTime()), findBidCount(auctionId), checkSameUser, imageUrls, dibsCount);
         return new GetAuctionResponseDto(AuctionListResponseDtos, auctionResponseDto);
     }
 
@@ -311,7 +314,7 @@ public class AuctionService {
         Long auctionEndCount = auctionRepository.countByUserUserIdAndAuctionStatus(user.getUserId(), END);
         List<GetAuctionBidResponseDto> auctionResponseDtoList = myAuctionPage.stream()
                 .map(auction -> {
-                    TimeRemaining timeRemaining = auctionHelper.countDownTime(auction);
+                    TimeRemaining timeRemaining = TimeUtil.countDownTime(auction.getAuctionEndTime());
                     Long bidCount = findBidCount(auction.getAuctionId());
                     TestListResponseDto responseDto = new TestListResponseDto(auction, timeRemaining, bidCount, auctionCount, auctionEndCount);
 
@@ -346,8 +349,7 @@ public class AuctionService {
             throw new IllegalArgumentException("경매 등록자가 아닙니다.");
         }
         auction.changeAuctionStatus(AuctionStatus.TRADING);
-        Goods auctionGoods = goodsRepository.findByAuctionAuctionId(auction.getAuctionId())
-                .orElseThrow(() -> new NullPointerException("존재하지 않는 물품입니다."));
+        Goods auctionGoods = auction.getGoods();
         auctionRepository.save(auction);
 
         auctionGoods.changeStatus(GoodsStatus.TRADING);
@@ -369,7 +371,7 @@ public class AuctionService {
 
     public Page<AuctionListResponseDto> findAllAuction(Page<Auction> auctionPage, Pageable pageable, UserDetailsImpl userDetails) {
         List<AuctionListResponseDto> auctionResponseDtoList = auctionPage.stream().map(auction -> {
-                    TimeRemaining timeRemaining = auctionHelper.countDownTime(auction);
+                    TimeRemaining timeRemaining = TimeUtil.countDownTime(auction.getAuctionEndTime());
                     boolean checkDibs = false;
                     if (null != userDetails) {
                         checkDibs = dibsRepository.findByUserUserIdAndGoodsGoodsIdAndGoodsIsDeletedFalse(userDetails.getUser().getUserId(), auction.getGoods().getGoodsId()).isPresent();

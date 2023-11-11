@@ -6,10 +6,11 @@ import lombok.Getter;
 public enum BidStatus {
 
     BIDDING("bidding"),
-    DONE("trading complete"),
     FAIL("bidding fail"),
     SUCCESS("bidding success"),
-    TRADING("trading");
+    TRADING("trading"),
+    DONE("trading complete"),
+    ;
 
     private final String status;
 

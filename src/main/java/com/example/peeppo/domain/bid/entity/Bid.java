@@ -67,7 +67,7 @@ public class Bid extends Timestamped {
         this.bidStatus = bidStatus;
     }
 
-    public void select() {
-        this.sellersPick = true;
+    public void setSellersPick(){
+        this.sellersPick = !this.sellersPick;
     }
 }
