@@ -21,6 +21,7 @@ import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,7 @@ public class HomeService {
     private final AuctionHelper auctionHelper;
 
     //@Cacheable(value = "homeCache", cacheManager = "cacheManager")
+    @Transactional(readOnly = true)
     public HomeResponseDto peeppoHome(UserDetailsImpl user) {
         List<Goods> goodsList = goodsRepository.findTop8ByCreatedAt();
         List<GoodsListResponseDto> goodsListResponseDtos = new ArrayList<>();
@@ -83,6 +85,7 @@ public class HomeService {
         return new HomeResponseDto(goodsListResponseDtos, ratingUserListResponseDto, auctionResponseDtos);
     }
 
+    @Transactional(readOnly = true)
     public List<Auction> findTopAuctionByCount(){
         List<Auction> auctionLists = auctionRepository.findByAuctionStatus(AuctionStatus.AUCTION);
         if(auctionLists.size() <= 3) {

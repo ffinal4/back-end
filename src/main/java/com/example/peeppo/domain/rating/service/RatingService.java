@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class RatingService {
     private final UserImageRepository userImageRepository;
 
@@ -32,7 +33,7 @@ public class RatingService {
     private final UserRepository userRepository;
     private final RatingHelper ratingHelper;
 
-
+    @Transactional(readOnly = true)
     public ApiResponse<List<RatingUserResponseDto>> ratingTopFiveUsers() {
         List<RatingUserResponseDto> responseDtoList = userRepository.findTopUsersByMaxRatingCount(5)
                 .stream()

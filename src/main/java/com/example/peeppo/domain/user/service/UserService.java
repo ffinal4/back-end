@@ -12,7 +12,7 @@ import com.example.peeppo.global.responseDto.ApiResponse;
 import com.example.peeppo.global.security.jwt.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
@@ -39,6 +39,7 @@ public class UserService {
     private final UserImageRepository userImageRepository;
     private final UserRatingHelper userRatingHelper;
 
+    @Transactional
     public ResponseDto signup(SignupRequestDto signupRequestDto) {
 
         String email = signupRequestDto.getEmail();
@@ -67,6 +68,7 @@ public class UserService {
         return new CheckResponseDto("중복되지 않은 이름입니다.", validateDuplicateNickname, OK.value(), "OK");
     }
 
+    @Transactional
     public ApiResponse<ResponseDto> checkValidatePassword(PasswordRequestDto passwordRequestDto, User user) {
         if (!passwordEncoder.matches(passwordRequestDto.getOriginPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
@@ -113,6 +115,7 @@ public class UserService {
     }
 
     //회원정보 페이지
+    @Transactional(readOnly = true)
     public MyPageResponseDto myPage(User user) {
         userRatingHelper.getUser(user.getUserId());
         Optional<UserImage> userImage = userImageRepository.findByUserUserId(user.getUserId());

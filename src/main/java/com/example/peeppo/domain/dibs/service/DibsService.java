@@ -13,6 +13,7 @@ import com.example.peeppo.domain.user.repository.UserRepository;
 import com.example.peeppo.global.security.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,11 +30,12 @@ public class DibsService {
     private final DibsRepository dibsRepository;
     private final ImageRepository imageRepository;
 
+    @Transactional(readOnly = true)
     public boolean checkDibsGoods(Long userId, Long GoodsId) {
         return dibsRepository.findByUserUserIdAndGoodsGoodsIdAndGoodsIsDeletedFalse(userId, GoodsId).isPresent();
     }
 
-
+    @Transactional
     public CheckResponseDto dibsGoods(UserDetailsImpl userDetails, DibsRequestDto dibsRequestDto) {
         User user = userDetails.getUser();
         Goods goods = findGoods(dibsRequestDto.getGoodsId());
@@ -43,24 +45,26 @@ public class DibsService {
         // 찜한 경우
         if (dibsGoods.isPresent()) {
             dibsRepository.delete(dibsGoods.get());
-            return new CheckResponseDto("이미 찜하신 목록입니다.", dibsGoods.isPresent(), OK.value(), "OK");
         }
 
         dibsRepository.save(new Dibs(goods, user));
 
-        return new CheckResponseDto("찜하셨습니다.", dibsGoods.isPresent(), OK.value(), "OK");
-    }
+        return new CheckResponseDto("완료", dibsGoods.isPresent(), OK.value(), "OK");
+}
 
+    @Transactional(readOnly = true)
     public User findUser(Long userId) {
         return userRepository.findById(userId).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 userId 입니다."));
     }
 
+    @Transactional(readOnly = true)
     public Goods findGoods(Long goodsId) {
         return goodsRepository.findById(goodsId).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 goodsId 입니다."));
     }
 
+    @Transactional(readOnly = true)
     public List<GoodsListResponseDto> getDibsGoods(User user) {
         List<Dibs> dibsList = dibsRepository.findByUserUserIdAndGoodsIsDeletedFalse(user.getUserId());
         List<GoodsListResponseDto> goodsListResponseDtos = new ArrayList<>();

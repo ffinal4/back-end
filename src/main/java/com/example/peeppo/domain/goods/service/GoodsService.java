@@ -12,7 +12,7 @@ import com.example.peeppo.domain.goods.enums.RequestStatus;
 import com.example.peeppo.domain.goods.enums.Category;
 import com.example.peeppo.domain.goods.repository.goods.GoodsRepository;
 import com.example.peeppo.domain.goods.request.RequestRepository;
-import com.example.peeppo.domain.goods.wantedGoods.WantedGoodsRepository;
+import com.example.peeppo.domain.goods.repository.wantedGoods.WantedGoodsRepository;
 import com.example.peeppo.domain.image.entity.Image;
 import com.example.peeppo.domain.image.entity.UserImage;
 import com.example.peeppo.domain.image.helper.ImageHelper;
@@ -93,15 +93,13 @@ public class GoodsService {
         ratingGoodsRepository.save(ratingGoods);
         wantedGoodsRepository.save(wantedGoods);
 
-        List<String> imageUrls = imageHelper
-                .saveImagesToS3AndRepository(images, goods)
-                .stream()
-                .map(Image::getImageUrl)
-                .toList();
+        imageHelper.saveImagesToS3AndRepository(images, goods);
+
 
         return new ApiResponse<>(true, new MsgResponseDto("게시글이 등록되었습니다."), null);
     }
 
+    @Transactional(readOnly = true)
     public Page<GoodsListResponseDto> allGoods(int page, int size, String sortBy, boolean isAsc, String categoryStr, UserDetailsImpl userDetails) {
         Pageable pageable = paging(page, size, sortBy, isAsc);
 
@@ -127,6 +125,7 @@ public class GoodsService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Page<GoodsListResponseDto> allGoodsEveryone(Pageable pageable, String categoryStr) {
         List<GoodsListResponseDto> goodsResponseList = new ArrayList<>();
         Page<Goods> goodsPage;
@@ -158,7 +157,7 @@ public class GoodsService {
         }
     }
 
-
+    @Transactional(readOnly = true)
     public ApiResponse<GoodsDetailResponseDto> getGoods(Long goodsId, User user) {
         userRatingHelper.getUser(user.getUserId());
         Goods goods = findGoods(goodsId);
@@ -180,6 +179,7 @@ public class GoodsService {
         return new ApiResponse<>(true, new GoodsDetailResponseDto(new GoodsResponseDto(goods, imageUrls, wantedGoods, checkSameUser, checkDibs, dibsCount), rcGoodsResponseDtoList), null);
     }
 
+    @Transactional(readOnly = true)
     public ApiResponse<PocketResponseDto> getMyGoods(int page,
                                                      int size,
                                                      String sortBy,
@@ -251,7 +251,7 @@ public class GoodsService {
         return new ApiResponse<>(true, new DeleteResponseDto("삭제되었습니다"), null);
     }
 
-
+    @Transactional(readOnly = true)
     public List<GoodsRecentDto> recentGoods(HttpServletResponse response) {
         List<GoodsRecentDto> goodsRecentDtos = new ArrayList<>();
         // 조회하면 리스트에 id, productname add 해주기
@@ -272,6 +272,7 @@ public class GoodsService {
         return getGoodsResponseDtos(user);
     }
 
+    @Transactional(readOnly = true)
     public ApiResponse<UrPocketResponseDto> getPocket(String nickname, UserDetailsImpl userDetails, int page,
                                                       int size, String sortBy, boolean isAsc) {
         User user = userRepository.findUserByNickname(nickname);
@@ -303,10 +304,10 @@ public class GoodsService {
         UrPocketResponseDto urPocketResponseDto = new UrPocketResponseDto(user, myGoods, userImage);
 
         return new ApiResponse<>(true, urPocketResponseDto, null);
-//        return getGoodsResponseDtos(user);
     }
 
-    private List<GoodsResponseDto> getGoodsResponseDtos(User user) {
+    @Transactional(readOnly = true)
+    public List<GoodsResponseDto> getGoodsResponseDtos(User user) {
         userRatingHelper.getUser(user.getUserId());
         List<Goods> goodsList = goodsRepository.findAllByUserAndIsDeletedFalseAndGoodsStatus(user, GoodsStatus.ONSALE);
         List<GoodsResponseDto> goodsResponseDtoList = new ArrayList<>();
@@ -321,6 +322,7 @@ public class GoodsService {
         return goodsResponseDtoList;
     }
 
+    @Transactional(readOnly = true)
     public ApiResponse<List<GoodsListResponseDto>> searchGoods(String keyword) {
         List<Goods> searchList = goodsRepository.findByTitleContainingAndIsDeletedFalse(keyword);
         List<GoodsListResponseDto> goodsListResponseDtos = new ArrayList<>();
@@ -330,6 +332,7 @@ public class GoodsService {
         return new ApiResponse<>(true, goodsListResponseDtos, null);
     }
 
+    @Transactional(readOnly = true)
     public List<RcGoodsResponseDto> getSameCategoryGoods(Goods goods) {
         List<Goods> goodsList = goodsRepository.findByCategoryAndIsDeletedFalse(goods.getCategory());
         List<RcGoodsResponseDto> rcGoodsResponseDtoList = new ArrayList<>();
@@ -342,13 +345,14 @@ public class GoodsService {
         return rcGoodsResponseDtoList;
     }
 
+    @Transactional(readOnly = true)
     public List<RcGoodsResponseDto> getSameCategoryGoodsWithUser(Goods goods, User user) {
         userRatingHelper.getUser(user.getUserId());
         List<Goods> goodsList = goodsRepository.findByCategoryAndIsDeletedFalse(goods.getCategory());
         List<RcGoodsResponseDto> rcGoodsResponseDtoList = new ArrayList<>();
         for (Goods goods1 : goodsList) {
             if (((!Objects.equals(goods1.getGoodsId(), goods.getGoodsId())) && (!Objects.equals(user.getUserId(), goods1.getUser().getUserId())))) {
-                boolean checkDibs = false;
+                boolean checkDibs;
                 checkDibs = dibsService.checkDibsGoods(user.getUserId(), goods1.getGoodsId());
                 RcGoodsResponseDto rcGoodsResponseDto = new RcGoodsResponseDto(goods1, checkDibs);
                 rcGoodsResponseDtoList.add(rcGoodsResponseDto);
@@ -358,6 +362,7 @@ public class GoodsService {
     }
 
     // 로그인 없이 조회
+    @Transactional(readOnly = true)
     public ApiResponse<GoodsDetailResponseDto> getGoodsEveryone(Long goodsId) {
         Goods goods = findGoods(goodsId);
         List<RcGoodsResponseDto> rcGoodsResponseDtoList = getSameCategoryGoods(goods);
@@ -375,6 +380,7 @@ public class GoodsService {
 
 
     // 내가 보낸 교환요청
+    @Transactional(readOnly = true)
     public ResponseEntity<Page<GoodsRequestResponseDto>> requestTradeList(User user, int page, int size, String sortBy, boolean isAsc,
                                                                           String requestStatusStr) {
 
@@ -385,6 +391,7 @@ public class GoodsService {
         if (requestStatusStr != null) {
             //1) requestgoods 테이블에서 seller goods 전부 찾아오기 => DTO 변환해주기
             requestStatus1 = RequestStatus.valueOf(requestStatusStr);
+            requestStatus1 = RequestStatus.valueOf(requestStatusStr);
             requestGoods = requestRepository.findSellerByUserIdAndRequestStatus(user.getUserId(), requestStatus1, pageable);
         } else {
             requestGoods = requestRepository.findSellerByUserId(user.getUserId(), pageable);
@@ -392,14 +399,16 @@ public class GoodsService {
 
         //2) requestGoods 순회하면서 buyerGoods 찾아오기
         for (Goods requestGood : requestGoods) {
-            Goods goods = goodsRepository.findByGoodsId(requestGood.getGoodsId()).orElse(null);// sellergoods가 뭔지 찾았다 !
+            Goods goods = goodsRepository.findByGoodsId(requestGood.getGoodsId()).orElseThrow(
+                    () -> new NullPointerException("존재하지 않는 상품"));// sellergoods가 뭔지 찾았다 !
             RequestGoods requestGoods1 = requestRepository.findBySellerGoodsId(goods.getGoodsId());
             RequestSingleResponseDto goodsListResponseDto = new RequestSingleResponseDto(goods);
             List<RequestGoods> buyerGoodsList = requestRepository.findAllBySellerGoodsIdAndUserId(goods.getGoodsId(), user.getUserId());
             List<RequestSingleResponseDto> goodsListResponseDtos = new ArrayList<>();
             // 3) requestGoods 순회하며 buyerGoods 물품 정보 가져오기 => dto 로 변환하기
             for (RequestGoods buyerGoods : buyerGoodsList) {
-                Goods goods1 = goodsRepository.findByGoodsId(buyerGoods.getBuyer().getGoodsId()).orElse(null);// buyerGoods 찾기
+                Goods goods1 = goodsRepository.findByGoodsId(buyerGoods.getBuyer().getGoodsId()).orElseThrow(
+                        () -> new NullPointerException("존재하지 않는 상품"));// buyerGoods 찾기
                 RequestSingleResponseDto goodsListResponseDto2 = new RequestSingleResponseDto(goods1);
                 goodsListResponseDtos.add(goodsListResponseDto2);
             }
@@ -412,6 +421,7 @@ public class GoodsService {
     }
 
     //내가 받은 교환요청
+    @Transactional(readOnly = true)
     public ResponseEntity<Page<GoodsRequestResponseDto>> receiveTradeList(User user, int page, int size, String sortBy, boolean isAsc, String requestStatusStr) {
 
         Pageable pageable = paging(page, size, sortBy, isAsc);
@@ -461,7 +471,8 @@ public class GoodsService {
                 .orElseThrow(() -> new NullPointerException("해당 상품이 존재하지 않습니다."));
         List<RequestGoods> requestGoods = new ArrayList<>();
         List<Goods> goodsList = new ArrayList<>();
-        String title = goodsRepository.findById(goodsRequestRequestDto.getGoodsId().get(0)).orElse(null).getTitle();
+        String title = goodsRepository.findById(goodsRequestRequestDto.getGoodsId().get(0)).orElseThrow(
+                () -> new NullPointerException("존재하지 않는 상품")).getTitle();
         String myImage = imageRepository.findByGoodsGoodsIdOrderByCreatedAtAscFirst(goodsRequestRequestDto.getGoodsId().get(0)).getImageUrl();
 
         for (Long goodsId : goodsRequestRequestDto.getGoodsId()) {
@@ -472,7 +483,7 @@ public class GoodsService {
             }
 
 
-            if (!(urGoods.getUser().equals(goods.getUser()))) {
+            if (!urGoods.getUser().equals(goods.getUser())) {
                 if (goods.getGoodsStatus().equals(GoodsStatus.ONSALE)) {// ||goods.getRequestedStatus().equals(RequestedStatus.REQUESTED)
                     requestGoods.add(new RequestGoods(urGoods, user, goods, RequestStatus.REQUEST));
                 } else {
@@ -490,8 +501,7 @@ public class GoodsService {
         return new ResponseDto("교환신청이 완료되었습니다.", HttpStatus.OK.value(), "OK");
     }
 
-
-
+    @Transactional(readOnly = true)
     public Page<GoodsListResponseDto> allGoods(Page<Goods> goodsPage, Pageable pageable, User user) {
 
         List<GoodsListResponseDto> goodsResponseList = new ArrayList<>();
@@ -506,7 +516,8 @@ public class GoodsService {
         return new PageResponse<>(goodsResponseList, pageable, goodsPage.getTotalElements());
     }
 
-    private ApiResponse<PocketResponseDto> getMyGoods(Page<Goods> goodsList, User user, Pageable pageable) {
+    @Transactional(readOnly = true)
+    public ApiResponse<PocketResponseDto> getMyGoods(Page<Goods> goodsList, User user, Pageable pageable) {
         userRatingHelper.getUser(user.getUserId());
         List<PocketListResponseDto> myGoods = goodsList.stream()
                 .map(goods -> {
@@ -524,7 +535,7 @@ public class GoodsService {
         return new ApiResponse<>(true, new PocketResponseDto(user, new PageImpl<>(myGoods, pageable, goodsList.getTotalElements()), imageUrl), null);
     }
 
-
+    @Transactional(readOnly = true)
     public ResponseDto ratingCheck(User user) {
         userRatingHelper.getUser(user.getUserId());
         Goods goods = goodsRepository.findByUserUserId(user.getUserId())
@@ -532,30 +543,30 @@ public class GoodsService {
         goods.changeCheck(true);
         goodsRepository.save(goods);
 
-        ResponseDto responseDto = new ResponseDto("레이팅 체크가 가능해집니다.", HttpStatus.OK.value(), "OK");
-        return responseDto;
+        return new ResponseDto("레이팅 체크가 가능해집니다.", HttpStatus.OK.value(), "OK");
     }
 
+    @Transactional(readOnly = true)
     public Goods findGoods(Long goodsId) {
         Goods goods = goodsRepository.findById(goodsId).orElseThrow(() ->
                 new NullPointerException("해당 게시글은 존재하지 않습니다."));
-        if (goods.getIsDeleted()) {
+        if (Boolean.TRUE.equals(goods.getIsDeleted())) {
             throw new IllegalStateException("삭제된 게시글입니다.");
         }
         return goods;
     }
 
+    @Transactional(readOnly = true)
     public WantedGoods findWantedGoods(Long wantedId) {
-        WantedGoods wantedGoods = wantedGoodsRepository.findById(wantedId).orElseThrow(() ->
+        return wantedGoodsRepository.findById(wantedId).orElseThrow(() ->
                 new NullPointerException("해당 게시글은 존재하지 않습니다."));
-        return wantedGoods;
     }
 
+    @Transactional(readOnly = true)
     public User findUser(Long userId) {
         return userRepository.findById(userId).orElseThrow(() ->
                 new IllegalArgumentException("존재하지 않는 유저입니다."));
     }
-
 
     private Pageable paging(int page, int size, String sortBy, boolean isAsc) {
         // 정렬
@@ -600,6 +611,7 @@ public class GoodsService {
 
 
     // 요청 -> 거절
+    @Transactional
     public void goodsRefuse(RequestAcceptRequestDto requestAcceptRequestDto, User user) {
         User buyer = null;
         Goods sellerGoods = null;

@@ -27,6 +27,7 @@ public class NotificationService {
     private final EmitterRepository emitterRepository;
 
     // 메시지 알림
+    @Transactional
     public SseEmitter subscribe(Long userId, String lastEventId) {
         String id = userId + "_" + System.currentTimeMillis();
         // 현재 클라이언트를 위한 sseEmitter 생성 => 생성자를 통해 만료시간 설정

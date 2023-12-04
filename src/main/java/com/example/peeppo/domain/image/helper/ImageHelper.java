@@ -141,6 +141,7 @@ public class ImageHelper {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
 
+    @Transactional
     public void deleteImageAmazonS3(String imageKey) {
         amazonS3.deleteObject(bucket, imageKey);
     }

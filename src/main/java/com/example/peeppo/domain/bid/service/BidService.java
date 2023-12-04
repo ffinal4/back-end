@@ -35,6 +35,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -58,6 +59,7 @@ public class BidService {
     private final UserRatingHelper userRatingHelper;
     private final ApplicationEventPublisher eventPublisher;
 
+    @Transactional
     public ResponseDto bidding(User user, Long auctionId, BidGoodsListRequestDto bidGoodsListRequestDto) throws IllegalAccessException {
 
         Auction auction = getAuction(auctionId);
@@ -110,6 +112,7 @@ public class BidService {
     }
 
     // 입찰물품 전체조회
+    @Transactional(readOnly = true)
     public Page<BidResponseListDto> BidList(Long auctionId, int page) {
         Pageable pageable = PageRequest.of(page, 12);
         Page<Bid> bidPage = bidRepository.findSortedBySellersPick(auctionId, pageable);
@@ -125,6 +128,7 @@ public class BidService {
     }
 
     // 입찰물품 상세조회
+    @Transactional(readOnly = true)
     public ApiResponse<List<BidDetailResponseDto>> sellectBids(Long auctionId, Long userId) {
         List<Bid> bidList = bidRepository.findByAuctionAuctionIdAndUserUserId(auctionId, userId);
         List<BidDetailResponseDto> bidDetailResponseDtos = bidList.stream()
@@ -140,8 +144,9 @@ public class BidService {
 
         return new ApiResponse<>(true, bidDetailResponseDtos, null);
     }
-    
 
+
+    @Transactional(readOnly = true)
     public ResponseEntity<Page<GetAuctionBidResponseDto>> bidTradeList(User user, int page, int size, String sortBy, boolean isAsc,
                                                                        String bidStatus1) {
 
@@ -175,6 +180,7 @@ public class BidService {
         return ResponseEntity.status(HttpStatus.OK.value()).body(response);
     }
 
+    @Transactional(readOnly = true)
     public Long findBidCount(Long id) {
         return auctionRepository.countByAuctionAuctionIdAndGroupByBidUserId(id);
     }
@@ -189,22 +195,26 @@ public class BidService {
         return new TimeRemaining(days, hours % 24, minutes % 60, seconds % 60);
     }
 
-    private Bid getBid(Long bidId) {
+    @Transactional(readOnly = true)
+    public Bid getBid(Long bidId) {
         return bidRepository.findById(bidId).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 bidId 입니다."));
     }
 
-    private Auction getAuction(Long auctionId) {
+    @Transactional(readOnly = true)
+    public Auction getAuction(Long auctionId) {
         return auctionRepository.findById(auctionId).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 auctionId 입니다."));
     }
 
-    private User getUser(Long userId) {
+    @Transactional(readOnly = true)
+    public User getUser(Long userId) {
         return userRepository.findById(userId).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 userId 입니다."));
     }
 
-    private Goods getGoods(Long goodsId) {
+    @Transactional(readOnly = true)
+    public Goods getGoods(Long goodsId) {
         return goodsRepository.findById(goodsId).orElseThrow(
                 () -> new IllegalArgumentException("존재하지 않는 goodsId 입니다."));
     }

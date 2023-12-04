@@ -143,6 +143,7 @@ public class AuctionService {
     }
 
     // 경매 전체 조회
+    @Transactional
     public Page<AuctionListResponseDto> findAllAuction(int i, int size, String sortBy, boolean isAsc, String categoryStr, UserDetailsImpl userDetails) {
         Pageable pageable = paging(i, size, sortBy, isAsc);
         Page<Auction> auctionPage;
@@ -290,6 +291,7 @@ public class AuctionService {
         notificationService.send(saveBidList.get(0).getUser(), NotificationStatus.AUCTIONPICK, auction.getGoods().getTitle(), image.getImageUrl());
     }
 
+    @Transactional(readOnly = true)
     public ResponseEntity<Page<TestListResponseDto>> auctionTradeList(User user, int page, int size, String sortBy, boolean isAsc,
                                                                       String auctionStatusStr) {
         Pageable pageable = paging(page, size, sortBy, isAsc);
@@ -367,6 +369,7 @@ public class AuctionService {
         return new ApiResponse<>(true, responseDto, null);
     }
 
+    @Transactional(readOnly = true)
     public Page<AuctionListResponseDto> findAllAuction(Page<Auction> auctionPage, Pageable pageable, UserDetailsImpl userDetails) {
         List<AuctionListResponseDto> auctionResponseDtoList = auctionPage.stream().map(auction -> {
                     TimeRemaining timeRemaining = auctionHelper.countDownTime(auction);
